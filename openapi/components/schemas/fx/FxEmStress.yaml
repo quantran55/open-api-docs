@@ -1,0 +1,15 @@
+type: object
+description: Emerging-market FX stress monitor — one entry per tracked currency pair.
+required:
+  - asOf
+  - pairs
+properties:
+  asOf:
+    type: string
+    format: date
+    description: Date the readings are as of.
+    example: "2026-05-14"
+  pairs:
+    type: array
+    items:
+      $ref: "./FxEmStressPair.yaml"

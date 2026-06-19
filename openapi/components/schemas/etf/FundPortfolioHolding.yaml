@@ -1,0 +1,30 @@
+type: object
+description: One equity position held in a fund's portfolio.
+required:
+  - symbol
+  - weightPercent
+properties:
+  symbol:
+    type: string
+    description: Ticker symbol of the holding.
+    example: MBB
+  price:
+    type: number
+    description: Latest price of the holding, in fund currency.
+    example: 25000
+  volume:
+    type: number
+    description: Number of shares held.
+    example: 7706790
+  weightPercent:
+    type: number
+    description: Position weight as a percentage of the portfolio.
+    example: 7.79
+  currency:
+    type: string
+    description: Reporting currency.
+    example: VND
+  month:
+    type: string
+    description: Reporting month (YYYY-MM).
+    example: "2026-05"

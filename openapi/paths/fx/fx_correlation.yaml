@@ -1,0 +1,50 @@
+get:
+  operationId: fxCorrelation
+  tags:
+    - FX
+  summary: FX correlation matrix
+  description: |
+    Rolling 90-day correlation matrix across major FX, crypto and gold
+    benchmarks. `matrix[i][j]` is the Pearson correlation between `symbols[i]`
+    and `symbols[j]`.
+  x-feature-code: fx_data
+  x-api-weight: 6
+  parameters:
+    - name: assets
+      in: query
+      required: false
+      description: Comma-separated list of assets / symbols to include (e.g. `DXY,EUR/USD,XAU/USD`). Returns the default symbol set when omitted.
+      schema:
+        type: string
+        example: DXY,EUR/USD,XAU/USD
+  responses:
+    "200":
+      description: FX correlation matrix.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/FxCorrelationResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              window: 90d
+              asOf: "2026-06-19"
+              samples: 89
+              symbols: [DXY, EUR/USD, XAU/USD]
+              matrix:
+                - [1, -0.87, -0.52]
+                - [-0.87, 1, 0.62]
+                - [-0.52, 0.62, 1]
+            meta:
+              timestamp: "2026-06-19T08:50:42.363Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

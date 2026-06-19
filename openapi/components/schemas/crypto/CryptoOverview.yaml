@@ -1,0 +1,85 @@
+type: object
+description: |
+  Crypto market overview — total market capitalisation, 24h volume, BTC/ETH/major
+  dominance split, the Fear & Greed index and a list of trending coins.
+required:
+  - totalMarketCap
+  - volume24h
+  - marketCapChange24h
+  - volumeChange24h
+  - dominance
+  - fearGreed
+  - trending
+properties:
+  totalMarketCap:
+    type: number
+    description: Total crypto market capitalisation in USD.
+    example: 2156391783530.09
+  volume24h:
+    type: number
+    description: Total 24-hour trading volume in USD.
+    example: 74938670897.24
+  marketCapChange24h:
+    type: number
+    description: 24-hour change in total market cap, as a percentage.
+    example: -2.6314
+  volumeChange24h:
+    type: number
+    description: 24-hour change in total trading volume, as a percentage.
+    example: -11.6008
+  dominance:
+    type: object
+    description: Market-cap dominance split (percentage) across major coins.
+    required:
+      - btc
+      - eth
+      - bnb
+      - sol
+      - xrp
+      - other
+    properties:
+      btc:
+        type: number
+        example: 58.148
+      eth:
+        type: number
+        example: 9.476
+      bnb:
+        type: number
+        example: 3.585
+      sol:
+        type: number
+        example: 1.843
+      xrp:
+        type: number
+        example: 3.242
+      other:
+        type: number
+        description: Combined dominance of all other coins.
+        example: 23.706
+  fearGreed:
+    type: object
+    description: Crypto Fear & Greed index reading.
+    required:
+      - value
+      - classification
+      - date
+    properties:
+      value:
+        type: integer
+        description: Index value from 0 (extreme fear) to 100 (extreme greed).
+        example: 19
+      classification:
+        type: string
+        description: Human-readable classification of the index value.
+        example: Extreme fear
+      date:
+        type: string
+        format: date
+        description: Date the index reading applies to.
+        example: "2026-06-18"
+  trending:
+    type: array
+    description: Notable trending coins (top gainers / losers).
+    items:
+      $ref: "./CryptoTrendingCoin.yaml"

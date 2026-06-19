@@ -1,0 +1,14 @@
+type: object
+description: Funding rate for a single perpetual-futures contract.
+required:
+  - rate
+  - annualized
+properties:
+  rate:
+    type: number
+    description: Current per-interval funding rate.
+    example: 0.00000854
+  annualized:
+    type: number
+    description: Funding rate annualised, as a percentage.
+    example: 0.93513

@@ -1,0 +1,81 @@
+type: object
+description: |
+  Full detail view for a single ETF — descriptive metadata, latest price,
+  top holdings, valuation ratios, sector weights, net-flow history and
+  cumulative-return performance.
+required:
+  - etfCode
+  - etfName
+  - managementCompany
+  - etfType
+properties:
+  etfCode:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1306"
+  etfName:
+    type: string
+    description: Fund name.
+    example: NEXT FUNDS TOPIX Exchange Traded Fund
+  managementCompany:
+    type: string
+    description: Asset manager operating the fund.
+    example: Nomura Asset Management
+  MER:
+    type: number
+    description: Management expense ratio, as a fraction.
+    example: 0.0505
+  etfType:
+    type: string
+    description: Asset-class / strategy classification.
+    example: Japanese Equity(Market)
+  indexName:
+    type: string
+    description: Benchmark index the fund tracks.
+    example: TOPIX Total Return Index
+  listingDate:
+    type: string
+    format: date
+    description: Date the ETF was first listed.
+    example: "2001-07-13"
+  currentPrice:
+    type: number
+    description: Latest market price.
+    example: 425.5
+  change:
+    type: number
+    description: Absolute price change versus the previous close.
+    example: 2.4
+  changePct:
+    type: number
+    description: Percentage price change versus the previous close.
+    example: 0.57
+  lastUpdateDate:
+    type: string
+    format: date
+    description: Date the snapshot was last updated.
+    example: "2026-06-17"
+  totalAssetValue:
+    type: number
+    description: Total net asset value, in fund currency.
+    example: 32511066650608.5
+  AssetAllocation:
+    type: array
+    description: Top holdings by market value.
+    items:
+      $ref: "./EtfDetailHolding.yaml"
+  equityHoldings:
+    $ref: "./EtfEquityHoldings.yaml"
+  sectorWeight:
+    type: array
+    description: Sector weights for the latest reporting month.
+    items:
+      $ref: "./EtfSectorWeight.yaml"
+  distributionYield:
+    type: number
+    description: Trailing distribution yield, as a fraction.
+    example: 0.0176
+  netflow:
+    $ref: "./EtfNetflowHistory.yaml"
+  performance:
+    $ref: "./EtfPerformance.yaml"

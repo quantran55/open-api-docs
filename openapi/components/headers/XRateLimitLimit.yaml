@@ -1,0 +1,4 @@
+description: Your plan's request-weight budget per 1-minute window.
+schema:
+  type: integer
+  example: 1000

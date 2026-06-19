@@ -1,0 +1,28 @@
+type: object
+description: |
+  A single NAV-growth series for one instrument, keyed by period window. Each
+  period maps to an ordered array of NAV-growth points. `etfCode` may be an empty
+  string when the slot is unused (e.g. the second comparand of a single-fund query).
+required:
+  - etfCode
+  - data
+properties:
+  etfCode:
+    type: string
+    description: Code of the instrument this series belongs to.
+    example: VESAF
+  data:
+    type: object
+    description: NAV-growth points grouped by period window (e.g. `3M`, `6M`, `1Y`, `3Y`).
+    additionalProperties:
+      type: array
+      items:
+        $ref: "./NavGrowthPoint.yaml"
+    example:
+      3M:
+        - date: 19-03-2026
+          growthRate: 0
+          nav: 19934.64
+        - date: 20-03-2026
+          growthRate: 0.07
+          nav: 19948.69

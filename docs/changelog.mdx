@@ -1,0 +1,15 @@
+---
+title: "Changelog"
+description: "Notable changes to the HayInsights Open API."
+---
+
+<Update label="0.1.0" description="2026-06-19">
+  **Initial preview release.**
+
+  - 40 read endpoints across six domains: Commodities, Crypto, ETF, FX, Macro and
+    Real Estate.
+  - Single-tier authentication via the `X-API-Key` header.
+  - Weighted, per-minute rate limiting with `X-RateLimit-*` headers.
+  - Plan-based feature gating (`<domain>_data` feature codes).
+  - Standard response envelope `{ success, statusCode, data, meta }`.
+</Update>

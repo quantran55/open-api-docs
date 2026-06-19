@@ -1,0 +1,26 @@
+type: object
+description: One sector slice of a fund's portfolio allocation.
+required:
+  - sectorName
+  - percent
+properties:
+  sectorName:
+    type: string
+    description: Sector name (localised).
+    example: Ngân hàng
+  value:
+    type: number
+    description: Value allocated to the sector, in fund currency.
+    example: 550441424500
+  percent:
+    type: number
+    description: Sector allocation as a percentage of the portfolio.
+    example: 24.39
+  currency:
+    type: string
+    description: Reporting currency.
+    example: VND
+  month:
+    type: string
+    description: Reporting month (YYYY-MM).
+    example: "2026-04"

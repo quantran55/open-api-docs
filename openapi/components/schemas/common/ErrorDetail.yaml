@@ -1,0 +1,22 @@
+type: object
+description: Error detail object carried under `error` in the error envelope.
+required:
+  - code
+  - message
+properties:
+  code:
+    type: string
+    description: |
+      Machine-readable error code. Specific for authentication / quota errors
+      (e.g. `API_KEY_REQUIRED`, `API_KEY_INVALID`, `FEATURE_NOT_IN_PLAN`,
+      `RATE_LIMIT_EXCEEDED`). For validation (400) and not-found (404) the code
+      is currently `INTERNAL_ERROR` and the HTTP status carries the semantics.
+    example: API_KEY_INVALID
+  message:
+    description: Human-readable message, or a list of validation messages (400).
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+    example: Invalid API key

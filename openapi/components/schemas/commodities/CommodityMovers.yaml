@@ -1,0 +1,19 @@
+type: object
+description: Top gaining and losing commodities over a period.
+required:
+  - period
+  - gainers
+  - losers
+properties:
+  period:
+    type: string
+    description: Period the movers are computed over.
+    example: mtd
+  gainers:
+    type: array
+    items:
+      $ref: "./CommodityMover.yaml"
+  losers:
+    type: array
+    items:
+      $ref: "./CommodityMover.yaml"

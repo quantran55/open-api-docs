@@ -1,0 +1,37 @@
+type: object
+description: A featured commodity with a short price sparkline.
+required:
+  - id
+  - name
+  - unit
+  - lastClose
+  - currency
+properties:
+  id:
+    type: string
+    example: gold
+  name:
+    type: string
+    example: Gold
+  unit:
+    type: string
+    example: USD/oz
+  lastClose:
+    type: number
+    example: 4189.22
+  currency:
+    type: string
+    example: USD
+  change1dPct:
+    type: number
+    description: 1-day percentage change.
+    example: 0.02
+  changeValue:
+    type: number
+    description: 1-day absolute price change.
+    example: 0.77
+  trendline:
+    type: array
+    description: Recent closing prices, oldest→newest, for a sparkline.
+    items:
+      type: number

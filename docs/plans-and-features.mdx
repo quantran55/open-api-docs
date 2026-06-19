@@ -1,0 +1,55 @@
+---
+title: "Plans & features"
+description: "How your subscription plan unlocks data domains."
+---
+
+Access to each data domain is controlled by a **feature** on your subscription
+plan. Your API key inherits your account's plan, and entitlement is resolved live
+on every request — so plan changes take effect immediately, with no need to
+rotate your key.
+
+## Feature codes
+
+Each domain maps to one feature code:
+
+| Domain | Feature code | Weight per call |
+| --- | --- | --- |
+| Commodities | `commodities_data` | 3 |
+| Crypto | `crypto_data` | 3 |
+| ETF | `etf_data` | 8 |
+| FX | `fx_data` | 3 – 6 |
+| Macro | `macro_data` | 2 |
+| Real Estate | `realestate_data` | 2 |
+
+## When a feature isn't in your plan
+
+Calling a domain your plan doesn't include returns **HTTP 403**:
+
+```json
+{
+  "success": false,
+  "statusCode": 403,
+  "error": { "code": "FEATURE_NOT_IN_PLAN", "message": "Your plan does not include this feature" },
+  "meta": { "timestamp": "2026-06-19T08:34:08.100Z" }
+}
+```
+
+To unlock the domain, upgrade your plan from the
+[dashboard](https://app.hayinsights.com).
+
+<Note>
+  The exact mapping of plans (and their per-minute quota) to features is managed
+  in the dashboard and may change as new tiers are introduced. This page lists
+  the feature codes; your account page shows the features and quota active on
+  your current plan.
+</Note>
+
+## How entitlement is resolved
+
+1. Your `X-API-Key` identifies your account.
+2. The account's **effective plan** is looked up.
+3. The plan's **active features** determine which domains you may call, and its
+   **weight budget** determines your [rate limit](/rate-limits).
+
+Because this happens per request, upgrading or downgrading is reflected
+instantly.

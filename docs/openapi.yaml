@@ -1,0 +1,6050 @@
+openapi: 3.1.0
+info:
+  title: HayInsights Open API
+  version: 0.1.0
+  description: |
+    Programmatic access to the **HayInsights** financial-data hub — commodities,
+    crypto, ETF, FX, macroeconomic and real-estate datasets, served from a single
+    API surface under `/openapi/v1/*`.
+
+    This specification is the **single source of truth** for the public API
+    surface — shared by SDK codegen, the reference docs, and (later) the mock
+    server / contract tests.
+
+    ## Authentication
+
+    Every request must carry your API key in the `X-API-Key` header. There is a
+    single authentication tier — no request signing. Create and manage keys in
+    the HayInsights dashboard (Account → API keys). See **Authentication**.
+
+    ## Plans & quota
+
+    Access to each data domain and your request quota are governed by the
+    subscription plan attached to your key. Each endpoint consumes a **weighted**
+    amount of your per-minute quota; every response carries `X-RateLimit-*`
+    headers. See **Rate limits** and **Plans & features**.
+  contact: {}
+servers:
+  - url: https://api.hayinsights.com
+    description: Production
+  - url: https://stg-api.hayinsights.com
+    description: Staging
+security:
+  - HayInsightsApiKey: []
+tags:
+  - name: Commodities
+    description: Spot prices, top movers, gold–DXY correlation and historical series for energy, metals and agricultural commodities.
+  - name: Crypto
+    description: Crypto market overview, dominance, bubble map, on-chain and derivatives metrics.
+  - name: ETF
+    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth and fund composition.
+  - name: FX
+    description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
+  - name: Macro
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
+  - name: Real Estate
+    description: Real-estate statistics, land prices, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+paths:
+  /openapi/v1/commodities:
+    get:
+      operationId: commoditiesList
+      tags:
+        - Commodities
+      summary: List commodity prices
+      description: |
+        Latest price snapshot for every tracked commodity across energy, metals,
+        agriculture and macro categories — including 1-day / MTD / YTD changes, the
+        50-period moving average, a trend classification and a sparkline.
+      x-feature-code: commodities_data
+      x-api-weight: 3
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Filter by commodity category.
+          schema:
+            $ref: '#/components/schemas/CommodityCategory'
+        - name: search
+          in: query
+          required: false
+          description: Free-text search on the commodity name.
+          schema:
+            type: string
+            example: gold
+        - name: sort
+          in: query
+          required: false
+          description: Field to sort by.
+          schema:
+            type: string
+            enum:
+              - name
+              - price
+              - change_1d
+              - mtd
+              - ytd
+            default: price
+        - name: order
+          in: query
+          required: false
+          description: Sort direction.
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+      responses:
+        '200':
+          description: List of commodity price snapshots.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommoditiesListResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: zinc-lme
+                    name: Zinc (LME)
+                    category: metals
+                    unit: USD/ton
+                    lastClose: 3588
+                    currency: USD
+                    change1dPct: 0.53
+                    changeMtdPct: 0.28
+                    changeYtdPct: 14.63
+                    ma50: 3475.3036
+                    trend: bullish
+                    trendline:
+                      - 3530
+                      - 3537
+                      - 3555.5
+                      - 3491
+                      - 3588
+                    updatedAt: '2026-06-17T00:00:00.000Z'
+                  - id: wti-crude
+                    name: WTI Crude Oil
+                    category: energy
+                    unit: USD/bbl
+                    lastClose: 76.55
+                    currency: USD
+                    change1dPct: -0.33
+                    changeMtdPct: -18.93
+                    changeYtdPct: 33.41
+                    ma50: 95.1804
+                    trend: bearish
+                    trendline:
+                      - 84.29
+                      - 81.85
+                      - 82.27
+                      - 76.8
+                      - 76.55
+                    updatedAt: '2026-06-19T00:00:00.000Z'
+                meta:
+                  timestamp: '2026-06-19T08:50:00.811Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/commodities/featured:
+    get:
+      operationId: commoditiesFeatured
+      tags:
+        - Commodities
+      summary: Featured commodities
+      description: |
+        A curated set of headline commodities (gold, crude oil, copper, …) with the
+        latest close, 1-day change and a short price sparkline.
+      x-feature-code: commodities_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: List of featured commodities.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommoditiesFeaturedResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: gold
+                    name: Gold
+                    unit: USD/oz
+                    lastClose: 4189.22
+                    currency: USD
+                    change1dPct: 0.02
+                    changeValue: 0.77
+                    trendline:
+                      - 4258.86
+                      - 4188.45
+                      - 4189.22
+                  - id: wti-crude
+                    name: WTI Crude Oil
+                    unit: USD/bbl
+                    lastClose: 76.55
+                    currency: USD
+                    change1dPct: -0.33
+                    changeValue: -0.25
+                    trendline:
+                      - 76.6
+                      - 76.8
+                      - 76.55
+                meta:
+                  timestamp: '2026-06-19T08:50:00.811Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/commodities/movers:
+    get:
+      operationId: commoditiesMovers
+      tags:
+        - Commodities
+      summary: Top movers
+      description: |
+        The biggest gaining and losing commodities over the requested period.
+      x-feature-code: commodities_data
+      x-api-weight: 3
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: Period the movers are computed over.
+          schema:
+            type: string
+            enum:
+              - mtd
+            default: mtd
+        - name: limit
+          in: query
+          required: false
+          description: Number of gainers and losers to return (1–10).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 3
+      responses:
+        '200':
+          description: Top gaining and losing commodities.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommoditiesMoversResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  period: mtd
+                  gainers:
+                    - id: coffee-robusta
+                      name: Coffee Robusta
+                      changePct: 7.35
+                    - id: coffee-arabica
+                      name: Coffee Arabica
+                      changePct: 4.28
+                  losers:
+                    - id: wti-crude
+                      name: WTI Crude Oil
+                      changePct: -18.93
+                    - id: baltic-dry
+                      name: Baltic Dry Index (BDI)
+                      changePct: -17.47
+                meta:
+                  timestamp: '2026-06-19T08:50:00.846Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/commodities/gold-dxy:
+    get:
+      operationId: commoditiesGoldDxy
+      tags:
+        - Commodities
+      summary: Gold vs DXY correlation
+      description: |
+        Rebased gold price and US Dollar Index (DXY) series over the requested
+        window, for visualising their (typically inverse) correlation.
+      x-feature-code: commodities_data
+      x-api-weight: 3
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - ytd
+            default: 3m
+      responses:
+        '200':
+          description: Rebased gold and DXY series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommoditiesGoldDxyResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  period: 3m
+                  series:
+                    gold:
+                      - date: '2026-03-22'
+                        pctChange: 0
+                        value: 4464.66
+                      - date: '2026-06-19'
+                        pctChange: -6.17
+                        value: 4189.22
+                    dxy:
+                      - date: '2026-03-22'
+                        pctChange: 0
+                        value: 99.35
+                      - date: '2026-06-19'
+                        pctChange: 1.42
+                        value: 100.757
+                meta:
+                  timestamp: '2026-06-19T08:50:00.912Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/commodities/{id}/history:
+    get:
+      operationId: commoditiesHistory
+      tags:
+        - Commodities
+      summary: Commodity price history
+      description: |
+        Historical closing prices for a single commodity. Use the `id` slug returned
+        by the list endpoint (e.g. `gold`, `wti-crude`).
+      x-feature-code: commodities_data
+      x-api-weight: 3
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Commodity slug.
+          schema:
+            type: string
+            example: gold
+        - name: period
+          in: query
+          required: false
+          description: History window.
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 1m
+              - 3m
+              - ytd
+              - 1y
+            default: 3m
+        - name: interval
+          in: query
+          required: false
+          description: Sampling interval.
+          schema:
+            type: string
+            enum:
+              - daily
+              - weekly
+            default: daily
+      responses:
+        '200':
+          description: Closing-price history series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommodityHistoryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - date: '2026-03-19'
+                    close: 4651.73
+                  - date: '2026-03-20'
+                    close: 4491.15
+                  - date: '2026-03-22'
+                    close: 4464.66
+                meta:
+                  timestamp: '2026-06-19T08:50:01.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/crypto:
+    get:
+      operationId: cryptoOverview
+      tags:
+        - Crypto
+      summary: Crypto market overview
+      description: |
+        Snapshot of the crypto market — total market capitalisation, 24h volume,
+        major-coin dominance split, the Fear & Greed index and trending coins.
+      x-feature-code: crypto_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: Crypto market overview snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoOverviewResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  totalMarketCap: 2156391783530.09
+                  volume24h: 74938670897.24
+                  marketCapChange24h: -2.6314
+                  volumeChange24h: -11.6008
+                  dominance:
+                    btc: 58.148
+                    eth: 9.476
+                    bnb: 3.585
+                    sol: 1.843
+                    xrp: 3.242
+                    other: 23.706
+                  fearGreed:
+                    value: 19
+                    classification: Extreme fear
+                    date: '2026-06-18'
+                  trending:
+                    - symbol: FF
+                      name: Falcon Finance
+                      rank: 98
+                      priceChange24h: 99.3142
+                      tag: gainer
+                    - symbol: DASH
+                      name: Dash
+                      rank: 74
+                      priceChange24h: 28.9689
+                      tag: gainer
+                meta:
+                  timestamp: '2026-06-19T08:50:00.956Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/crypto/bubble-map:
+    get:
+      operationId: cryptoBubbleMap
+      tags:
+        - Crypto
+      summary: Crypto bubble map
+      description: |
+        Top coins by market capitalisation with their price change over a selected
+        timeframe and a normalised bubble size, for a bubble-map visualisation.
+      x-feature-code: crypto_data
+      x-api-weight: 3
+      parameters:
+        - name: timeframe
+          in: query
+          required: false
+          description: Timeframe the price changes are computed over.
+          schema:
+            type: string
+            enum:
+              - 1h
+              - 1d
+              - 1w
+            default: 1d
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of coins to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 100
+      responses:
+        '200':
+          description: Bubble-map dataset for the requested timeframe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoBubbleMapResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  timeframe: 1d
+                  coins:
+                    - symbol: BTC
+                      name: Bitcoin
+                      marketCap: 1254560380643.96
+                      change: -2.9057
+                      size: 1
+                    - symbol: ETH
+                      name: Ethereum
+                      marketCap: 204246767811.64
+                      change: -3.2733
+                      size: 0.4035
+                    - symbol: USDT
+                      name: Tether USDt
+                      marketCap: 186279683262.83
+                      change: -0.0033
+                      size: 0.3853
+                meta:
+                  timestamp: '2026-06-19T08:50:00.981Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/crypto/onchain:
+    get:
+      operationId: cryptoOnchain
+      tags:
+        - Crypto
+      summary: Crypto on-chain metrics
+      description: |
+        On-chain network metrics — Ethereum gas prices, Bitcoin hashrate and active
+        addresses, whale transaction count and the MVRV / NUPL valuation indicators.
+      x-feature-code: crypto_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: On-chain network metrics snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoOnchainResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  ethGas:
+                    safe: 0.084424998
+                    standard: 0.08533128
+                    fast: 0.093864408
+                    baseFee: 0.0843841
+                    unit: gwei
+                  btcHashrate:
+                    value: 1024.72
+                    unit: EH/s
+                  btcActiveAddresses: 503361
+                  whaleTxCount: 29766
+                  mvrv:
+                    value: 1.1772253837760067
+                    zone: fair_value
+                  nupl:
+                    value: 0.1586
+                    zone: hope_fear
+                meta:
+                  timestamp: '2026-06-19T08:50:01.004Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/crypto/derivatives:
+    get:
+      operationId: cryptoDerivatives
+      tags:
+        - Crypto
+      summary: Crypto derivatives metrics
+      description: |
+        Derivatives-market metrics — open interest, funding rates, 24h liquidations
+        and the options put/call ratio for the major coins.
+      x-feature-code: crypto_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: Derivatives-market metrics snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoDerivativesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  openInterest:
+                    btc:
+                      symbol: BTCUSDT
+                      value: '98678.224'
+                      unit: USDT
+                    eth:
+                      symbol: ETHUSDT
+                      value: '2240418.100'
+                      unit: USDT
+                  fundingRate:
+                    btc:
+                      rate: 0.00000854
+                      annualized: 0.93513
+                    eth:
+                      rate: -0.00000986
+                      annualized: -1.0796700000000001
+                  liquidations24h:
+                    total: 600914130.33
+                    long: 515261276.52
+                    short: 85652853.81
+                  putCallRatio:
+                    btc:
+                      ratio: 0.633
+                      putOi: 169791
+                      callOi: 268093
+                meta:
+                  timestamp: '2026-06-19T08:50:01.022Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/crypto/dominance:
+    get:
+      operationId: cryptoDominance
+      tags:
+        - Crypto
+      summary: Crypto market dominance
+      description: |
+        Market-cap dominance breakdown — total market cap and each major coin's
+        share of it, with the freshness of the underlying source data.
+      x-feature-code: crypto_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: Market-cap dominance breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CryptoDominanceResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  totalMarketCap: 2156391783530.09
+                  coins:
+                    - symbol: BTC
+                      name: Bitcoin
+                      dominancePercentage: 58.18
+                      marketCap: 1254560380643.96
+                    - symbol: ETH
+                      name: Ethereum
+                      dominancePercentage: 9.47
+                      marketCap: 204246767811.64
+                    - symbol: USDT
+                      name: Tether USDt
+                      dominancePercentage: 8.64
+                      marketCap: 186279683262.83
+                  asOf:
+                    globalMetrics: '2026-06-19T08:45:00.000Z'
+                    assets: '2026-06-19T08:45:00.040Z'
+                    skewSeconds: 0
+                    isStale: false
+                meta:
+                  timestamp: '2026-06-19T08:50:01.048Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf:
+    get:
+      operationId: etfList
+      tags:
+        - ETF
+      summary: List ETFs
+      description: |
+        The full catalogue of tracked exchange-traded funds, with descriptive
+        metadata (manager, benchmark index, trust fee), the latest price and assets
+        under management. Use an entry's `etfCode` as the `{code}` path param for the
+        info, holdings, prices-history and detail endpoints.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters: []
+      responses:
+        '200':
+          description: List of ETFs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfListResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: 794
+                    listingDate: '2001-07-13'
+                    etfCode: '1305'
+                    etfName: iFreeETF TOPIX (Yearly Dividend Type)
+                    managementCompany: Daiwa Asset Management
+                    indexName: TOPIX Total Return Index
+                    tradingUnit: 10
+                    trustFee: 0.06
+                    etfNameJP: iFreeETF TOPIX（年1回決算型）
+                    country: jp
+                    distributionYield: 0.0177
+                    etfType: Japanese Equity(Market)
+                    price: 4299
+                    aum: null
+                  - id: 798
+                    listingDate: '2001-07-13'
+                    etfCode: '1306'
+                    etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+                    managementCompany: Nomura Asset Management
+                    indexName: TOPIX Total Return Index
+                    tradingUnit: 10
+                    trustFee: 0.0505
+                    etfNameJP: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+                    country: jp
+                    distributionYield: 0.0176
+                    etfType: Japanese Equity(Market)
+                    price: 425.5
+                    aum: 32437253262780
+                meta:
+                  timestamp: '2026-06-19T08:50:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/top-performance:
+    get:
+      operationId: etfTopPerformance
+      tags:
+        - ETF
+      summary: Top-performing ETFs
+      description: |
+        ETFs ranked by NAV change over the requested period, best to worst. Use the
+        `period` query parameter to choose the look-back window.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: Look-back window for the performance ranking.
+          schema:
+            type: string
+            enum:
+              - 1M
+              - 6M
+              - 1Y
+            default: 1M
+      responses:
+        '200':
+          description: ETFs ranked by performance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfTopPerformanceResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - etfCode: '1321'
+                    etfName: NEXT FUNDS Nikkei 225 Exchange Traded Fund
+                    currentNav: 61538.17917892439
+                    changePercent: 10.96
+                  - etfCode: '1348'
+                    etfName: MAXIS TOPIX ETF
+                    currentNav: 3953.21351900172
+                    changePercent: 5.65
+                meta:
+                  timestamp: '2026-06-19T08:50:32.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/top-netflow:
+    get:
+      operationId: etfTopNetflow
+      tags:
+        - ETF
+      summary: Top ETFs by net flow
+      description: |
+        ETFs ranked by net capital flow. Set `type` to `positive` for the largest
+        inflows or `negative` for the largest outflows.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: Whether to rank by inflows (`positive`) or outflows (`negative`).
+          schema:
+            type: string
+            enum:
+              - positive
+              - negative
+            default: positive
+      responses:
+        '200':
+          description: ETFs ranked by net flow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfTopNetflowResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - etfCode: '1348'
+                    etfName: MAXIS TOPIX ETF
+                    netflow: 21323272800
+                    netflowAumPercentage: 0.47
+                  - etfCode: 518A
+                    etfName: NEXT FUNDS FTSE Japan ex-REITs High Income Cash Flow 50 Index Exchange Traded Fund
+                    netflow: 4755004000
+                    netflowAumPercentage: 74.79
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/heatmap:
+    get:
+      operationId: etfHeatmap
+      tags:
+        - ETF
+      summary: ETF market heatmap
+      description: |
+        Snapshot of every tracked ETF for rendering a treemap heatmap — closing
+        price, volume, market cap, price fluctuation and each fund's contribution to
+        the aggregate index movement. `contributionArea` is the relative tile size.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters: []
+      responses:
+        '200':
+          description: Heatmap cells for every tracked ETF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfHeatmapResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - code: '1305'
+                    name: iFreeETF TOPIX (Yearly Dividend Type)
+                    currency: JPY
+                    currentDate: '2026-06-16T17:00:00.000Z'
+                    closePrice: 4299
+                    volume: 71520
+                    marketCap: 307464480
+                    tradingValue: 307464480
+                    priceFluctuation: 19
+                    priceFluctuationPercent: 0.44
+                    contributionValue: 1352843.7119999998
+                    marketCapChange: -1835060720
+                    contributionArea: 0.07973
+                  - code: '1306'
+                    name: NEXT FUNDS TOPIX Exchange Traded Fund
+                    currency: JPY
+                    currentDate: '2026-06-16T17:00:00.000Z'
+                    closePrice: 425.5
+                    volume: 11852430
+                    marketCap: 5043208965
+                    tradingValue: 5043208965
+                    priceFluctuation: 2.4
+                    priceFluctuationPercent: 0.57
+                    contributionValue: 28746291.1005
+                    marketCapChange: -2150997271
+                    contributionArea: 1.69419
+                meta:
+                  timestamp: '2026-06-19T08:50:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/compare/fund-composition:
+    get:
+      operationId: etfCompareFundComposition
+      tags:
+        - ETF
+      summary: Compare fund composition
+      description: |
+        Side-by-side composition for two to five Vietnamese funds — asset allocation,
+        the equity portfolio and the sector breakdown — for direct comparison. Pass
+        the VN fund codes (e.g. `VESAF`) as a comma-separated `codes` list.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: codes
+          in: query
+          required: true
+          description: Comma-separated list of 2 to 5 Vietnamese fund codes to compare.
+          schema:
+            type: string
+            example: VESAF,VEOF
+      responses:
+        '200':
+          description: Composition for each requested fund.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfCompareFundCompositionResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - fundCode: VESAF
+                    assetAllocation:
+                      bond: 0
+                      stock: 2154943464100
+                      others: 318018107481
+                      total: 2472961571581
+                      bondPercent: 0
+                      stockPercent: 87.14
+                      othersPercent: 12.86
+                      currency: VND
+                      month: 2026-05
+                    portfolio:
+                      - symbol: MBB
+                        price: 25000
+                        volume: 7706790
+                        weightPercent: 7.79
+                        currency: VND
+                        month: 2026-05
+                      - symbol: BVH
+                        price: 67700
+                        volume: 2801910
+                        weightPercent: 7.67
+                        currency: VND
+                        month: 2026-05
+                    sectorAllocation:
+                      - sectorName: Ngân hàng
+                        value: 550441424500
+                        percent: 24.39
+                        currency: VND
+                        month: 2026-04
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/compare/nav-growth:
+    get:
+      operationId: etfCompareNavGrowth
+      tags:
+        - ETF
+      summary: Compare NAV growth
+      description: |
+        NAV-growth series for two Vietnamese funds, benchmarked against the VN-Index,
+        across the available period windows. Pass the two VN fund codes (e.g. `VESAF`)
+        as `code1` and `code2`.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code1
+          in: query
+          required: true
+          description: First Vietnamese fund code to compare.
+          schema:
+            type: string
+            example: VESAF
+        - name: code2
+          in: query
+          required: true
+          description: Second Vietnamese fund code to compare.
+          schema:
+            type: string
+            example: VEOF
+      responses:
+        '200':
+          description: NAV-growth comparison for the two funds and the VN-Index.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfCompareNavGrowthResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  etf1:
+                    etfCode: VESAF
+                    data:
+                      3M:
+                        - date: 19-03-2026
+                          growthRate: 0
+                          nav: 34990.91
+                        - date: 20-03-2026
+                          growthRate: 0.07
+                          nav: 35015.42
+                  etf2:
+                    etfCode: VEOF
+                    data:
+                      3M:
+                        - date: 19-03-2026
+                          growthRate: 0
+                          nav: 36023.97
+                  vnIndex:
+                    etfCode: VNINDEX
+                    data:
+                      3M:
+                        - date: 19-03-2026
+                          growthRate: 0
+                          nav: 1699.13
+                  periodAvailability:
+                    1M: false
+                    3M: true
+                    6M: true
+                    1Y: true
+                    3Y: true
+                  startDate: 24-04-2017
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/nav-growth/{code}:
+    get:
+      operationId: etfNavGrowth
+      tags:
+        - ETF
+      summary: ETF NAV growth
+      description: |
+        NAV-growth series for a single Vietnamese fund, benchmarked against the
+        VN-Index, across the available period windows. Use the VN fund certificate
+        code (e.g. `VESAF`) as the `{code}` path param. The response shares the
+        comparison shape; the unused `etf2` slot has an empty `etfCode`.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Vietnamese fund certificate code.
+          schema:
+            type: string
+            example: VESAF
+      responses:
+        '200':
+          description: NAV-growth series for the fund and the VN-Index.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfNavGrowthResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  etf1:
+                    etfCode: VNDAF
+                    data:
+                      3M:
+                        - date: 19-03-2026
+                          growthRate: 0
+                          nav: 19934.64
+                        - date: 20-03-2026
+                          growthRate: 0.07
+                          nav: 19948.69
+                  etf2:
+                    etfCode: ''
+                    data: {}
+                  vnIndex:
+                    etfCode: VNINDEX
+                    data:
+                      3M:
+                        - date: 19-03-2026
+                          growthRate: 0
+                          nav: 1699.13
+                  periodAvailability:
+                    1M: false
+                    3M: true
+                    6M: true
+                    1Y: true
+                    3Y: true
+                  startDate: 18-01-2018
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/{code}/info:
+    get:
+      operationId: etfInfo
+      tags:
+        - ETF
+      summary: ETF info
+      description: |
+        Core descriptive metadata for a single ETF — manager, benchmark index,
+        listing date, trust fee and distribution yield. Use the exchange ticker
+        (e.g. a TSE code like `1306`) as the `{code}` path param.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+          schema:
+            type: string
+            example: '1306'
+      responses:
+        '200':
+          description: Descriptive metadata for the ETF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfInfoResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  id: 798
+                  listingDate: '2001-07-13'
+                  etfCode: '1306'
+                  etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+                  managementCompany: Nomura Asset Management
+                  indexName: TOPIX Total Return Index
+                  tradingUnit: 10
+                  trustFee: 0.0505
+                  etfNameJP: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+                  country: jp
+                  distributionYield: 0.0176
+                  etfType: Japanese Equity(Market)
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/{code}/holdings:
+    get:
+      operationId: etfHoldings
+      tags:
+        - ETF
+      summary: ETF holdings
+      description: |
+        The underlying constituent holdings of an ETF's basket — ticker, name, shares
+        held and position value, as of the latest fund snapshot. Use the exchange
+        ticker (e.g. a TSE code like `1306`) as the `{code}` path param.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+          schema:
+            type: string
+            example: '1306'
+      responses:
+        '200':
+          description: Constituent holdings of the ETF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfHoldingsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: 6316032
+                    code: '1301'
+                    name: KYOKUYO CO LTD
+                    exchange: TSE
+                    currency: JPY
+                    sharesAmount: '350200.000000'
+                    stockPrice: 4865
+                    value: '1703723000.000000'
+                    etfCode: '1306'
+                    sharesOutstanding: '81194626440.000000'
+                    fundDate: '2026-04-21'
+                    isin: JP3257200000
+                  - id: 6316072
+                    code: '1860'
+                    name: TODA CORP
+                    exchange: TSE
+                    currency: JPY
+                    sharesAmount: '7196900.000000'
+                    stockPrice: 1414.5
+                    value: '10180015050.000000'
+                    etfCode: '1306'
+                    sharesOutstanding: '81194626440.000000'
+                    fundDate: '2026-04-21'
+                    isin: JP3627000007
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/{code}/prices-history:
+    get:
+      operationId: etfPricesHistory
+      tags:
+        - ETF
+      summary: ETF price history
+      description: |
+        Daily OHLCV price history for a single ETF, ordered oldest to newest. Use the
+        exchange ticker (e.g. a TSE code like `1306`) as the `{code}` path param.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+          schema:
+            type: string
+            example: '1306'
+      responses:
+        '200':
+          description: Daily OHLCV price history for the ETF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfPricesHistoryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: 346280
+                    date: '2021-06-14'
+                    etfCode: '1306'
+                    open: 2065
+                    high: 2068
+                    low: 2051
+                    close: 2056
+                    volume: '573610.000000'
+                    currency: JPY
+                  - id: 346281
+                    date: '2021-06-15'
+                    etfCode: '1306'
+                    open: 2060
+                    high: 2076
+                    low: 2059
+                    close: 2075
+                    volume: '2708520.000000'
+                    currency: JPY
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/{code}/detail:
+    get:
+      operationId: etfDetail
+      tags:
+        - ETF
+      summary: ETF detail
+      description: |
+        Full detail view for a single ETF — descriptive metadata, latest price, top
+        holdings, valuation ratios, sector weights, net-flow history and
+        cumulative-return performance by period. Use the exchange ticker (e.g. a TSE
+        code like `1306`) as the `{code}` path param.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+          schema:
+            type: string
+            example: '1306'
+      responses:
+        '200':
+          description: Full detail view for the ETF.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfDetailResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  etfCode: '1306'
+                  etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+                  managementCompany: Nomura Asset Management
+                  MER: 0.0505
+                  etfType: Japanese Equity(Market)
+                  indexName: TOPIX Total Return Index
+                  listingDate: '2001-07-13'
+                  currentPrice: 425.5
+                  change: 2.4
+                  changePct: 0.57
+                  lastUpdateDate: '2026-06-17'
+                  totalAssetValue: 32511066650608.5
+                  AssetAllocation:
+                    - name: TOYOTA MOTOR CORP
+                      value: 1074907641000
+                    - name: MITSUBISHI UFJ FIN
+                      value: 1063805290650
+                  equityHoldings:
+                    PE: '0.0600'
+                    PB: '0.6400'
+                    PS: '0.8400'
+                    PC: '0.0900'
+                  sectorWeight:
+                    - sector: null
+                      weight: 0.2803
+                      month: 4
+                      year: 2026
+                  distributionYield: 0.0176
+                  netflow:
+                    data:
+                      - date: '2025-10-17'
+                        aum: 26913496133220
+                        netflow: -26107300968
+                        netflowAumPct: -0.097
+                    periodAvailability:
+                      1M: true
+                      3M: true
+                      6M: true
+                  performance:
+                    periodAvailability:
+                      1M: true
+                      3M: true
+                      6M: true
+                      1Y: true
+                      3Y: true
+                    periods:
+                      1M:
+                        - date: 15-05-2026
+                          nav: 409.9
+                          cumulativeReturn: 0
+                        - date: 18-05-2026
+                          nav: 405.9
+                          cumulativeReturn: -0.98
+                meta:
+                  timestamp: '2026-06-19T08:50:39.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/{code}/composition:
+    get:
+      operationId: etfComposition
+      tags:
+        - ETF
+      summary: ETF / fund composition
+      description: |
+        Full composition of a single Vietnamese fund certificate — asset allocation,
+        the equity portfolio and the sector breakdown. Use the VN fund code (e.g.
+        `VESAF`) as the `{code}` path param.
+      x-feature-code: etf_data
+      x-api-weight: 8
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Vietnamese fund certificate code.
+          schema:
+            type: string
+            example: VESAF
+      responses:
+        '200':
+          description: Composition of the fund.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfCompositionResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  fundCode: VESAF
+                  assetAllocation:
+                    bond: 0
+                    stock: 2154943464100
+                    others: 318018107481
+                    total: 2472961571581
+                    bondPercent: 0
+                    stockPercent: 87.14
+                    othersPercent: 12.86
+                    currency: VND
+                    month: 2026-05
+                  portfolio:
+                    - symbol: MBB
+                      price: 25000
+                      volume: 7706790
+                      weightPercent: 7.79
+                      currency: VND
+                      month: 2026-05
+                    - symbol: BVH
+                      price: 67700
+                      volume: 2801910
+                      weightPercent: 7.67
+                      currency: VND
+                      month: 2026-05
+                  sectorAllocation:
+                    - sectorName: Ngân hàng
+                      value: 550441424500
+                      percent: 24.39
+                      currency: VND
+                      month: 2026-04
+                meta:
+                  timestamp: '2026-06-19T08:50:42.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/fx/summary:
+    get:
+      operationId: fxSummary
+      tags:
+        - FX
+      summary: FX summary
+      description: |
+        FX dashboard summary — the US Dollar Index (DXY), the USD/JPY rate (each with
+        a 1-day change) and a headline emerging-market FX stress reading.
+      x-feature-code: fx_data
+      x-api-weight: 3
+      responses:
+        '200':
+          description: FX summary snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FxSummaryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  dxy:
+                    value: 100.76
+                    changePct: 0.14
+                    asOf: '2026-06-19'
+                    source: https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md
+                  usdJpy:
+                    value: 161.35
+                    changePct: 0.03
+                    asOf: '2026-06-19'
+                    source: https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md
+                  emStress:
+                    level: PANIC
+                    score: 4
+                    panicCount: 0
+                    warningCount: 4
+                meta:
+                  timestamp: '2026-06-19T08:50:42.282Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/fx/table:
+    get:
+      operationId: fxTable
+      tags:
+        - FX
+      summary: FX table
+      description: |
+        Live table of tracked currency pairs — latest price, 1-day change, a 10-day
+        sparkline and the 52-week high / low for each.
+      x-feature-code: fx_data
+      x-api-weight: 3
+      parameters:
+        - name: pairs
+          in: query
+          required: false
+          description: Comma-separated list of currency pairs to filter by (e.g. `EUR/USD,USD/JPY`). Returns all tracked pairs when omitted.
+          schema:
+            type: string
+            example: EUR/USD,USD/JPY
+      responses:
+        '200':
+          description: Live FX table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FxTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  asOf: '2026-06-19'
+                  rows:
+                    - pair: EUR/USD
+                      lastPrice: 1.14
+                      changePct: -0.23
+                      sparkline10d:
+                        - 1.15
+                        - 1.16
+                        - 1.16
+                        - 1.16
+                        - 1.16
+                        - 1.16
+                        - 1.16
+                        - 1.15
+                        - 1.15
+                        - 1.14
+                      high52w: 1.2
+                      low52w: 1.14
+                      asOf: '2026-06-19'
+                    - pair: USD/JPY
+                      lastPrice: 161.35
+                      changePct: 0.03
+                      sparkline10d:
+                        - 160.55
+                        - 159.94
+                        - 160.23
+                        - 160.24
+                        - 159.96
+                        - 160.33
+                        - 160.45
+                        - 160.64
+                        - 161.3
+                        - 161.35
+                      high52w: 161.35
+                      low52w: 143.58
+                      asOf: '2026-06-19'
+                meta:
+                  timestamp: '2026-06-19T08:50:42.336Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/fx/correlation:
+    get:
+      operationId: fxCorrelation
+      tags:
+        - FX
+      summary: FX correlation matrix
+      description: |
+        Rolling 90-day correlation matrix across major FX, crypto and gold
+        benchmarks. `matrix[i][j]` is the Pearson correlation between `symbols[i]`
+        and `symbols[j]`.
+      x-feature-code: fx_data
+      x-api-weight: 6
+      parameters:
+        - name: assets
+          in: query
+          required: false
+          description: Comma-separated list of assets / symbols to include (e.g. `DXY,EUR/USD,XAU/USD`). Returns the default symbol set when omitted.
+          schema:
+            type: string
+            example: DXY,EUR/USD,XAU/USD
+      responses:
+        '200':
+          description: FX correlation matrix.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FxCorrelationResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  window: 90d
+                  asOf: '2026-06-19'
+                  samples: 89
+                  symbols:
+                    - DXY
+                    - EUR/USD
+                    - XAU/USD
+                  matrix:
+                    - - 1
+                      - -0.87
+                      - -0.52
+                    - - -0.87
+                      - 1
+                      - 0.62
+                    - - -0.52
+                      - 0.62
+                      - 1
+                meta:
+                  timestamp: '2026-06-19T08:50:42.363Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/fx/em-stress:
+    get:
+      operationId: fxEmStress
+      tags:
+        - FX
+      summary: Emerging-market FX stress
+      description: |
+        Emerging-market FX stress monitor — for each tracked pair, compares recent
+        realised volatility against its 90-day distribution and classifies the pair
+        as STABLE, WARNING or PANIC.
+      x-feature-code: fx_data
+      x-api-weight: 6
+      responses:
+        '200':
+          description: Emerging-market FX stress readings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FxEmStressResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  asOf: '2026-05-14'
+                  pairs:
+                    - pair: USD/CNY
+                      latestPrice: 6.79
+                      vol30d: 1.42
+                      vol90dMean: 2.39
+                      vol90dSd: 0.63
+                      zScore: -1.52
+                      priceZScore: -2
+                      level: WARNING
+                      sampleN: 90
+                    - pair: USD/IDR
+                      latestPrice: 17500.9
+                      vol30d: 3.95
+                      vol90dMean: 3.56
+                      vol90dSd: 0.37
+                      zScore: 1.02
+                      priceZScore: 2.49
+                      level: WARNING
+                      sampleN: 90
+                meta:
+                  timestamp: '2026-06-19T08:50:42.383Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/gdp-growth-rate:
+    get:
+      operationId: macroGdpGrowthRate
+      tags:
+        - Macro
+      summary: GDP growth rate
+      description: |
+        Quarterly nominal GDP and its period-over-period growth rate for a country.
+        Each point also carries the value's unit and the start/end of the quarter.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: ISO country code.
+          schema:
+            type: string
+            default: JP
+            example: JP
+      responses:
+        '200':
+          description: Quarterly GDP growth-rate series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroGdpGrowthRateResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - country: JP
+                    quarter: Q4 2025
+                    gdp: '672199.300'
+                    gdpUnit: Billion JPY
+                    growthRate: 0.6
+                    realGdp: null
+                    realGrowthRate: null
+                    dateFrom: '2025-10-01T00:00:00.000Z'
+                    dateTo: '2025-12-31T23:59:59.999Z'
+                  - country: JP
+                    quarter: Q1 2026
+                    gdp: '677233.400'
+                    gdpUnit: Billion JPY
+                    growthRate: 0.8
+                    realGdp: null
+                    realGrowthRate: null
+                    dateFrom: '2026-01-01T00:00:00.000Z'
+                    dateTo: '2026-03-31T23:59:59.999Z'
+                meta:
+                  timestamp: '2026-06-19T08:50:42.428Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/market-recap:
+    get:
+      operationId: macroMarketRecap
+      tags:
+        - Macro
+      summary: Latest macroeconomic market recap
+      description: |
+        A point-in-time market recap bundling the latest Japanese equity / commodity
+        indices, REITs, TOPIX, 3-month interbank reference rates and key currency
+        rates into a single payload.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters: []
+      responses:
+        '200':
+          description: Latest market recap snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroMarketRecapResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  updateTime: '2024-01-15T15:30:00'
+                  nikkeiJpxGold:
+                    - index: Nikkei 225
+                      value: 38500.5
+                      changeValue: 120.3
+                      changePercent: 0.31
+                      datetime: '2024-01-15T15:30:00'
+                      atClose: '2024-01-15T15:30:00'
+                  nikkeiJpxOil: []
+                  tokyoStockExchangeReit: []
+                  topix: []
+                  interbankRates3m:
+                    - index: TIBOR 3M
+                      value: 0.08
+                      changeValue: 0.01
+                      changePercent: null
+                      datetime: '2024-01-15T15:30:00'
+                      atClose: '2024-01-15T15:30:00'
+                  currencyRate:
+                    - index: USD/JPY
+                      value: 148.5
+                      changeValue: 0.3
+                      changePercent: 0.2
+                      datetime: '2024-01-15T15:30:00'
+                      atClose: '2024-01-15T15:30:00'
+                meta:
+                  timestamp: '2026-06-19T08:50:42.493Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/economic-data:
+    get:
+      operationId: macroEconomicData
+      tags:
+        - Macro
+      summary: Economic data series
+      description: |
+        Time series for a selected macroeconomic indicator — GDP, CPI, PCE or
+        import-export — for a country, over a chosen look-back window.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Indicator to return.
+          schema:
+            type: string
+            enum:
+              - gdp
+              - cpi
+              - pce
+              - import-export
+            example: gdp
+        - name: country
+          in: query
+          required: false
+          description: ISO country code.
+          schema:
+            type: string
+            default: JP
+            example: JP
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 1Y
+              - 3Y
+              - 10Y
+            default: 10Y
+      responses:
+        '200':
+          description: Selected economic data series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroEconomicDataResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - country: JP
+                    quarter: Q4 2025
+                    gdp: '672199.300'
+                    gdpUnit: Billion JPY
+                    growthRate: 0.6
+                    realGdp: null
+                    realGrowthRate: null
+                    dateFrom: '2025-10-01T00:00:00.000Z'
+                    dateTo: '2025-12-31T23:59:59.999Z'
+                  - country: JP
+                    quarter: Q1 2026
+                    gdp: '677233.400'
+                    gdpUnit: Billion JPY
+                    growthRate: 0.8
+                    realGdp: null
+                    realGrowthRate: null
+                    dateFrom: '2026-01-01T00:00:00.000Z'
+                    dateTo: '2026-03-31T23:59:59.999Z'
+                meta:
+                  timestamp: '2026-06-19T08:50:42.471Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/exchange-rate:
+    get:
+      operationId: macroExchangeRate
+      tags:
+        - Macro
+      summary: Exchange rate series
+      description: |
+        Daily closing exchange-rate history for a currency pair. Optionally limit the
+        look-back window or return only data before a given date.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: currency1
+          in: query
+          required: true
+          description: Base currency code.
+          schema:
+            type: string
+            example: USD
+        - name: currency2
+          in: query
+          required: true
+          description: Quote currency code.
+          schema:
+            type: string
+            example: JPY
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 1Y
+              - 3Y
+              - 5Y
+              - 10Y
+            example: 1Y
+        - name: before
+          in: query
+          required: false
+          description: Return only observations dated before this date.
+          schema:
+            type: string
+            format: date
+            example: '2024-01-01'
+      responses:
+        '200':
+          description: Closing exchange-rate series for the pair.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroExchangeRateResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - date: '2024-01-12'
+                    close: 144.89
+                    exchangeRateName: USD/JPY
+                  - date: '2024-01-15'
+                    close: 148.5
+                    exchangeRateName: USD/JPY
+                meta:
+                  timestamp: '2026-06-19T08:50:42.493Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/population:
+    get:
+      operationId: macroPopulation
+      tags:
+        - Macro
+      summary: Population & unemployment
+      description: |
+        Monthly total-population figures alongside the unemployment rate for a
+        country, over a chosen look-back window.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: ISO country code.
+          schema:
+            type: string
+            default: JP
+            example: JP
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 1Y
+              - 3Y
+              - 10Y
+            default: 1Y
+      responses:
+        '200':
+          description: Population and unemployment series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroPopulationResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - country: JP
+                    observationDate: '2026-02-01'
+                    population: 122860000
+                    unemploymentRate: 2.6
+                  - country: JP
+                    observationDate: '2026-03-01'
+                    population: 122850000
+                    unemploymentRate: 2.7
+                meta:
+                  timestamp: '2026-06-19T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/monetary-policy/central-government-debt:
+    get:
+      operationId: macroCentralGovernmentDebt
+      tags:
+        - Macro
+      summary: Central government debt (% of GDP)
+      description: |
+        Quarterly central-government debt expressed as a percentage of GDP for a
+        country, with the year-over-year change in the ratio.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: ISO country code.
+          schema:
+            type: string
+            default: US
+            example: US
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 5Y
+              - 10Y
+              - 20Y
+            default: 5Y
+      responses:
+        '200':
+          description: Central-government-debt series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroCentralGovernmentDebtResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - observationDate: '2025-07-01'
+                    country: US
+                    centralGovernmentDebt: 121.44
+                    yoyChange: 0.82
+                  - observationDate: '2025-10-01'
+                    country: US
+                    centralGovernmentDebt: 122.57
+                    yoyChange: 1.13
+                meta:
+                  timestamp: '2026-06-19T08:50:42.523Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/monetary-policy/rates-yields:
+    get:
+      operationId: macroRatesYields
+      tags:
+        - Macro
+      summary: Policy rates & bond yields
+      description: |
+        Monthly policy / overnight call rate alongside the 10-year government bond
+        yield for a country, over a chosen look-back window.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: ISO country code.
+          schema:
+            type: string
+            default: JP
+            example: JP
+        - name: period
+          in: query
+          required: false
+          description: Look-back window.
+          schema:
+            type: string
+            enum:
+              - 1Y
+              - 3Y
+              - 10Y
+            default: 10Y
+      responses:
+        '200':
+          description: Policy-rate and bond-yield series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroRatesYieldsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - observationDate: '2026-02-01'
+                    country: JP
+                    tenYearsGovernmentBondYieldsPct: 2.31
+                    overnightCallRate: 0.71
+                  - observationDate: '2026-03-01'
+                    country: JP
+                    tenYearsGovernmentBondYieldsPct: 2.35
+                    overnightCallRate: 0.73
+                meta:
+                  timestamp: '2026-06-19T08:50:42.552Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/geojson:
+    get:
+      operationId: realEstateGeoJson
+      tags:
+        - Real Estate
+      summary: Ward choropleth GeoJSON
+      description: |
+        Ward boundary geometry paired with average-price attributes, for rendering a
+        choropleth map. The response can be large (boundary coordinates for every ward);
+        the geometry is modelled permissively. Data is available for `vn`; `jp` is empty.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+      responses:
+        '200':
+          description: Ward features with price attributes and boundary geometry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateGeoJsonResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  wards:
+                    - wardId: 34
+                      wardName: Phú Thuận
+                      areaName: Khu vực II
+                      area: Khu vực II
+                      avgPriceResidentialVt1: 52639.39
+                      avgPriceResidentialVt2: null
+                      avgPriceResidentialVt3: null
+                      avgPriceResidentialVt4: null
+                      minPriceResidential: 36500
+                      maxPriceResidential: 83400
+                      roadCount: 38
+                      unit: k_vnd
+                      coordinates:
+                        - - - 106.751906
+                            - 10.7051207
+                          - - 106.751422
+                            - 10.7074537
+                meta:
+                  timestamp: '2026-06-19T08:54:29.621Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/stats:
+    get:
+      operationId: realEstateStats
+      tags:
+        - Real Estate
+      summary: Country land-price statistics
+      description: |
+        Aggregate land-price statistics for a country — overall ward / segment totals, the
+        observed price range, per-area breakdowns and the highest-priced roads. Data is
+        available for `vn`; `jp` is empty.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+      responses:
+        '200':
+          description: Aggregate land-price statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateStatsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  totalWards: 185
+                  totalSegments: 13674
+                  priceRange:
+                    min: 0
+                    max: 702194
+                    unit: k_vnd
+                  byArea:
+                    - area: Khu vực I
+                      avgPrice: 165462
+                      minPrice: 48600
+                      maxPrice: 687200
+                      wardCount: 32
+                      segmentCount: 1026
+                  topRoads:
+                    - roadName: Hai Bà Trưng
+                      wardName: Khu vực 1
+                      area: Khu vực 1
+                      priceResidential: 702194
+                meta:
+                  timestamp: '2026-06-19T08:54:29.621Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/wards:
+    get:
+      operationId: realEstateWards
+      tags:
+        - Real Estate
+      summary: List ward land-price summaries
+      description: |
+        Ward-level land-price summaries for a country — average residential prices across
+        value-position tiers, min/max prices and road counts. Data is available for `vn`;
+        `jp` is empty.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+        - name: lang
+          in: query
+          required: false
+          description: Language for localized names.
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
+      responses:
+        '200':
+          description: List of ward land-price summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateWardsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - wardId: 1
+                    wardName: Sài Gòn
+                    area: Khu vực I
+                    avgPriceResidentialVt1: 365020
+                    avgPriceResidentialVt2: null
+                    avgPriceResidentialVt3: null
+                    avgPriceResidentialVt4: null
+                    minPriceResidential: 191200
+                    maxPriceResidential: 687200
+                    roadCount: 60
+                    year: 2025
+                    month: 1
+                    unit: k_vnd
+                meta:
+                  timestamp: '2026-06-19T08:54:29.621Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/wards/{wardId}:
+    get:
+      operationId: realEstateWardDetail
+      tags:
+        - Real Estate
+      summary: Ward land-price detail
+      description: |
+        Full land-price detail for a single ward — an aggregate summary plus every priced
+        road segment with residential, commercial and production prices across value-position
+        tiers. Use the `wardId` returned by the wards list. Data is available for `vn`.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+        - name: wardId
+          in: path
+          required: true
+          description: Ward identifier.
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Land-price detail for a single ward.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateWardDetailResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  wardId: 1
+                  wardName: Sài Gòn
+                  area: Khu vực I
+                  summary:
+                    avgPriceResidentialVt1: 365020
+                    avgPriceResidentialVt2: null
+                    avgPriceResidentialVt3: null
+                    avgPriceResidentialVt4: null
+                    minPriceResidential: 191200
+                    maxPriceResidential: 687200
+                    roadCount: '60'
+                    year: 2025
+                    month: 1
+                    unit: k_vnd
+                  roads:
+                    - roadName: NGUYỄN HUỆ
+                      segmentFrom: TRỌN ĐƯỜNG
+                      segmentTo: null
+                      priceResidentialVt1: 687200
+                      priceResidentialVt2: null
+                      priceResidentialVt3: null
+                      priceResidentialVt4: null
+                      priceCommercialVt1: 481000
+                      priceProductionVt1: 412300
+                meta:
+                  timestamp: '2026-06-19T08:54:29.812Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/land-prices:
+    get:
+      operationId: realEstateLandPrices
+      tags:
+        - Real Estate
+      summary: List priced road segments
+      description: |
+        Priced road segments for a country, with residential, commercial and production
+        prices across value-position tiers. Filter by land-use `type`, `area`, `ward_id` or
+        a free-text search, and cap the result count with `limit`. Data is available for `vn`.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+        - name: type
+          in: query
+          required: false
+          description: Filter by land-use type.
+          schema:
+            type: string
+            enum:
+              - residential
+              - commercial
+              - production
+        - name: area
+          in: query
+          required: false
+          description: Filter by area / land-value zone.
+          schema:
+            type: string
+            enum:
+              - I
+              - II
+              - III
+              - IV
+        - name: ward_id
+          in: query
+          required: false
+          description: Filter by ward identifier.
+          schema:
+            type: integer
+            example: 169
+        - name: q
+          in: query
+          required: false
+          description: Free-text search on road / ward name.
+          schema:
+            type: string
+            example: Hai Bà Trưng
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of segments to return.
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: List of priced road segments.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateLandPricesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - wardId: 169
+                    wardName: Khu vực 1
+                    area: Khu vực 1
+                    roadName: Nhà Thờ
+                    segmentFrom: Đầu đường
+                    segmentTo: Cuối đường
+                    priceResidentialVt1: 702194
+                    priceResidentialVt2: 316389
+                    priceResidentialVt3: 229626
+                    priceResidentialVt4: 196388
+                    priceCommercialVt1: null
+                    priceCommercialVt2: null
+                    priceCommercialVt3: null
+                    priceCommercialVt4: null
+                    priceProductionVt1: null
+                    priceProductionVt2: null
+                    priceProductionVt3: null
+                    priceProductionVt4: null
+                    unit: k_vnd
+                    year: 2026
+                    month: 1
+                meta:
+                  timestamp: '2026-06-19T08:54:29.621Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/provinces:
+    get:
+      operationId: realEstateProvinces
+      tags:
+        - Real Estate
+      summary: List provinces
+      description: |
+        Provinces / cities available for real-estate queries in a country. Data is
+        available for `vn`; `jp` is empty.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+        - name: lang
+          in: query
+          required: false
+          description: Language for localized names.
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
+      responses:
+        '200':
+          description: List of provinces / cities.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateProvincesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - id: 2
+                    name: Hà Nội
+                    code: HN
+                    bbox: null
+                  - id: 1
+                    name: Hồ Chí Minh
+                    code: HCM
+                    bbox: null
+                meta:
+                  timestamp: '2026-06-19T08:54:29.672Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}:
+    get:
+      operationId: realEstateCountrySummary
+      tags:
+        - Real Estate
+      summary: Country real-estate summary
+      description: |
+        Top-level real-estate summary for a country. Currently returns an empty array on
+        staging — use the `stats`, `wards`, `land-prices`, `provinces` and `geojson`
+        sub-routes for detailed data. Data is available for `vn`; `jp` is empty.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code, lowercase.
+          schema:
+            type: string
+            example: vn
+      responses:
+        '200':
+          description: Country summary rows (currently empty on staging).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateCountrySummaryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data: []
+                meta:
+                  timestamp: '2026-06-19T08:54:29.621Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    HayInsightsApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Your HayInsights API key (prefixed `apk_`). Create and manage keys in the
+        HayInsights dashboard (Account → API keys).
+
+        Send it in the `X-API-Key` header on **every** request to `/openapi/v1/*`.
+        Which data domains you may access and your request quota are both governed by
+        the subscription plan attached to the key — see the **Plans & features** and
+        **Rate limits** guides.
+  schemas:
+    CommodityCategory:
+      type: string
+      enum:
+        - energy
+        - metals
+        - agriculture
+        - macro
+      description: Commodity category.
+      example: metals
+    SortOrder:
+      type: string
+      enum:
+        - asc
+        - desc
+      default: desc
+      description: Sort direction.
+      example: desc
+    Meta:
+      type: object
+      description: Response metadata. Always present; `timestamp` is the server time the response was generated.
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Server time when the response was generated (ISO 8601).
+          example: '2026-06-19T08:31:59.478Z'
+      additionalProperties: true
+    EnvelopeBase:
+      type: object
+      description: |
+        Standard success envelope shared by every endpoint. Each operation's response
+        wrapper extends this (via `allOf`) and adds a typed `data` property.
+      required:
+        - success
+        - statusCode
+      properties:
+        success:
+          type: boolean
+          const: true
+          description: Always `true` for a successful response.
+          example: true
+        statusCode:
+          type: integer
+          description: Mirrors the HTTP status code.
+          example: 200
+        meta:
+          $ref: '#/components/schemas/Meta'
+    CommodityPrice:
+      type: object
+      description: Latest price snapshot for a single commodity.
+      required:
+        - id
+        - name
+        - category
+        - unit
+        - lastClose
+        - currency
+      properties:
+        id:
+          type: string
+          description: Commodity slug — use as the `{id}` path param for history.
+          example: zinc-lme
+        name:
+          type: string
+          example: Zinc (LME)
+        category:
+          $ref: '#/components/schemas/CommodityCategory'
+        unit:
+          type: string
+          example: USD/ton
+        lastClose:
+          type: number
+          description: Most recent closing price.
+          example: 3588
+        currency:
+          type: string
+          example: USD
+        change1dPct:
+          type: number
+          description: 1-day percentage change.
+          example: 0.53
+        changeMtdPct:
+          type: number
+          description: Month-to-date percentage change.
+          example: 0.28
+        changeYtdPct:
+          type: number
+          description: Year-to-date percentage change.
+          example: 14.63
+        ma50:
+          type: number
+          description: 50-period moving average.
+          example: 3475.3036
+        trend:
+          type: string
+          enum:
+            - bullish
+            - bearish
+            - neutral
+          description: Trend classification derived from the moving average.
+          example: bullish
+        trendline:
+          type: array
+          description: Recent closing prices, oldest→newest, for a sparkline.
+          items:
+            type: number
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-06-17T00:00:00.000Z'
+    CommoditiesListResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CommodityPrice'
+    ErrorDetail:
+      type: object
+      description: Error detail object carried under `error` in the error envelope.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: |
+            Machine-readable error code. Specific for authentication / quota errors
+            (e.g. `API_KEY_REQUIRED`, `API_KEY_INVALID`, `FEATURE_NOT_IN_PLAN`,
+            `RATE_LIMIT_EXCEEDED`). For validation (400) and not-found (404) the code
+            is currently `INTERNAL_ERROR` and the HTTP status carries the semantics.
+          example: API_KEY_INVALID
+        message:
+          description: Human-readable message, or a list of validation messages (400).
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: Invalid API key
+    ErrorBody:
+      type: object
+      description: Standard error envelope returned for every 4xx / 5xx response.
+      required:
+        - success
+        - statusCode
+        - error
+      properties:
+        success:
+          type: boolean
+          const: false
+          description: Always `false` for an error response.
+          example: false
+        statusCode:
+          type: integer
+          description: Mirrors the HTTP status code.
+          example: 401
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    FeaturedCommodity:
+      type: object
+      description: A featured commodity with a short price sparkline.
+      required:
+        - id
+        - name
+        - unit
+        - lastClose
+        - currency
+      properties:
+        id:
+          type: string
+          example: gold
+        name:
+          type: string
+          example: Gold
+        unit:
+          type: string
+          example: USD/oz
+        lastClose:
+          type: number
+          example: 4189.22
+        currency:
+          type: string
+          example: USD
+        change1dPct:
+          type: number
+          description: 1-day percentage change.
+          example: 0.02
+        changeValue:
+          type: number
+          description: 1-day absolute price change.
+          example: 0.77
+        trendline:
+          type: array
+          description: Recent closing prices, oldest→newest, for a sparkline.
+          items:
+            type: number
+    CommoditiesFeaturedResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeaturedCommodity'
+    CommodityMover:
+      type: object
+      description: A single commodity in a movers (gainers / losers) list.
+      required:
+        - id
+        - name
+        - changePct
+      properties:
+        id:
+          type: string
+          example: coffee-robusta
+        name:
+          type: string
+          example: Coffee Robusta
+        changePct:
+          type: number
+          description: Percentage change over the requested period.
+          example: 7.35
+    CommodityMovers:
+      type: object
+      description: Top gaining and losing commodities over a period.
+      required:
+        - period
+        - gainers
+        - losers
+      properties:
+        period:
+          type: string
+          description: Period the movers are computed over.
+          example: mtd
+        gainers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommodityMover'
+        losers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommodityMover'
+    CommoditiesMoversResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CommodityMovers'
+    IndexedPricePoint:
+      type: object
+      description: One point of a rebased price series (percentage change vs the series start).
+      required:
+        - date
+        - value
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-03-22'
+        pctChange:
+          type: number
+          description: Percentage change versus the first point in the series.
+          example: 0
+        value:
+          type: number
+          description: Raw value on this date.
+          example: 4464.66
+    GoldDxyCorrelation:
+      type: object
+      description: Rebased gold and US Dollar Index (DXY) series for correlation analysis.
+      required:
+        - period
+        - series
+      properties:
+        period:
+          type: string
+          description: Look-back window.
+          example: 3m
+        series:
+          type: object
+          required:
+            - gold
+            - dxy
+          properties:
+            gold:
+              type: array
+              items:
+                $ref: '#/components/schemas/IndexedPricePoint'
+            dxy:
+              type: array
+              items:
+                $ref: '#/components/schemas/IndexedPricePoint'
+    CommoditiesGoldDxyResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/GoldDxyCorrelation'
+    CommodityHistoryPoint:
+      type: object
+      description: One closing price in a commodity's history series.
+      required:
+        - date
+        - close
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-03-19'
+        close:
+          type: number
+          example: 4651.73
+    CommodityHistoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CommodityHistoryPoint'
+    CryptoTrendingCoin:
+      type: object
+      description: A trending coin in the market overview — a notable 24h gainer or loser.
+      required:
+        - symbol
+        - name
+        - rank
+        - priceChange24h
+        - tag
+      properties:
+        symbol:
+          type: string
+          description: Ticker symbol of the coin.
+          example: FF
+        name:
+          type: string
+          example: Falcon Finance
+        rank:
+          type: integer
+          description: Market-cap rank of the coin.
+          example: 98
+        priceChange24h:
+          type: number
+          description: 24-hour price change, as a percentage.
+          example: 99.3142
+        tag:
+          type: string
+          enum:
+            - gainer
+            - loser
+          description: Whether the coin is a top gainer or loser.
+          example: gainer
+    CryptoOverview:
+      type: object
+      description: |
+        Crypto market overview — total market capitalisation, 24h volume, BTC/ETH/major
+        dominance split, the Fear & Greed index and a list of trending coins.
+      required:
+        - totalMarketCap
+        - volume24h
+        - marketCapChange24h
+        - volumeChange24h
+        - dominance
+        - fearGreed
+        - trending
+      properties:
+        totalMarketCap:
+          type: number
+          description: Total crypto market capitalisation in USD.
+          example: 2156391783530.09
+        volume24h:
+          type: number
+          description: Total 24-hour trading volume in USD.
+          example: 74938670897.24
+        marketCapChange24h:
+          type: number
+          description: 24-hour change in total market cap, as a percentage.
+          example: -2.6314
+        volumeChange24h:
+          type: number
+          description: 24-hour change in total trading volume, as a percentage.
+          example: -11.6008
+        dominance:
+          type: object
+          description: Market-cap dominance split (percentage) across major coins.
+          required:
+            - btc
+            - eth
+            - bnb
+            - sol
+            - xrp
+            - other
+          properties:
+            btc:
+              type: number
+              example: 58.148
+            eth:
+              type: number
+              example: 9.476
+            bnb:
+              type: number
+              example: 3.585
+            sol:
+              type: number
+              example: 1.843
+            xrp:
+              type: number
+              example: 3.242
+            other:
+              type: number
+              description: Combined dominance of all other coins.
+              example: 23.706
+        fearGreed:
+          type: object
+          description: Crypto Fear & Greed index reading.
+          required:
+            - value
+            - classification
+            - date
+          properties:
+            value:
+              type: integer
+              description: Index value from 0 (extreme fear) to 100 (extreme greed).
+              example: 19
+            classification:
+              type: string
+              description: Human-readable classification of the index value.
+              example: Extreme fear
+            date:
+              type: string
+              format: date
+              description: Date the index reading applies to.
+              example: '2026-06-18'
+        trending:
+          type: array
+          description: Notable trending coins (top gainers / losers).
+          items:
+            $ref: '#/components/schemas/CryptoTrendingCoin'
+    CryptoOverviewResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoOverview'
+    CryptoBubbleCoin:
+      type: object
+      description: A single coin rendered as a bubble on the market bubble map.
+      required:
+        - symbol
+        - name
+        - marketCap
+        - change
+        - size
+      properties:
+        symbol:
+          type: string
+          description: Ticker symbol of the coin.
+          example: BTC
+        name:
+          type: string
+          example: Bitcoin
+        marketCap:
+          type: number
+          description: Market capitalisation in USD.
+          example: 1254560380643.96
+        change:
+          type: number
+          description: Price change over the requested timeframe, as a percentage.
+          example: -2.9057
+        size:
+          type: number
+          description: Normalised bubble size (0–1) relative to the largest coin.
+          example: 1
+    CryptoBubbleMap:
+      type: object
+      description: |
+        Bubble-map dataset — the top coins by market cap with their price change over a
+        selected timeframe and a normalised bubble size for visualisation.
+      required:
+        - timeframe
+        - coins
+      properties:
+        timeframe:
+          type: string
+          enum:
+            - 1h
+            - 1d
+            - 1w
+          description: Timeframe the price changes are computed over.
+          example: 1d
+        coins:
+          type: array
+          description: Coins to render as bubbles, ordered by market cap (largest first).
+          items:
+            $ref: '#/components/schemas/CryptoBubbleCoin'
+    CryptoBubbleMapResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoBubbleMap'
+    CryptoOnchain:
+      type: object
+      description: |
+        On-chain network metrics — Ethereum gas prices, Bitcoin hashrate and active
+        addresses, whale transaction count and the MVRV / NUPL valuation indicators.
+      required:
+        - ethGas
+        - btcHashrate
+        - btcActiveAddresses
+        - whaleTxCount
+        - mvrv
+        - nupl
+      properties:
+        ethGas:
+          type: object
+          description: Ethereum gas price tiers.
+          required:
+            - safe
+            - standard
+            - fast
+            - baseFee
+            - unit
+          properties:
+            safe:
+              type: number
+              description: Gas price for a low-priority (safe) transaction.
+              example: 0.084424998
+            standard:
+              type: number
+              description: Gas price for a standard-priority transaction.
+              example: 0.08533128
+            fast:
+              type: number
+              description: Gas price for a high-priority (fast) transaction.
+              example: 0.093864408
+            baseFee:
+              type: number
+              description: Current network base fee.
+              example: 0.0843841
+            unit:
+              type: string
+              description: Unit the gas prices are expressed in.
+              example: gwei
+        btcHashrate:
+          type: object
+          description: Bitcoin network hashrate.
+          required:
+            - value
+            - unit
+          properties:
+            value:
+              type: number
+              example: 1024.72
+            unit:
+              type: string
+              description: Unit the hashrate is expressed in.
+              example: EH/s
+        btcActiveAddresses:
+          type: integer
+          description: Number of active Bitcoin addresses.
+          example: 503361
+        whaleTxCount:
+          type: integer
+          description: Number of large ("whale") transactions observed.
+          example: 29766
+        mvrv:
+          type: object
+          description: Market-Value-to-Realised-Value ratio and its valuation zone.
+          required:
+            - value
+            - zone
+          properties:
+            value:
+              type: number
+              example: 1.1772253837760067
+            zone:
+              type: string
+              description: Valuation zone derived from the MVRV value.
+              example: fair_value
+        nupl:
+          type: object
+          description: Net Unrealised Profit / Loss and its sentiment zone.
+          required:
+            - value
+            - zone
+          properties:
+            value:
+              type: number
+              example: 0.1586
+            zone:
+              type: string
+              description: Sentiment zone derived from the NUPL value.
+              example: hope_fear
+    CryptoOnchainResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoOnchain'
+    CryptoOpenInterest:
+      type: object
+      description: Open interest for a single perpetual-futures contract.
+      required:
+        - symbol
+        - value
+        - unit
+      properties:
+        symbol:
+          type: string
+          description: Contract symbol.
+          example: BTCUSDT
+        value:
+          type: string
+          description: Open interest, expressed in the contract's settlement unit.
+          example: '98678.224'
+        unit:
+          type: string
+          description: Unit the open interest is expressed in.
+          example: USDT
+    CryptoFundingRate:
+      type: object
+      description: Funding rate for a single perpetual-futures contract.
+      required:
+        - rate
+        - annualized
+      properties:
+        rate:
+          type: number
+          description: Current per-interval funding rate.
+          example: 0.00000854
+        annualized:
+          type: number
+          description: Funding rate annualised, as a percentage.
+          example: 0.93513
+    CryptoDerivatives:
+      type: object
+      description: |
+        Derivatives-market metrics — open interest, funding rates, 24h liquidations and
+        the options put/call ratio for the major coins.
+      required:
+        - openInterest
+        - fundingRate
+        - liquidations24h
+        - putCallRatio
+      properties:
+        openInterest:
+          type: object
+          description: Perpetual-futures open interest per coin.
+          required:
+            - btc
+            - eth
+          properties:
+            btc:
+              $ref: '#/components/schemas/CryptoOpenInterest'
+            eth:
+              $ref: '#/components/schemas/CryptoOpenInterest'
+        fundingRate:
+          type: object
+          description: Perpetual-futures funding rate per coin.
+          required:
+            - btc
+            - eth
+          properties:
+            btc:
+              $ref: '#/components/schemas/CryptoFundingRate'
+            eth:
+              $ref: '#/components/schemas/CryptoFundingRate'
+        liquidations24h:
+          type: object
+          description: Total long and short liquidations over the last 24 hours, in USD.
+          required:
+            - total
+            - long
+            - short
+          properties:
+            total:
+              type: number
+              example: 600914130.33
+            long:
+              type: number
+              description: Value of liquidated long positions.
+              example: 515261276.52
+            short:
+              type: number
+              description: Value of liquidated short positions.
+              example: 85652853.81
+        putCallRatio:
+          type: object
+          description: Options put/call ratio per coin.
+          required:
+            - btc
+          properties:
+            btc:
+              type: object
+              required:
+                - ratio
+                - putOi
+                - callOi
+              properties:
+                ratio:
+                  type: number
+                  description: Put open interest divided by call open interest.
+                  example: 0.633
+                putOi:
+                  type: number
+                  description: Open interest in put options.
+                  example: 169791
+                callOi:
+                  type: number
+                  description: Open interest in call options.
+                  example: 268093
+    CryptoDerivativesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoDerivatives'
+    CryptoDominanceCoin:
+      type: object
+      description: Market-cap dominance entry for a single coin.
+      required:
+        - symbol
+        - name
+        - dominancePercentage
+        - marketCap
+      properties:
+        symbol:
+          type: string
+          description: Ticker symbol of the coin.
+          example: BTC
+        name:
+          type: string
+          example: Bitcoin
+        dominancePercentage:
+          type: number
+          description: Share of total crypto market cap, as a percentage.
+          example: 58.18
+        marketCap:
+          type: number
+          description: Market capitalisation in USD.
+          example: 1254560380643.96
+    CryptoDominance:
+      type: object
+      description: |
+        Market-cap dominance breakdown — total market cap and each major coin's share,
+        with the freshness of the underlying source data.
+      required:
+        - totalMarketCap
+        - coins
+        - asOf
+      properties:
+        totalMarketCap:
+          type: number
+          description: Total crypto market capitalisation in USD.
+          example: 2156391783530.09
+        coins:
+          type: array
+          description: Per-coin dominance entries, ordered by dominance (largest first).
+          items:
+            $ref: '#/components/schemas/CryptoDominanceCoin'
+        asOf:
+          type: object
+          description: Freshness metadata for the underlying source data.
+          required:
+            - globalMetrics
+            - assets
+            - skewSeconds
+            - isStale
+          properties:
+            globalMetrics:
+              type: string
+              format: date-time
+              description: Timestamp of the global-metrics snapshot.
+              example: '2026-06-19T08:45:00.000Z'
+            assets:
+              type: string
+              format: date-time
+              description: Timestamp of the per-asset snapshot.
+              example: '2026-06-19T08:45:00.040Z'
+            skewSeconds:
+              type: integer
+              description: Skew, in seconds, between the two snapshots.
+              example: 0
+            isStale:
+              type: boolean
+              description: Whether the data is considered stale.
+              example: false
+    CryptoDominanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/CryptoDominance'
+    Etf:
+      type: object
+      description: |
+        A single exchange-traded fund as returned by the list endpoint. The `etfCode`
+        is the exchange ticker (e.g. a TSE code like `1306`) used as the `{code}` path
+        param for the info / holdings / prices-history / detail endpoints.
+      required:
+        - id
+        - etfCode
+        - etfName
+        - managementCompany
+        - country
+        - etfType
+      properties:
+        id:
+          type: integer
+          description: Internal numeric identifier of the ETF record.
+          example: 798
+        listingDate:
+          type: string
+          format: date
+          description: Date the ETF was first listed.
+          example: '2001-07-13'
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1306'
+        etfName:
+          type: string
+          description: Fund name (English / romanised).
+          example: NEXT FUNDS TOPIX Exchange Traded Fund
+        managementCompany:
+          type: string
+          description: Asset manager operating the fund.
+          example: Nomura Asset Management
+        indexName:
+          type: string
+          description: Benchmark index the fund tracks.
+          example: TOPIX Total Return Index
+        tradingUnit:
+          type: integer
+          description: Minimum tradable lot size, in shares.
+          example: 10
+        trustFee:
+          type: number
+          description: Annual trust / management fee, as a fraction (e.g. 0.0505 = 5.05%).
+          example: 0.0505
+        etfNameJP:
+          type: string
+          description: Fund name in Japanese.
+          example: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+        country:
+          type: string
+          description: ISO-style country code of the listing market.
+          example: jp
+        distributionYield:
+          type: number
+          description: Trailing distribution yield, as a fraction.
+          example: 0.0176
+        etfType:
+          type: string
+          description: Asset-class / strategy classification.
+          example: Japanese Equity(Market)
+        price:
+          type: number
+          description: Latest market price.
+          example: 425.5
+        aum:
+          type:
+            - number
+            - 'null'
+          description: Assets under management in fund currency; `null` when unavailable.
+          example: 32437253262780
+    EtfListResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Etf'
+    EtfTopPerformance:
+      type: object
+      description: One ETF in the top-performance ranking for the requested period.
+      required:
+        - etfCode
+        - etfName
+        - currentNav
+        - changePercent
+      properties:
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1321'
+        etfName:
+          type: string
+          description: Fund name.
+          example: NEXT FUNDS Nikkei 225 Exchange Traded Fund
+        currentNav:
+          type: number
+          description: Current net asset value per share.
+          example: 61538.17917892439
+        changePercent:
+          type: number
+          description: Percentage NAV change over the requested period.
+          example: 10.96
+    EtfTopPerformanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EtfTopPerformance'
+    EtfTopNetflow:
+      type: object
+      description: One ETF in the top net-flow ranking.
+      required:
+        - etfCode
+        - etfName
+        - netflow
+        - netflowAumPercentage
+      properties:
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1348'
+        etfName:
+          type: string
+          description: Fund name.
+          example: MAXIS TOPIX ETF
+        netflow:
+          type: number
+          description: Net capital flow over the period, in fund currency.
+          example: 21323272800
+        netflowAumPercentage:
+          type: number
+          description: Net flow expressed as a percentage of assets under management.
+          example: 0.47
+    EtfTopNetflowResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EtfTopNetflow'
+    EtfHeatmapItem:
+      type: object
+      description: One ETF cell in the market heatmap, sized and coloured by market activity.
+      required:
+        - code
+        - name
+        - currency
+        - closePrice
+      properties:
+        code:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1305'
+        name:
+          type: string
+          description: Fund name.
+          example: iFreeETF TOPIX (Yearly Dividend Type)
+        currency:
+          type: string
+          description: Quote currency.
+          example: JPY
+        currentDate:
+          type: string
+          format: date-time
+          description: Timestamp of the quoted close.
+          example: '2026-06-16T17:00:00.000Z'
+        closePrice:
+          type: number
+          description: Closing price.
+          example: 4299
+        volume:
+          type: number
+          description: Traded volume for the session.
+          example: 71520
+        marketCap:
+          type: number
+          description: Market capitalisation.
+          example: 307464480
+        tradingValue:
+          type: number
+          description: Total traded value for the session.
+          example: 307464480
+        priceFluctuation:
+          type: number
+          description: Absolute price change versus the previous close.
+          example: 19
+        priceFluctuationPercent:
+          type: number
+          description: Percentage price change versus the previous close.
+          example: 0.44
+        contributionValue:
+          type: number
+          description: Contribution of this ETF to the aggregate index movement.
+          example: 1352843.7119999998
+        marketCapChange:
+          type: number
+          description: Change in market capitalisation versus the previous session.
+          example: -1835060720
+        contributionArea:
+          type: number
+          description: Relative tile area used to size the heatmap cell.
+          example: 0.07973
+    EtfHeatmapResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EtfHeatmapItem'
+    FundAssetAllocation:
+      type: object
+      description: Breakdown of a fund's assets across bonds, stocks and other instruments.
+      required:
+        - total
+        - currency
+      properties:
+        bond:
+          type: number
+          description: Value held in bonds, in fund currency.
+          example: 0
+        stock:
+          type: number
+          description: Value held in stocks, in fund currency.
+          example: 2154943464100
+        others:
+          type: number
+          description: Value held in other instruments, in fund currency.
+          example: 318018107481
+        total:
+          type: number
+          description: Total net asset value, in fund currency.
+          example: 2472961571581
+        bondPercent:
+          type: number
+          description: Bond allocation as a percentage of total.
+          example: 0
+        stockPercent:
+          type: number
+          description: Stock allocation as a percentage of total.
+          example: 87.14
+        othersPercent:
+          type: number
+          description: Other-instrument allocation as a percentage of total.
+          example: 12.86
+        currency:
+          type: string
+          description: Reporting currency.
+          example: VND
+        month:
+          type: string
+          description: Reporting month (YYYY-MM).
+          example: 2026-05
+    FundPortfolioHolding:
+      type: object
+      description: One equity position held in a fund's portfolio.
+      required:
+        - symbol
+        - weightPercent
+      properties:
+        symbol:
+          type: string
+          description: Ticker symbol of the holding.
+          example: MBB
+        price:
+          type: number
+          description: Latest price of the holding, in fund currency.
+          example: 25000
+        volume:
+          type: number
+          description: Number of shares held.
+          example: 7706790
+        weightPercent:
+          type: number
+          description: Position weight as a percentage of the portfolio.
+          example: 7.79
+        currency:
+          type: string
+          description: Reporting currency.
+          example: VND
+        month:
+          type: string
+          description: Reporting month (YYYY-MM).
+          example: 2026-05
+    FundSectorAllocation:
+      type: object
+      description: One sector slice of a fund's portfolio allocation.
+      required:
+        - sectorName
+        - percent
+      properties:
+        sectorName:
+          type: string
+          description: Sector name (localised).
+          example: Ngân hàng
+        value:
+          type: number
+          description: Value allocated to the sector, in fund currency.
+          example: 550441424500
+        percent:
+          type: number
+          description: Sector allocation as a percentage of the portfolio.
+          example: 24.39
+        currency:
+          type: string
+          description: Reporting currency.
+          example: VND
+        month:
+          type: string
+          description: Reporting month (YYYY-MM).
+          example: 2026-04
+    FundComposition:
+      type: object
+      description: |
+        Full composition of a Vietnamese fund certificate — asset allocation, the
+        equity portfolio and the sector breakdown. Identified by the VN fund code
+        (e.g. `VESAF`).
+      required:
+        - fundCode
+        - assetAllocation
+        - portfolio
+        - sectorAllocation
+      properties:
+        fundCode:
+          type: string
+          description: Vietnamese fund certificate code.
+          example: VESAF
+        assetAllocation:
+          $ref: '#/components/schemas/FundAssetAllocation'
+        portfolio:
+          type: array
+          description: Equity positions held by the fund.
+          items:
+            $ref: '#/components/schemas/FundPortfolioHolding'
+        sectorAllocation:
+          type: array
+          description: Sector-level allocation breakdown.
+          items:
+            $ref: '#/components/schemas/FundSectorAllocation'
+    EtfCompareFundCompositionResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FundComposition'
+    NavGrowthPoint:
+      type: object
+      description: One point in a NAV-growth series.
+      required:
+        - date
+        - growthRate
+        - nav
+      properties:
+        date:
+          type: string
+          description: Observation date (DD-MM-YYYY).
+          example: 19-03-2026
+        growthRate:
+          type: number
+          description: Cumulative growth rate since the series start, in percent.
+          example: 0.07
+        nav:
+          type: number
+          description: Net asset value per share on the date.
+          example: 19948.69
+    NavGrowthSeries:
+      type: object
+      description: |
+        A single NAV-growth series for one instrument, keyed by period window. Each
+        period maps to an ordered array of NAV-growth points. `etfCode` may be an empty
+        string when the slot is unused (e.g. the second comparand of a single-fund query).
+      required:
+        - etfCode
+        - data
+      properties:
+        etfCode:
+          type: string
+          description: Code of the instrument this series belongs to.
+          example: VESAF
+        data:
+          type: object
+          description: NAV-growth points grouped by period window (e.g. `3M`, `6M`, `1Y`, `3Y`).
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/NavGrowthPoint'
+          example:
+            3M:
+              - date: 19-03-2026
+                growthRate: 0
+                nav: 19934.64
+              - date: 20-03-2026
+                growthRate: 0.07
+                nav: 19948.69
+    NavGrowthComparison:
+      type: object
+      description: |
+        NAV-growth comparison payload. Returns the NAV-growth series for two funds
+        (`etf1`, `etf2`) benchmarked against the VN-Index (`vnIndex`), the set of
+        available period windows and the series start date. The single-fund endpoint
+        populates `etf1` and leaves `etf2.etfCode` empty.
+      required:
+        - etf1
+        - etf2
+        - vnIndex
+        - periodAvailability
+        - startDate
+      properties:
+        etf1:
+          $ref: '#/components/schemas/NavGrowthSeries'
+        etf2:
+          $ref: '#/components/schemas/NavGrowthSeries'
+        vnIndex:
+          $ref: '#/components/schemas/NavGrowthSeries'
+        periodAvailability:
+          type: object
+          description: Which period windows have data, keyed by period.
+          additionalProperties:
+            type: boolean
+          example:
+            1M: false
+            3M: true
+            6M: true
+            1Y: true
+            3Y: true
+        startDate:
+          type: string
+          description: Start date of the longest available series (DD-MM-YYYY).
+          example: 24-04-2017
+    EtfCompareNavGrowthResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/NavGrowthComparison'
+    EtfNavGrowthResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/NavGrowthComparison'
+    EtfInfo:
+      type: object
+      description: Core descriptive metadata for a single ETF.
+      required:
+        - id
+        - etfCode
+        - etfName
+        - managementCompany
+        - country
+        - etfType
+      properties:
+        id:
+          type: integer
+          description: Internal numeric identifier of the ETF record.
+          example: 798
+        listingDate:
+          type: string
+          format: date
+          description: Date the ETF was first listed.
+          example: '2001-07-13'
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1306'
+        etfName:
+          type: string
+          description: Fund name (English / romanised).
+          example: NEXT FUNDS TOPIX Exchange Traded Fund
+        managementCompany:
+          type: string
+          description: Asset manager operating the fund.
+          example: Nomura Asset Management
+        indexName:
+          type: string
+          description: Benchmark index the fund tracks.
+          example: TOPIX Total Return Index
+        tradingUnit:
+          type: integer
+          description: Minimum tradable lot size, in shares.
+          example: 10
+        trustFee:
+          type: number
+          description: Annual trust / management fee, as a fraction.
+          example: 0.0505
+        etfNameJP:
+          type: string
+          description: Fund name in Japanese.
+          example: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+        country:
+          type: string
+          description: ISO-style country code of the listing market.
+          example: jp
+        distributionYield:
+          type: number
+          description: Trailing distribution yield, as a fraction.
+          example: 0.0176
+        etfType:
+          type: string
+          description: Asset-class / strategy classification.
+          example: Japanese Equity(Market)
+    EtfInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EtfInfo'
+    EtfHolding:
+      type: object
+      description: One constituent holding of an ETF's underlying basket.
+      required:
+        - id
+        - code
+        - name
+        - etfCode
+      properties:
+        id:
+          type: integer
+          description: Internal numeric identifier of the holding record.
+          example: 6316032
+        code:
+          type: string
+          description: Ticker symbol of the constituent.
+          example: '1301'
+        name:
+          type: string
+          description: Name of the constituent company.
+          example: KYOKUYO CO LTD
+        exchange:
+          type: string
+          description: Exchange the constituent trades on.
+          example: TSE
+        currency:
+          type: string
+          description: Quote currency of the constituent.
+          example: JPY
+        sharesAmount:
+          type: string
+          description: Number of shares of the constituent held by the fund.
+          example: '350200.000000'
+        stockPrice:
+          type: number
+          description: Latest price of the constituent.
+          example: 4865
+        value:
+          type: string
+          description: Market value of the position, in fund currency.
+          example: '1703723000.000000'
+        etfCode:
+          type: string
+          description: Exchange ticker of the ETF this holding belongs to.
+          example: '1306'
+        sharesOutstanding:
+          type: string
+          description: Total shares outstanding of the ETF.
+          example: '81194626440.000000'
+        fundDate:
+          type: string
+          format: date
+          description: As-of date of the holdings snapshot.
+          example: '2026-04-21'
+        isin:
+          type: string
+          description: ISIN of the constituent.
+          example: JP3257200000
+    EtfHoldingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EtfHolding'
+    EtfPriceHistoryPoint:
+      type: object
+      description: One daily OHLCV bar in an ETF's price history.
+      required:
+        - id
+        - date
+        - etfCode
+        - close
+      properties:
+        id:
+          type: integer
+          description: Internal numeric identifier of the bar.
+          example: 346280
+        date:
+          type: string
+          format: date
+          description: Trading date of the bar.
+          example: '2021-06-14'
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1306'
+        open:
+          type: number
+          description: Opening price.
+          example: 2065
+        high:
+          type: number
+          description: Session high.
+          example: 2068
+        low:
+          type: number
+          description: Session low.
+          example: 2051
+        close:
+          type: number
+          description: Closing price.
+          example: 2056
+        volume:
+          type: string
+          description: Traded volume for the session.
+          example: '573610.000000'
+        currency:
+          type: string
+          description: Quote currency.
+          example: JPY
+    EtfPricesHistoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EtfPriceHistoryPoint'
+    EtfDetailHolding:
+      type: object
+      description: One top holding contributing to an ETF's net asset value.
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+          description: Name of the holding.
+          example: TOYOTA MOTOR CORP
+        value:
+          type: number
+          description: Market value of the position, in fund currency.
+          example: 1074907641000
+    EtfEquityHoldings:
+      type: object
+      description: Aggregate valuation ratios for the ETF's equity holdings.
+      properties:
+        PE:
+          type: string
+          description: Portfolio price-to-earnings ratio.
+          example: '0.0600'
+        PB:
+          type: string
+          description: Portfolio price-to-book ratio.
+          example: '0.6400'
+        PS:
+          type: string
+          description: Portfolio price-to-sales ratio.
+          example: '0.8400'
+        PC:
+          type: string
+          description: Portfolio price-to-cash-flow ratio.
+          example: '0.0900'
+    EtfSectorWeight:
+      type: object
+      description: One sector weight in an ETF's portfolio for a given month.
+      required:
+        - weight
+      properties:
+        sector:
+          type:
+            - string
+            - 'null'
+          description: Sector name; `null` when uncategorised.
+          example: Financials
+        weight:
+          type: number
+          description: Sector weight as a fraction of the portfolio.
+          example: 0.2803
+        month:
+          type: integer
+          description: Reporting month (1–12).
+          example: 4
+        year:
+          type: integer
+          description: Reporting year.
+          example: 2026
+    EtfNetflowPoint:
+      type: object
+      description: One net-flow observation in an ETF's net-flow history.
+      required:
+        - date
+        - netflow
+      properties:
+        date:
+          type: string
+          format: date
+          description: Observation date.
+          example: '2025-10-17'
+        aum:
+          type: number
+          description: Assets under management on the date, in fund currency.
+          example: 26913496133220
+        netflow:
+          type: number
+          description: Net capital flow on the date, in fund currency.
+          example: -26107300968
+        netflowAumPct:
+          type: number
+          description: Net flow as a percentage of assets under management.
+          example: -0.097
+    EtfNetflowHistory:
+      type: object
+      description: An ETF's net-flow history with the set of available period windows.
+      required:
+        - data
+        - periodAvailability
+      properties:
+        data:
+          type: array
+          description: Net-flow observations, ordered oldest to newest.
+          items:
+            $ref: '#/components/schemas/EtfNetflowPoint'
+        periodAvailability:
+          type: object
+          description: Which period windows have data, keyed by period.
+          additionalProperties:
+            type: boolean
+          example:
+            1M: true
+            3M: true
+            6M: true
+    EtfPerformancePoint:
+      type: object
+      description: One point in an ETF's cumulative-return performance series.
+      required:
+        - date
+        - nav
+        - cumulativeReturn
+      properties:
+        date:
+          type: string
+          description: Observation date (DD-MM-YYYY).
+          example: 15-05-2026
+        nav:
+          type: number
+          description: Net asset value per share on the date.
+          example: 409.9
+        cumulativeReturn:
+          type: number
+          description: Cumulative return since the period start, in percent.
+          example: -0.98
+    EtfPerformance:
+      type: object
+      description: An ETF's cumulative-return performance, grouped by period window.
+      required:
+        - periodAvailability
+        - periods
+      properties:
+        periodAvailability:
+          type: object
+          description: Which period windows have data, keyed by period.
+          additionalProperties:
+            type: boolean
+          example:
+            1M: true
+            3M: true
+            6M: true
+            1Y: true
+            3Y: true
+        periods:
+          type: object
+          description: Performance series grouped by period window (e.g. `1M`, `1Y`).
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/EtfPerformancePoint'
+          example:
+            1M:
+              - date: 15-05-2026
+                nav: 409.9
+                cumulativeReturn: 0
+              - date: 18-05-2026
+                nav: 405.9
+                cumulativeReturn: -0.98
+    EtfDetail:
+      type: object
+      description: |
+        Full detail view for a single ETF — descriptive metadata, latest price,
+        top holdings, valuation ratios, sector weights, net-flow history and
+        cumulative-return performance.
+      required:
+        - etfCode
+        - etfName
+        - managementCompany
+        - etfType
+      properties:
+        etfCode:
+          type: string
+          description: Exchange ticker for the ETF.
+          example: '1306'
+        etfName:
+          type: string
+          description: Fund name.
+          example: NEXT FUNDS TOPIX Exchange Traded Fund
+        managementCompany:
+          type: string
+          description: Asset manager operating the fund.
+          example: Nomura Asset Management
+        MER:
+          type: number
+          description: Management expense ratio, as a fraction.
+          example: 0.0505
+        etfType:
+          type: string
+          description: Asset-class / strategy classification.
+          example: Japanese Equity(Market)
+        indexName:
+          type: string
+          description: Benchmark index the fund tracks.
+          example: TOPIX Total Return Index
+        listingDate:
+          type: string
+          format: date
+          description: Date the ETF was first listed.
+          example: '2001-07-13'
+        currentPrice:
+          type: number
+          description: Latest market price.
+          example: 425.5
+        change:
+          type: number
+          description: Absolute price change versus the previous close.
+          example: 2.4
+        changePct:
+          type: number
+          description: Percentage price change versus the previous close.
+          example: 0.57
+        lastUpdateDate:
+          type: string
+          format: date
+          description: Date the snapshot was last updated.
+          example: '2026-06-17'
+        totalAssetValue:
+          type: number
+          description: Total net asset value, in fund currency.
+          example: 32511066650608.5
+        AssetAllocation:
+          type: array
+          description: Top holdings by market value.
+          items:
+            $ref: '#/components/schemas/EtfDetailHolding'
+        equityHoldings:
+          $ref: '#/components/schemas/EtfEquityHoldings'
+        sectorWeight:
+          type: array
+          description: Sector weights for the latest reporting month.
+          items:
+            $ref: '#/components/schemas/EtfSectorWeight'
+        distributionYield:
+          type: number
+          description: Trailing distribution yield, as a fraction.
+          example: 0.0176
+        netflow:
+          $ref: '#/components/schemas/EtfNetflowHistory'
+        performance:
+          $ref: '#/components/schemas/EtfPerformance'
+    EtfDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EtfDetail'
+    EtfCompositionResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FundComposition'
+    FxRate:
+      type: object
+      description: Latest value of a single FX benchmark (index or currency pair).
+      required:
+        - value
+        - changePct
+        - asOf
+        - source
+      properties:
+        value:
+          type: number
+          description: Most recent value.
+          example: 100.76
+        changePct:
+          type: number
+          description: 1-day percentage change.
+          example: 0.14
+        asOf:
+          type: string
+          format: date
+          description: Date the value is as of.
+          example: '2026-06-19'
+        source:
+          type: string
+          description: Link to the methodology / data source.
+          example: https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md
+    FxEmStressSummary:
+      type: object
+      description: Headline emerging-market FX stress reading.
+      required:
+        - level
+        - score
+        - panicCount
+        - warningCount
+      properties:
+        level:
+          type: string
+          enum:
+            - STABLE
+            - WARNING
+            - PANIC
+          description: Overall stress level.
+          example: PANIC
+        score:
+          type: integer
+          description: Aggregate stress score.
+          example: 4
+        panicCount:
+          type: integer
+          description: Number of tracked pairs currently at the PANIC level.
+          example: 0
+        warningCount:
+          type: integer
+          description: Number of tracked pairs currently at the WARNING level.
+          example: 4
+    FxSummary:
+      type: object
+      description: |
+        FX dashboard summary — the US Dollar Index (DXY), the USD/JPY rate and a
+        headline emerging-market stress reading.
+      required:
+        - dxy
+        - usdJpy
+        - emStress
+      properties:
+        dxy:
+          $ref: '#/components/schemas/FxRate'
+        usdJpy:
+          $ref: '#/components/schemas/FxRate'
+        emStress:
+          $ref: '#/components/schemas/FxEmStressSummary'
+    FxSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FxSummary'
+    FxTableRow:
+      type: object
+      description: One currency pair in the FX table, with a 10-day sparkline and 52-week range.
+      required:
+        - pair
+        - lastPrice
+        - changePct
+        - asOf
+      properties:
+        pair:
+          type: string
+          description: Currency-pair symbol.
+          example: EUR/USD
+        lastPrice:
+          type: number
+          description: Most recent price.
+          example: 1.14
+        changePct:
+          type: number
+          description: 1-day percentage change.
+          example: -0.23
+        sparkline10d:
+          type: array
+          description: Last 10 daily prices, oldest→newest, for a sparkline.
+          items:
+            type: number
+        high52w:
+          type: number
+          description: 52-week high.
+          example: 1.2
+        low52w:
+          type: number
+          description: 52-week low.
+          example: 1.14
+        asOf:
+          type: string
+          format: date
+          description: Date the row is as of.
+          example: '2026-06-19'
+    FxTable:
+      type: object
+      description: Live FX table — one row per tracked currency pair.
+      required:
+        - asOf
+        - rows
+      properties:
+        asOf:
+          type: string
+          format: date
+          description: Date the table is as of.
+          example: '2026-06-19'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/FxTableRow'
+    FxTableResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FxTable'
+    FxCorrelation:
+      type: object
+      description: |
+        Rolling correlation matrix across FX, crypto and gold benchmarks over the
+        look-back window. `matrix[i][j]` is the Pearson correlation between
+        `symbols[i]` and `symbols[j]`.
+      required:
+        - window
+        - asOf
+        - samples
+        - symbols
+        - matrix
+      properties:
+        window:
+          type: string
+          description: Look-back window the correlations are computed over.
+          example: 90d
+        asOf:
+          type: string
+          format: date
+          description: Date the matrix is as of.
+          example: '2026-06-19'
+        samples:
+          type: integer
+          description: Number of daily observations used in the calculation.
+          example: 89
+        symbols:
+          type: array
+          description: Row / column labels of the matrix, in order.
+          items:
+            type: string
+          example:
+            - DXY
+            - EUR/USD
+            - GBP/USD
+            - USD/JPY
+            - USD/CNY
+            - AUD/USD
+            - USD/SGD
+            - BTC/USD
+            - XAU/USD
+        matrix:
+          type: array
+          description: Square correlation matrix; `matrix[i][j]` correlates `symbols[i]` with `symbols[j]`.
+          items:
+            type: array
+            items:
+              type: number
+    FxCorrelationResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FxCorrelation'
+    FxEmStressPair:
+      type: object
+      description: |
+        Emerging-market FX stress reading for a single currency pair — comparing
+        recent realised volatility against its 90-day distribution.
+      required:
+        - pair
+        - latestPrice
+        - vol30d
+        - vol90dMean
+        - vol90dSd
+        - zScore
+        - priceZScore
+        - level
+        - sampleN
+      properties:
+        pair:
+          type: string
+          description: Currency-pair symbol.
+          example: USD/CNY
+        latestPrice:
+          type: number
+          description: Most recent price.
+          example: 6.79
+        vol30d:
+          type: number
+          description: Annualised 30-day realised volatility (%).
+          example: 1.42
+        vol90dMean:
+          type: number
+          description: Mean of the 90-day realised-volatility distribution (%).
+          example: 2.39
+        vol90dSd:
+          type: number
+          description: Standard deviation of the 90-day realised-volatility distribution (%).
+          example: 0.63
+        zScore:
+          type: number
+          description: Z-score of current volatility versus its 90-day distribution.
+          example: -1.52
+        priceZScore:
+          type: number
+          description: Z-score of the latest price versus its 90-day distribution.
+          example: -2
+        level:
+          type: string
+          enum:
+            - STABLE
+            - WARNING
+            - PANIC
+          description: Stress classification for this pair.
+          example: WARNING
+        sampleN:
+          type: integer
+          description: Number of observations in the sample.
+          example: 90
+    FxEmStress:
+      type: object
+      description: Emerging-market FX stress monitor — one entry per tracked currency pair.
+      required:
+        - asOf
+        - pairs
+      properties:
+        asOf:
+          type: string
+          format: date
+          description: Date the readings are as of.
+          example: '2026-05-14'
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FxEmStressPair'
+    FxEmStressResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FxEmStress'
+    EconomicDataPoint:
+      type: object
+      description: |
+        One observation in an economic data series (GDP / CPI / PCE / import-export).
+        Shared by the GDP growth-rate and economic-data endpoints.
+      required:
+        - country
+        - quarter
+        - gdp
+        - gdpUnit
+        - growthRate
+        - dateFrom
+        - dateTo
+      properties:
+        country:
+          type: string
+          description: ISO country code the series belongs to.
+          example: JP
+        quarter:
+          type: string
+          description: Human-readable observation period.
+          example: Q1 2026
+        gdp:
+          type: string
+          description: |
+            Nominal value for the period. Delivered as a string on the wire to
+            preserve full numeric precision.
+          example: '677233.400'
+        gdpUnit:
+          type: string
+          description: Unit the value is expressed in.
+          example: Billion JPY
+        growthRate:
+          type: number
+          description: Period-over-period nominal growth rate, in percent.
+          example: 0.8
+        realGdp:
+          type:
+            - number
+            - 'null'
+          description: Inflation-adjusted value; `null` when not published for the period.
+          example: null
+        realGrowthRate:
+          type:
+            - number
+            - 'null'
+          description: Inflation-adjusted growth rate, in percent; `null` when unavailable.
+          example: null
+        dateFrom:
+          type: string
+          format: date-time
+          description: Inclusive start of the observation period.
+          example: '2026-01-01T00:00:00.000Z'
+        dateTo:
+          type: string
+          format: date-time
+          description: Inclusive end of the observation period.
+          example: '2026-03-31T23:59:59.999Z'
+    MacroGdpGrowthRateResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EconomicDataPoint'
+    MarketIndexData:
+      type: object
+      description: A single market-index quote.
+      required:
+        - index
+        - datetime
+        - atClose
+      properties:
+        index:
+          type: string
+          example: Nikkei 225
+        value:
+          type:
+            - number
+            - 'null'
+          example: 38500.5
+        changeValue:
+          type:
+            - number
+            - 'null'
+          description: Absolute change versus the previous close.
+          example: 120.3
+        changePercent:
+          type:
+            - number
+            - 'null'
+          description: Percentage change versus the previous close.
+          example: 0.31
+        datetime:
+          type: string
+          example: '2024-01-15T15:30:00'
+        atClose:
+          type: string
+          example: '2024-01-15T15:30:00'
+    InterbankRateData:
+      type: object
+      description: A single 3-month interbank rate quote.
+      required:
+        - index
+        - value
+        - datetime
+        - atClose
+      properties:
+        index:
+          type: string
+          example: TIBOR 3M
+        value:
+          type: number
+          example: 0.08
+        changeValue:
+          type:
+            - number
+            - 'null'
+          description: Absolute change versus the previous close.
+          example: 0.01
+        changePercent:
+          type:
+            - number
+            - 'null'
+          description: Percentage change versus the previous close.
+          example: null
+        datetime:
+          type: string
+          example: '2024-01-15T15:30:00'
+        atClose:
+          type: string
+          example: '2024-01-15T15:30:00'
+    ExchangeRateData:
+      type: object
+      description: A single currency-pair quote.
+      required:
+        - index
+        - datetime
+        - atClose
+      properties:
+        index:
+          type: string
+          example: USD/JPY
+        value:
+          type:
+            - number
+            - 'null'
+          example: 148.5
+        changeValue:
+          type:
+            - number
+            - 'null'
+          description: Absolute change versus the previous close.
+          example: 0.3
+        changePercent:
+          type:
+            - number
+            - 'null'
+          description: Percentage change versus the previous close.
+          example: 0.2
+        datetime:
+          type: string
+          example: '2024-01-15T15:30:00'
+        atClose:
+          type: string
+          example: '2024-01-15T15:30:00'
+    MarketRecap:
+      type: object
+      description: |
+        Latest macroeconomic market recap — a snapshot of Japanese equity / commodity
+        indices, REITs, TOPIX, 3-month interbank rates and key currency rates.
+
+        Schema derived from the API's `MarketRecapResponseDto`: the live staging
+        endpoint currently returns HTTP 500 (a known server-side bug), so this shape
+        and its example are authored from the source DTO rather than harvested.
+      required:
+        - updateTime
+        - nikkeiJpxGold
+        - nikkeiJpxOil
+        - tokyoStockExchangeReit
+        - topix
+        - interbankRates3m
+        - currencyRate
+      properties:
+        updateTime:
+          type: string
+          description: Timestamp of the recap snapshot.
+          example: '2024-01-15T15:30:00'
+        nikkeiJpxGold:
+          type: array
+          description: Nikkei / JPX gold index series.
+          items:
+            $ref: '#/components/schemas/MarketIndexData'
+        nikkeiJpxOil:
+          type: array
+          description: Nikkei / JPX oil index series.
+          items:
+            $ref: '#/components/schemas/MarketIndexData'
+        tokyoStockExchangeReit:
+          type: array
+          description: Tokyo Stock Exchange REIT index series.
+          items:
+            $ref: '#/components/schemas/MarketIndexData'
+        topix:
+          type: array
+          description: TOPIX index series.
+          items:
+            $ref: '#/components/schemas/MarketIndexData'
+        interbankRates3m:
+          type: array
+          description: 3-month interbank reference rates.
+          items:
+            $ref: '#/components/schemas/InterbankRateData'
+        currencyRate:
+          type: array
+          description: Key currency-pair exchange rates.
+          items:
+            $ref: '#/components/schemas/ExchangeRateData'
+      $defs:
+        MarketIndexData:
+          type: object
+          description: A single market-index quote.
+          required:
+            - index
+            - datetime
+            - atClose
+          properties:
+            index:
+              type: string
+              example: Nikkei 225
+            value:
+              type:
+                - number
+                - 'null'
+              example: 38500.5
+            changeValue:
+              type:
+                - number
+                - 'null'
+              description: Absolute change versus the previous close.
+              example: 120.3
+            changePercent:
+              type:
+                - number
+                - 'null'
+              description: Percentage change versus the previous close.
+              example: 0.31
+            datetime:
+              type: string
+              example: '2024-01-15T15:30:00'
+            atClose:
+              type: string
+              example: '2024-01-15T15:30:00'
+        InterbankRateData:
+          type: object
+          description: A single 3-month interbank rate quote.
+          required:
+            - index
+            - value
+            - datetime
+            - atClose
+          properties:
+            index:
+              type: string
+              example: TIBOR 3M
+            value:
+              type: number
+              example: 0.08
+            changeValue:
+              type:
+                - number
+                - 'null'
+              description: Absolute change versus the previous close.
+              example: 0.01
+            changePercent:
+              type:
+                - number
+                - 'null'
+              description: Percentage change versus the previous close.
+              example: null
+            datetime:
+              type: string
+              example: '2024-01-15T15:30:00'
+            atClose:
+              type: string
+              example: '2024-01-15T15:30:00'
+        ExchangeRateData:
+          type: object
+          description: A single currency-pair quote.
+          required:
+            - index
+            - datetime
+            - atClose
+          properties:
+            index:
+              type: string
+              example: USD/JPY
+            value:
+              type:
+                - number
+                - 'null'
+              example: 148.5
+            changeValue:
+              type:
+                - number
+                - 'null'
+              description: Absolute change versus the previous close.
+              example: 0.3
+            changePercent:
+              type:
+                - number
+                - 'null'
+              description: Percentage change versus the previous close.
+              example: 0.2
+            datetime:
+              type: string
+              example: '2024-01-15T15:30:00'
+            atClose:
+              type: string
+              example: '2024-01-15T15:30:00'
+    MacroMarketRecapResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/MarketRecap'
+    MacroEconomicDataResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EconomicDataPoint'
+    ExchangeRatePoint:
+      type: object
+      description: One closing exchange-rate observation for a currency pair.
+      required:
+        - date
+        - close
+        - exchangeRateName
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2024-01-15'
+        close:
+          type: number
+          description: Closing exchange rate for the pair on this date.
+          example: 148.5
+        exchangeRateName:
+          type: string
+          description: Currency pair the rate refers to, formatted `BASE/QUOTE`.
+          example: USD/JPY
+    MacroExchangeRateResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExchangeRatePoint'
+    PopulationPoint:
+      type: object
+      description: One monthly observation of population and the unemployment rate.
+      required:
+        - country
+        - observationDate
+        - population
+        - unemploymentRate
+      properties:
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: JP
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2026-03-01'
+        population:
+          type: integer
+          description: Total population for the period.
+          example: 122850000
+        unemploymentRate:
+          type: number
+          description: Unemployment rate, in percent.
+          example: 2.7
+    MacroPopulationResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PopulationPoint'
+    CentralGovernmentDebtPoint:
+      type: object
+      description: One observation of central-government debt as a share of GDP.
+      required:
+        - observationDate
+        - country
+        - centralGovernmentDebt
+      properties:
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2025-10-01'
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: US
+        centralGovernmentDebt:
+          type: number
+          description: Central-government debt as a percentage of GDP.
+          example: 122.57
+        yoyChange:
+          type:
+            - number
+            - 'null'
+          description: |
+            Year-over-year change in the debt ratio, in percentage points; `null`
+            for the earliest observations where no prior-year value exists.
+          example: 1.13
+    MacroCentralGovernmentDebtResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CentralGovernmentDebtPoint'
+    RatesYieldsPoint:
+      type: object
+      description: One observation of the policy rate and the 10-year government bond yield.
+      required:
+        - observationDate
+        - country
+        - tenYearsGovernmentBondYieldsPct
+        - overnightCallRate
+      properties:
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2026-03-01'
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: JP
+        tenYearsGovernmentBondYieldsPct:
+          type: number
+          description: 10-year government bond yield, in percent.
+          example: 2.35
+        overnightCallRate:
+          type: number
+          description: Overnight policy / call rate, in percent.
+          example: 0.73
+    MacroRatesYieldsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RatesYieldsPoint'
+    RealEstateGeoJson:
+      type: object
+      description: |
+        Choropleth payload: a collection of ward features carrying both their average-price
+        attributes and their boundary geometry. The geometry (`coordinates`) is intentionally
+        modelled permissively — it is a nested array of `[longitude, latitude]` coordinate
+        rings and can be large; clients typically pass it straight to a mapping library.
+      required:
+        - wards
+      properties:
+        wards:
+          type: array
+          description: Ward features with price attributes and boundary geometry.
+          items:
+            type: object
+            required:
+              - wardId
+              - wardName
+              - area
+            properties:
+              wardId:
+                type: integer
+                description: Ward identifier.
+                example: 34
+              wardName:
+                type: string
+                description: Ward name.
+                example: Phú Thuận
+              areaName:
+                type: string
+                description: Area / zone display name (localized).
+                example: Khu vực II
+              area:
+                type: string
+                description: Area / land-value zone label (localized).
+                example: Khu vực II
+              avgPriceResidentialVt1:
+                type:
+                  - number
+                  - 'null'
+                description: Average residential price, value-position tier 1.
+                example: 52639.39
+              avgPriceResidentialVt2:
+                type:
+                  - number
+                  - 'null'
+                description: Average residential price, value-position tier 2.
+                example: null
+              avgPriceResidentialVt3:
+                type:
+                  - number
+                  - 'null'
+                description: Average residential price, value-position tier 3.
+                example: null
+              avgPriceResidentialVt4:
+                type:
+                  - number
+                  - 'null'
+                description: Average residential price, value-position tier 4.
+                example: null
+              minPriceResidential:
+                type:
+                  - number
+                  - 'null'
+                description: Minimum residential price in the ward.
+                example: 36500
+              maxPriceResidential:
+                type:
+                  - number
+                  - 'null'
+                description: Maximum residential price in the ward.
+                example: 83400
+              roadCount:
+                type: integer
+                description: Number of priced roads in the ward.
+                example: 38
+              unit:
+                type: string
+                description: Price unit. `k_vnd` means thousands of VND per square metre.
+                example: k_vnd
+              coordinates:
+                description: |
+                  Boundary geometry as nested coordinate arrays (polygon / multipolygon rings of
+                  `[longitude, latitude]` points). Permissive by design — pass through to a map.
+                type: array
+                items: {}
+            additionalProperties: true
+    RealEstateGeoJsonResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/RealEstateGeoJson'
+    RealEstateStats:
+      type: object
+      description: Aggregate land-price statistics for a country, including overall totals, the observed price range and per-area breakdowns.
+      required:
+        - totalWards
+        - totalSegments
+        - priceRange
+        - byArea
+      properties:
+        totalWards:
+          type: integer
+          description: Number of wards covered by the dataset.
+          example: 185
+        totalSegments:
+          type: integer
+          description: Number of priced road segments across all wards.
+          example: 13674
+        priceRange:
+          type: object
+          description: Overall residential price range across every segment.
+          required:
+            - min
+            - max
+            - unit
+          properties:
+            min:
+              type: number
+              description: Lowest observed price.
+              example: 0
+            max:
+              type: number
+              description: Highest observed price.
+              example: 702194
+            unit:
+              type: string
+              description: Price unit. `k_vnd` means thousands of VND per square metre.
+              example: k_vnd
+        byArea:
+          type: array
+          description: Price statistics grouped by administrative area / land-value zone.
+          items:
+            type: object
+            required:
+              - area
+              - avgPrice
+              - minPrice
+              - maxPrice
+              - wardCount
+              - segmentCount
+            properties:
+              area:
+                type: string
+                description: Area / zone label (localized).
+                example: Khu vực I
+              avgPrice:
+                type: number
+                description: Average residential price within the area.
+                example: 165462
+              minPrice:
+                type: number
+                description: Minimum residential price within the area.
+                example: 48600
+              maxPrice:
+                type: number
+                description: Maximum residential price within the area.
+                example: 687200
+              wardCount:
+                type: integer
+                description: Number of wards in the area.
+                example: 32
+              segmentCount:
+                type: integer
+                description: Number of priced road segments in the area.
+                example: 1026
+        topRoads:
+          type: array
+          description: Highest-priced roads across the country.
+          items:
+            type: object
+            required:
+              - roadName
+              - wardName
+              - area
+              - priceResidential
+            properties:
+              roadName:
+                type: string
+                description: Road name.
+                example: Hai Bà Trưng
+              wardName:
+                type: string
+                description: Ward the road belongs to.
+                example: Khu vực 1
+              area:
+                type: string
+                description: Area / zone label (localized).
+                example: Khu vực 1
+              priceResidential:
+                type: number
+                description: Residential land price for the road.
+                example: 702194
+    RealEstateStatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/RealEstateStats'
+    RealEstateWard:
+      type: object
+      description: |
+        Ward-level land-price summary. The four `avgPriceResidentialVt1..4` fields are the
+        average residential price for value-position tiers 1–4 (frontage → rear). Tiers
+        that do not apply to a ward are `null`.
+      required:
+        - wardId
+        - wardName
+        - area
+        - minPriceResidential
+        - maxPriceResidential
+        - roadCount
+        - year
+        - month
+        - unit
+      properties:
+        wardId:
+          type: integer
+          description: Ward identifier — use as the `{wardId}` path param for ward detail.
+          example: 1
+        wardName:
+          type: string
+          description: Ward name.
+          example: Sài Gòn
+        area:
+          type: string
+          description: Area / land-value zone label (localized).
+          example: Khu vực I
+        avgPriceResidentialVt1:
+          type:
+            - number
+            - 'null'
+          description: Average residential price, value-position tier 1.
+          example: 365020
+        avgPriceResidentialVt2:
+          type:
+            - number
+            - 'null'
+          description: Average residential price, value-position tier 2.
+          example: null
+        avgPriceResidentialVt3:
+          type:
+            - number
+            - 'null'
+          description: Average residential price, value-position tier 3.
+          example: null
+        avgPriceResidentialVt4:
+          type:
+            - number
+            - 'null'
+          description: Average residential price, value-position tier 4.
+          example: null
+        minPriceResidential:
+          type:
+            - number
+            - 'null'
+          description: Minimum residential price observed in the ward.
+          example: 191200
+        maxPriceResidential:
+          type:
+            - number
+            - 'null'
+          description: Maximum residential price observed in the ward.
+          example: 687200
+        roadCount:
+          type: integer
+          description: Number of priced roads in the ward.
+          example: 60
+        year:
+          type: integer
+          description: Year the price schedule applies to.
+          example: 2025
+        month:
+          type: integer
+          description: Month the price schedule applies to.
+          example: 1
+        unit:
+          type: string
+          description: Price unit. `k_vnd` means thousands of VND per square metre.
+          example: k_vnd
+    RealEstateWardsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RealEstateWard'
+    RealEstateWardDetail:
+      type: object
+      description: |
+        Full land-price detail for a single ward — an aggregate `summary` plus the list of
+        priced `roads`. The `Vt1..4` suffixes denote value-position tiers (frontage → rear);
+        tiers that do not apply are `null`.
+      required:
+        - wardId
+        - wardName
+        - area
+        - summary
+        - roads
+      properties:
+        wardId:
+          type: integer
+          description: Ward identifier.
+          example: 1
+        wardName:
+          type: string
+          description: Ward name.
+          example: Sài Gòn
+        area:
+          type: string
+          description: Area / land-value zone label (localized).
+          example: Khu vực I
+        summary:
+          type: object
+          description: Aggregate price summary for the ward.
+          required:
+            - minPriceResidential
+            - maxPriceResidential
+            - roadCount
+            - year
+            - month
+            - unit
+          properties:
+            avgPriceResidentialVt1:
+              type:
+                - number
+                - 'null'
+              description: Average residential price, value-position tier 1.
+              example: 365020
+            avgPriceResidentialVt2:
+              type:
+                - number
+                - 'null'
+              description: Average residential price, value-position tier 2.
+              example: null
+            avgPriceResidentialVt3:
+              type:
+                - number
+                - 'null'
+              description: Average residential price, value-position tier 3.
+              example: null
+            avgPriceResidentialVt4:
+              type:
+                - number
+                - 'null'
+              description: Average residential price, value-position tier 4.
+              example: null
+            minPriceResidential:
+              type:
+                - number
+                - 'null'
+              description: Minimum residential price in the ward.
+              example: 191200
+            maxPriceResidential:
+              type:
+                - number
+                - 'null'
+              description: Maximum residential price in the ward.
+              example: 687200
+            roadCount:
+              type: string
+              description: Number of priced roads in the ward (returned as a string).
+              example: '60'
+            year:
+              type: integer
+              description: Year the price schedule applies to.
+              example: 2025
+            month:
+              type: integer
+              description: Month the price schedule applies to.
+              example: 1
+            unit:
+              type: string
+              description: Price unit. `k_vnd` means thousands of VND per square metre.
+              example: k_vnd
+        roads:
+          type: array
+          description: Priced road segments within the ward.
+          items:
+            type: object
+            required:
+              - roadName
+              - priceResidentialVt1
+            properties:
+              roadName:
+                type: string
+                description: Road name.
+                example: NGUYỄN HUỆ
+              segmentFrom:
+                type:
+                  - string
+                  - 'null'
+                description: Start of the priced segment (or `TRỌN ĐƯỜNG` for the whole road).
+                example: TRỌN ĐƯỜNG
+              segmentTo:
+                type:
+                  - string
+                  - 'null'
+                description: End of the priced segment.
+                example: null
+              priceResidentialVt1:
+                type:
+                  - number
+                  - 'null'
+                description: Residential price, value-position tier 1.
+                example: 687200
+              priceResidentialVt2:
+                type:
+                  - number
+                  - 'null'
+                description: Residential price, value-position tier 2.
+                example: null
+              priceResidentialVt3:
+                type:
+                  - number
+                  - 'null'
+                description: Residential price, value-position tier 3.
+                example: null
+              priceResidentialVt4:
+                type:
+                  - number
+                  - 'null'
+                description: Residential price, value-position tier 4.
+                example: null
+              priceCommercialVt1:
+                type:
+                  - number
+                  - 'null'
+                description: Commercial price, value-position tier 1.
+                example: 481000
+              priceProductionVt1:
+                type:
+                  - number
+                  - 'null'
+                description: Production / manufacturing price, value-position tier 1.
+                example: 412300
+    RealEstateWardDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/RealEstateWardDetail'
+    RealEstateLandPrice:
+      type: object
+      description: |
+        A single priced road segment. Each segment carries residential, commercial and
+        production prices across four value-position tiers (`Vt1..4`, frontage → rear).
+        Tiers or price types that do not apply to a segment are `null`.
+      required:
+        - wardId
+        - wardName
+        - area
+        - roadName
+        - unit
+        - year
+        - month
+      properties:
+        wardId:
+          type: integer
+          description: Ward identifier the segment belongs to.
+          example: 169
+        wardName:
+          type: string
+          description: Ward name.
+          example: Khu vực 1
+        area:
+          type: string
+          description: Area / land-value zone label (localized).
+          example: Khu vực 1
+        roadName:
+          type: string
+          description: Road name.
+          example: Nhà Thờ
+        segmentFrom:
+          type:
+            - string
+            - 'null'
+          description: Start of the priced segment.
+          example: Đầu đường
+        segmentTo:
+          type:
+            - string
+            - 'null'
+          description: End of the priced segment.
+          example: Cuối đường
+        priceResidentialVt1:
+          type:
+            - number
+            - 'null'
+          description: Residential price, value-position tier 1.
+          example: 702194
+        priceResidentialVt2:
+          type:
+            - number
+            - 'null'
+          description: Residential price, value-position tier 2.
+          example: 316389
+        priceResidentialVt3:
+          type:
+            - number
+            - 'null'
+          description: Residential price, value-position tier 3.
+          example: 229626
+        priceResidentialVt4:
+          type:
+            - number
+            - 'null'
+          description: Residential price, value-position tier 4.
+          example: 196388
+        priceCommercialVt1:
+          type:
+            - number
+            - 'null'
+          description: Commercial price, value-position tier 1.
+          example: null
+        priceCommercialVt2:
+          type:
+            - number
+            - 'null'
+          description: Commercial price, value-position tier 2.
+          example: null
+        priceCommercialVt3:
+          type:
+            - number
+            - 'null'
+          description: Commercial price, value-position tier 3.
+          example: null
+        priceCommercialVt4:
+          type:
+            - number
+            - 'null'
+          description: Commercial price, value-position tier 4.
+          example: null
+        priceProductionVt1:
+          type:
+            - number
+            - 'null'
+          description: Production / manufacturing price, value-position tier 1.
+          example: null
+        priceProductionVt2:
+          type:
+            - number
+            - 'null'
+          description: Production / manufacturing price, value-position tier 2.
+          example: null
+        priceProductionVt3:
+          type:
+            - number
+            - 'null'
+          description: Production / manufacturing price, value-position tier 3.
+          example: null
+        priceProductionVt4:
+          type:
+            - number
+            - 'null'
+          description: Production / manufacturing price, value-position tier 4.
+          example: null
+        unit:
+          type: string
+          description: Price unit. `k_vnd` means thousands of VND per square metre.
+          example: k_vnd
+        year:
+          type: integer
+          description: Year the price schedule applies to.
+          example: 2026
+        month:
+          type: integer
+          description: Month the price schedule applies to.
+          example: 1
+    RealEstateLandPricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RealEstateLandPrice'
+    RealEstateProvince:
+      type: object
+      description: A province / city administrative unit available for real-estate queries.
+      required:
+        - id
+        - name
+        - code
+      properties:
+        id:
+          type: integer
+          description: Province identifier.
+          example: 2
+        name:
+          type: string
+          description: Province / city name (localized by the `lang` query parameter).
+          example: Hà Nội
+        code:
+          type: string
+          description: Short province code.
+          example: HN
+        bbox:
+          type:
+            - array
+            - 'null'
+          description: Optional geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Currently `null` on staging.
+          items:
+            type: number
+          example: null
+    RealEstateProvincesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RealEstateProvince'
+    RealEstateCountrySummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              description: Country-level summary rows (currently empty on staging).
+              items:
+                type: object
+                additionalProperties: true
+  responses:
+    BadRequest:
+      description: Invalid or missing parameter — bad enum, range, format, or a missing required query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 400
+            error:
+              code: INTERNAL_ERROR
+              message:
+                - Invalid type parameter. Must be "gdp", "cpi", "pce", or "import-export"
+                - Type parameter is required
+            meta:
+              error: Bad Request
+              statusCode: 400
+              timestamp: '2026-06-19T08:34:08.081Z'
+    Unauthorized:
+      description: Missing, invalid, disabled or expired API key. Send a valid key in the `X-API-Key` header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 401
+            error:
+              code: API_KEY_INVALID
+              message: Invalid API key
+            meta:
+              timestamp: '2026-06-19T08:34:08.023Z'
+    Forbidden:
+      description: Your subscription plan does not include this data feature, or your key's scope denies it.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 403
+            error:
+              code: FEATURE_NOT_IN_PLAN
+              message: Your plan does not include this feature
+            meta:
+              timestamp: '2026-06-19T08:34:08.100Z'
+    RateLimited:
+      description: |
+        Rate limit exceeded — you have consumed your plan's per-minute weight budget.
+        Wait until `X-RateLimit-Reset` (or `Retry-After` seconds) then retry.
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/XRateLimitLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/XRateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/XRateLimitReset'
+        X-RateLimit-Weight-Used:
+          $ref: '#/components/headers/XRateLimitWeightUsed'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 429
+            error:
+              code: RATE_LIMIT_EXCEEDED
+              message: Rate limit exceeded
+            meta:
+              timestamp: '2026-06-19T08:34:09.000Z'
+    InternalError:
+      description: Unexpected server error. Retry after a short exponential backoff.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 500
+            error:
+              code: INTERNAL_ERROR
+              message: Internal server error
+            meta:
+              timestamp: '2026-06-19T08:34:10.000Z'
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: INTERNAL_ERROR
+              message: Commodity 'zzz-nope' not found
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: '2026-06-19T08:34:08.205Z'
+  headers:
+    XRateLimitLimit:
+      description: Your plan's request-weight budget per 1-minute window.
+      schema:
+        type: integer
+        example: 1000
+    XRateLimitRemaining:
+      description: Remaining request weight in the current 1-minute window.
+      schema:
+        type: integer
+        example: 997
+    XRateLimitReset:
+      description: Unix timestamp (seconds) when the current rate-limit window resets.
+      schema:
+        type: integer
+        format: int64
+        example: 1781857979
+    XRateLimitWeightUsed:
+      description: Request weight consumed by this call (see each endpoint's weight).
+      schema:
+        type: integer
+        example: 3
+    RetryAfter:
+      description: Seconds to wait before retrying. Present on 429 responses.
+      schema:
+        type: integer
+        example: 30
+x-hayinsights-quota:
+  model: weighted-sliding-window
+  window: 1m
+  unit: weight
+  description: |
+    Each call consumes its endpoint's weight from your plan's per-minute budget.
+    When the budget is exhausted the API returns 429 until the window resets.
+  headers:
+    limit: X-RateLimit-Limit
+    remaining: X-RateLimit-Remaining
+    reset: X-RateLimit-Reset
+    weightUsed: X-RateLimit-Weight-Used
+  exceeded:
+    status: 429
+    code: RATE_LIMIT_EXCEEDED
+    retryAfterHeader: Retry-After
+  weightsByTag:
+    Macro: 2
+    Real Estate: 2
+    Commodities: 3
+    Crypto: 3
+    FX: 3-6
+    ETF: 8
+x-tagGroups:
+  - name: Market Data
+    tags:
+      - Commodities
+      - Crypto
+      - ETF
+      - FX
+      - Macro
+      - Real Estate

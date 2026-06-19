@@ -1,0 +1,71 @@
+get:
+  operationId: cryptoBubbleMap
+  tags:
+    - Crypto
+  summary: Crypto bubble map
+  description: |
+    Top coins by market capitalisation with their price change over a selected
+    timeframe and a normalised bubble size, for a bubble-map visualisation.
+  x-feature-code: crypto_data
+  x-api-weight: 3
+  parameters:
+    - name: timeframe
+      in: query
+      required: false
+      description: Timeframe the price changes are computed over.
+      schema:
+        type: string
+        enum:
+          - 1h
+          - 1d
+          - 1w
+        default: 1d
+    - name: limit
+      in: query
+      required: false
+      description: Maximum number of coins to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 100
+  responses:
+    "200":
+      description: Bubble-map dataset for the requested timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CryptoBubbleMapResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              timeframe: 1d
+              coins:
+                - symbol: BTC
+                  name: Bitcoin
+                  marketCap: 1254560380643.96
+                  change: -2.9057
+                  size: 1
+                - symbol: ETH
+                  name: Ethereum
+                  marketCap: 204246767811.64
+                  change: -3.2733
+                  size: 0.4035
+                - symbol: USDT
+                  name: Tether USDt
+                  marketCap: 186279683262.83
+                  change: -0.0033
+                  size: 0.3853
+            meta:
+              timestamp: "2026-06-19T08:50:00.981Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

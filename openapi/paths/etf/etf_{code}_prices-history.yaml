@@ -1,0 +1,61 @@
+get:
+  operationId: etfPricesHistory
+  tags:
+    - ETF
+  summary: ETF price history
+  description: |
+    Daily OHLCV price history for a single ETF, ordered oldest to newest. Use the
+    exchange ticker (e.g. a TSE code like `1306`) as the `{code}` path param.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+      schema:
+        type: string
+        example: "1306"
+  responses:
+    "200":
+      description: Daily OHLCV price history for the ETF.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfPricesHistoryResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - id: 346280
+                date: "2021-06-14"
+                etfCode: "1306"
+                open: 2065
+                high: 2068
+                low: 2051
+                close: 2056
+                volume: "573610.000000"
+                currency: JPY
+              - id: 346281
+                date: "2021-06-15"
+                etfCode: "1306"
+                open: 2060
+                high: 2076
+                low: 2059
+                close: 2075
+                volume: "2708520.000000"
+                currency: JPY
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

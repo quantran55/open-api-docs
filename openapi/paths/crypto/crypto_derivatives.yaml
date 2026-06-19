@@ -1,0 +1,56 @@
+get:
+  operationId: cryptoDerivatives
+  tags:
+    - Crypto
+  summary: Crypto derivatives metrics
+  description: |
+    Derivatives-market metrics — open interest, funding rates, 24h liquidations
+    and the options put/call ratio for the major coins.
+  x-feature-code: crypto_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: Derivatives-market metrics snapshot.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CryptoDerivativesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              openInterest:
+                btc:
+                  symbol: BTCUSDT
+                  value: "98678.224"
+                  unit: USDT
+                eth:
+                  symbol: ETHUSDT
+                  value: "2240418.100"
+                  unit: USDT
+              fundingRate:
+                btc:
+                  rate: 0.00000854
+                  annualized: 0.93513
+                eth:
+                  rate: -0.00000986
+                  annualized: -1.0796700000000001
+              liquidations24h:
+                total: 600914130.33
+                long: 515261276.52
+                short: 85652853.81
+              putCallRatio:
+                btc:
+                  ratio: 0.633
+                  putOi: 169791
+                  callOi: 268093
+            meta:
+              timestamp: "2026-06-19T08:50:01.022Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

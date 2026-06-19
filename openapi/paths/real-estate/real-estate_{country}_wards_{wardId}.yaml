@@ -1,0 +1,75 @@
+get:
+  operationId: realEstateWardDetail
+  tags:
+    - Real Estate
+  summary: Ward land-price detail
+  description: |
+    Full land-price detail for a single ward — an aggregate summary plus every priced
+    road segment with residential, commercial and production prices across value-position
+    tiers. Use the `wardId` returned by the wards list. Data is available for `vn`.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+    - name: wardId
+      in: path
+      required: true
+      description: Ward identifier.
+      schema:
+        type: integer
+        example: 1
+  responses:
+    "200":
+      description: Land-price detail for a single ward.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateWardDetailResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              wardId: 1
+              wardName: Sài Gòn
+              area: Khu vực I
+              summary:
+                avgPriceResidentialVt1: 365020
+                avgPriceResidentialVt2: null
+                avgPriceResidentialVt3: null
+                avgPriceResidentialVt4: null
+                minPriceResidential: 191200
+                maxPriceResidential: 687200
+                roadCount: "60"
+                year: 2025
+                month: 1
+                unit: k_vnd
+              roads:
+                - roadName: NGUYỄN HUỆ
+                  segmentFrom: TRỌN ĐƯỜNG
+                  segmentTo: null
+                  priceResidentialVt1: 687200
+                  priceResidentialVt2: null
+                  priceResidentialVt3: null
+                  priceResidentialVt4: null
+                  priceCommercialVt1: 481000
+                  priceProductionVt1: 412300
+            meta:
+              timestamp: "2026-06-19T08:54:29.812Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

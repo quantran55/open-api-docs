@@ -1,0 +1,19 @@
+type: object
+description: Aggregate valuation ratios for the ETF's equity holdings.
+properties:
+  PE:
+    type: string
+    description: Portfolio price-to-earnings ratio.
+    example: "0.0600"
+  PB:
+    type: string
+    description: Portfolio price-to-book ratio.
+    example: "0.6400"
+  PS:
+    type: string
+    description: Portfolio price-to-sales ratio.
+    example: "0.8400"
+  PC:
+    type: string
+    description: Portfolio price-to-cash-flow ratio.
+    example: "0.0900"

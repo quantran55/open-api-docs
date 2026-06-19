@@ -1,0 +1,58 @@
+get:
+  operationId: macroMarketRecap
+  tags:
+    - Macro
+  summary: Latest macroeconomic market recap
+  description: |
+    A point-in-time market recap bundling the latest Japanese equity / commodity
+    indices, REITs, TOPIX, 3-month interbank reference rates and key currency
+    rates into a single payload.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters: []
+  responses:
+    "200":
+      description: Latest market recap snapshot.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroMarketRecapResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              updateTime: "2024-01-15T15:30:00"
+              nikkeiJpxGold:
+                - index: Nikkei 225
+                  value: 38500.5
+                  changeValue: 120.3
+                  changePercent: 0.31
+                  datetime: "2024-01-15T15:30:00"
+                  atClose: "2024-01-15T15:30:00"
+              nikkeiJpxOil: []
+              tokyoStockExchangeReit: []
+              topix: []
+              interbankRates3m:
+                - index: TIBOR 3M
+                  value: 0.08
+                  changeValue: 0.01
+                  changePercent: null
+                  datetime: "2024-01-15T15:30:00"
+                  atClose: "2024-01-15T15:30:00"
+              currencyRate:
+                - index: USD/JPY
+                  value: 148.5
+                  changeValue: 0.3
+                  changePercent: 0.2
+                  datetime: "2024-01-15T15:30:00"
+                  atClose: "2024-01-15T15:30:00"
+            meta:
+              timestamp: "2026-06-19T08:50:42.493Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

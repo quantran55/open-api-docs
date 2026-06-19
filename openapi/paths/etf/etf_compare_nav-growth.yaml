@@ -1,0 +1,80 @@
+get:
+  operationId: etfCompareNavGrowth
+  tags:
+    - ETF
+  summary: Compare NAV growth
+  description: |
+    NAV-growth series for two Vietnamese funds, benchmarked against the VN-Index,
+    across the available period windows. Pass the two VN fund codes (e.g. `VESAF`)
+    as `code1` and `code2`.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code1
+      in: query
+      required: true
+      description: First Vietnamese fund code to compare.
+      schema:
+        type: string
+        example: VESAF
+    - name: code2
+      in: query
+      required: true
+      description: Second Vietnamese fund code to compare.
+      schema:
+        type: string
+        example: VEOF
+  responses:
+    "200":
+      description: NAV-growth comparison for the two funds and the VN-Index.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfCompareNavGrowthResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              etf1:
+                etfCode: VESAF
+                data:
+                  3M:
+                    - date: 19-03-2026
+                      growthRate: 0
+                      nav: 34990.91
+                    - date: 20-03-2026
+                      growthRate: 0.07
+                      nav: 35015.42
+              etf2:
+                etfCode: VEOF
+                data:
+                  3M:
+                    - date: 19-03-2026
+                      growthRate: 0
+                      nav: 36023.97
+              vnIndex:
+                etfCode: VNINDEX
+                data:
+                  3M:
+                    - date: 19-03-2026
+                      growthRate: 0
+                      nav: 1699.13
+              periodAvailability:
+                1M: false
+                3M: true
+                6M: true
+                1Y: true
+                3Y: true
+              startDate: 24-04-2017
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,24 @@
+type: object
+description: Rebased gold and US Dollar Index (DXY) series for correlation analysis.
+required:
+  - period
+  - series
+properties:
+  period:
+    type: string
+    description: Look-back window.
+    example: 3m
+  series:
+    type: object
+    required:
+      - gold
+      - dxy
+    properties:
+      gold:
+        type: array
+        items:
+          $ref: "./IndexedPricePoint.yaml"
+      dxy:
+        type: array
+        items:
+          $ref: "./IndexedPricePoint.yaml"

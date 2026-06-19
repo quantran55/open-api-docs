@@ -1,0 +1,19 @@
+type: object
+description: Open interest for a single perpetual-futures contract.
+required:
+  - symbol
+  - value
+  - unit
+properties:
+  symbol:
+    type: string
+    description: Contract symbol.
+    example: BTCUSDT
+  value:
+    type: string
+    description: Open interest, expressed in the contract's settlement unit.
+    example: "98678.224"
+  unit:
+    type: string
+    description: Unit the open interest is expressed in.
+    example: USDT

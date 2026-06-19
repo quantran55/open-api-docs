@@ -1,0 +1,46 @@
+get:
+  operationId: fxSummary
+  tags:
+    - FX
+  summary: FX summary
+  description: |
+    FX dashboard summary — the US Dollar Index (DXY), the USD/JPY rate (each with
+    a 1-day change) and a headline emerging-market FX stress reading.
+  x-feature-code: fx_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: FX summary snapshot.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/FxSummaryResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              dxy:
+                value: 100.76
+                changePct: 0.14
+                asOf: "2026-06-19"
+                source: "https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md"
+              usdJpy:
+                value: 161.35
+                changePct: 0.03
+                asOf: "2026-06-19"
+                source: "https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md"
+              emStress:
+                level: PANIC
+                score: 4
+                panicCount: 0
+                warningCount: 4
+            meta:
+              timestamp: "2026-06-19T08:50:42.282Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

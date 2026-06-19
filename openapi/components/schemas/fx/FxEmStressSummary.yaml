@@ -1,0 +1,28 @@
+type: object
+description: Headline emerging-market FX stress reading.
+required:
+  - level
+  - score
+  - panicCount
+  - warningCount
+properties:
+  level:
+    type: string
+    enum:
+      - STABLE
+      - WARNING
+      - PANIC
+    description: Overall stress level.
+    example: PANIC
+  score:
+    type: integer
+    description: Aggregate stress score.
+    example: 4
+  panicCount:
+    type: integer
+    description: Number of tracked pairs currently at the PANIC level.
+    example: 0
+  warningCount:
+    type: integer
+    description: Number of tracked pairs currently at the WARNING level.
+    example: 4

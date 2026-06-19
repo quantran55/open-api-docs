@@ -1,0 +1,5 @@
+description: Unix timestamp (seconds) when the current rate-limit window resets.
+schema:
+  type: integer
+  format: int64
+  example: 1781857979

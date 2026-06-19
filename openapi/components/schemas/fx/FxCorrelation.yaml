@@ -1,0 +1,47 @@
+type: object
+description: |
+  Rolling correlation matrix across FX, crypto and gold benchmarks over the
+  look-back window. `matrix[i][j]` is the Pearson correlation between
+  `symbols[i]` and `symbols[j]`.
+required:
+  - window
+  - asOf
+  - samples
+  - symbols
+  - matrix
+properties:
+  window:
+    type: string
+    description: Look-back window the correlations are computed over.
+    example: 90d
+  asOf:
+    type: string
+    format: date
+    description: Date the matrix is as of.
+    example: "2026-06-19"
+  samples:
+    type: integer
+    description: Number of daily observations used in the calculation.
+    example: 89
+  symbols:
+    type: array
+    description: Row / column labels of the matrix, in order.
+    items:
+      type: string
+    example:
+      - DXY
+      - EUR/USD
+      - GBP/USD
+      - USD/JPY
+      - USD/CNY
+      - AUD/USD
+      - USD/SGD
+      - BTC/USD
+      - XAU/USD
+  matrix:
+    type: array
+    description: Square correlation matrix; `matrix[i][j]` correlates `symbols[i]` with `symbols[j]`.
+    items:
+      type: array
+      items:
+        type: number

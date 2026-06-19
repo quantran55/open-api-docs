@@ -1,0 +1,98 @@
+get:
+  operationId: etfDetail
+  tags:
+    - ETF
+  summary: ETF detail
+  description: |
+    Full detail view for a single ETF — descriptive metadata, latest price, top
+    holdings, valuation ratios, sector weights, net-flow history and
+    cumulative-return performance by period. Use the exchange ticker (e.g. a TSE
+    code like `1306`) as the `{code}` path param.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+      schema:
+        type: string
+        example: "1306"
+  responses:
+    "200":
+      description: Full detail view for the ETF.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfDetailResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              etfCode: "1306"
+              etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+              managementCompany: Nomura Asset Management
+              MER: 0.0505
+              etfType: Japanese Equity(Market)
+              indexName: TOPIX Total Return Index
+              listingDate: "2001-07-13"
+              currentPrice: 425.5
+              change: 2.4
+              changePct: 0.57
+              lastUpdateDate: "2026-06-17"
+              totalAssetValue: 32511066650608.5
+              AssetAllocation:
+                - name: TOYOTA MOTOR CORP
+                  value: 1074907641000
+                - name: MITSUBISHI UFJ FIN
+                  value: 1063805290650
+              equityHoldings:
+                PE: "0.0600"
+                PB: "0.6400"
+                PS: "0.8400"
+                PC: "0.0900"
+              sectorWeight:
+                - sector: null
+                  weight: 0.2803
+                  month: 4
+                  year: 2026
+              distributionYield: 0.0176
+              netflow:
+                data:
+                  - date: "2025-10-17"
+                    aum: 26913496133220
+                    netflow: -26107300968
+                    netflowAumPct: -0.097
+                periodAvailability:
+                  1M: true
+                  3M: true
+                  6M: true
+              performance:
+                periodAvailability:
+                  1M: true
+                  3M: true
+                  6M: true
+                  1Y: true
+                  3Y: true
+                periods:
+                  1M:
+                    - date: 15-05-2026
+                      nav: 409.9
+                      cumulativeReturn: 0
+                    - date: 18-05-2026
+                      nav: 405.9
+                      cumulativeReturn: -0.98
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

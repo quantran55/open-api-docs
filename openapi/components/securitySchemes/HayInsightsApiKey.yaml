@@ -1,0 +1,11 @@
+type: apiKey
+in: header
+name: X-API-Key
+description: |
+  Your HayInsights API key (prefixed `apk_`). Create and manage keys in the
+  HayInsights dashboard (Account → API keys).
+
+  Send it in the `X-API-Key` header on **every** request to `/openapi/v1/*`.
+  Which data domains you may access and your request quota are both governed by
+  the subscription plan attached to the key — see the **Plans & features** and
+  **Rate limits** guides.

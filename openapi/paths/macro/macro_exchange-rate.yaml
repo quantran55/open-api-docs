@@ -1,0 +1,74 @@
+get:
+  operationId: macroExchangeRate
+  tags:
+    - Macro
+  summary: Exchange rate series
+  description: |
+    Daily closing exchange-rate history for a currency pair. Optionally limit the
+    look-back window or return only data before a given date.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: currency1
+      in: query
+      required: true
+      description: Base currency code.
+      schema:
+        type: string
+        example: USD
+    - name: currency2
+      in: query
+      required: true
+      description: Quote currency code.
+      schema:
+        type: string
+        example: JPY
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 1Y
+          - 3Y
+          - 5Y
+          - 10Y
+        example: 1Y
+    - name: before
+      in: query
+      required: false
+      description: Return only observations dated before this date.
+      schema:
+        type: string
+        format: date
+        example: "2024-01-01"
+  responses:
+    "200":
+      description: Closing exchange-rate series for the pair.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroExchangeRateResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - date: "2024-01-12"
+                close: 144.89
+                exchangeRateName: USD/JPY
+              - date: "2024-01-15"
+                close: 148.5
+                exchangeRateName: USD/JPY
+            meta:
+              timestamp: "2026-06-19T08:50:42.493Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

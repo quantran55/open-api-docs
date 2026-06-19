@@ -1,0 +1,24 @@
+type: object
+description: One ETF in the top-performance ranking for the requested period.
+required:
+  - etfCode
+  - etfName
+  - currentNav
+  - changePercent
+properties:
+  etfCode:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1321"
+  etfName:
+    type: string
+    description: Fund name.
+    example: NEXT FUNDS Nikkei 225 Exchange Traded Fund
+  currentNav:
+    type: number
+    description: Current net asset value per share.
+    example: 61538.17917892439
+  changePercent:
+    type: number
+    description: Percentage NAV change over the requested period.
+    example: 10.96

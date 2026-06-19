@@ -1,0 +1,61 @@
+type: object
+description: One ETF cell in the market heatmap, sized and coloured by market activity.
+required:
+  - code
+  - name
+  - currency
+  - closePrice
+properties:
+  code:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1305"
+  name:
+    type: string
+    description: Fund name.
+    example: iFreeETF TOPIX (Yearly Dividend Type)
+  currency:
+    type: string
+    description: Quote currency.
+    example: JPY
+  currentDate:
+    type: string
+    format: date-time
+    description: Timestamp of the quoted close.
+    example: "2026-06-16T17:00:00.000Z"
+  closePrice:
+    type: number
+    description: Closing price.
+    example: 4299
+  volume:
+    type: number
+    description: Traded volume for the session.
+    example: 71520
+  marketCap:
+    type: number
+    description: Market capitalisation.
+    example: 307464480
+  tradingValue:
+    type: number
+    description: Total traded value for the session.
+    example: 307464480
+  priceFluctuation:
+    type: number
+    description: Absolute price change versus the previous close.
+    example: 19
+  priceFluctuationPercent:
+    type: number
+    description: Percentage price change versus the previous close.
+    example: 0.44
+  contributionValue:
+    type: number
+    description: Contribution of this ETF to the aggregate index movement.
+    example: 1352843.7119999998
+  marketCapChange:
+    type: number
+    description: Change in market capitalisation versus the previous session.
+    example: -1835060720
+  contributionArea:
+    type: number
+    description: Relative tile area used to size the heatmap cell.
+    example: 0.07973

@@ -1,0 +1,14 @@
+type: object
+description: One top holding contributing to an ETF's net asset value.
+required:
+  - name
+  - value
+properties:
+  name:
+    type: string
+    description: Name of the holding.
+    example: TOYOTA MOTOR CORP
+  value:
+    type: number
+    description: Market value of the position, in fund currency.
+    example: 1074907641000

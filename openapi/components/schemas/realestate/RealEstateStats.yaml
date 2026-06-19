@@ -1,0 +1,100 @@
+type: object
+description: Aggregate land-price statistics for a country, including overall totals, the observed price range and per-area breakdowns.
+required:
+  - totalWards
+  - totalSegments
+  - priceRange
+  - byArea
+properties:
+  totalWards:
+    type: integer
+    description: Number of wards covered by the dataset.
+    example: 185
+  totalSegments:
+    type: integer
+    description: Number of priced road segments across all wards.
+    example: 13674
+  priceRange:
+    type: object
+    description: Overall residential price range across every segment.
+    required:
+      - min
+      - max
+      - unit
+    properties:
+      min:
+        type: number
+        description: Lowest observed price.
+        example: 0
+      max:
+        type: number
+        description: Highest observed price.
+        example: 702194
+      unit:
+        type: string
+        description: Price unit. `k_vnd` means thousands of VND per square metre.
+        example: k_vnd
+  byArea:
+    type: array
+    description: Price statistics grouped by administrative area / land-value zone.
+    items:
+      type: object
+      required:
+        - area
+        - avgPrice
+        - minPrice
+        - maxPrice
+        - wardCount
+        - segmentCount
+      properties:
+        area:
+          type: string
+          description: Area / zone label (localized).
+          example: Khu vực I
+        avgPrice:
+          type: number
+          description: Average residential price within the area.
+          example: 165462
+        minPrice:
+          type: number
+          description: Minimum residential price within the area.
+          example: 48600
+        maxPrice:
+          type: number
+          description: Maximum residential price within the area.
+          example: 687200
+        wardCount:
+          type: integer
+          description: Number of wards in the area.
+          example: 32
+        segmentCount:
+          type: integer
+          description: Number of priced road segments in the area.
+          example: 1026
+  topRoads:
+    type: array
+    description: Highest-priced roads across the country.
+    items:
+      type: object
+      required:
+        - roadName
+        - wardName
+        - area
+        - priceResidential
+      properties:
+        roadName:
+          type: string
+          description: Road name.
+          example: Hai Bà Trưng
+        wardName:
+          type: string
+          description: Ward the road belongs to.
+          example: Khu vực 1
+        area:
+          type: string
+          description: Area / zone label (localized).
+          example: Khu vực 1
+        priceResidential:
+          type: number
+          description: Residential land price for the road.
+          example: 702194

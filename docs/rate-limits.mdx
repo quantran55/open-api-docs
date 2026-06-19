@@ -1,0 +1,91 @@
+---
+title: "Rate limits"
+description: "A weighted, per-minute quota tied to your plan."
+---
+
+HayInsights uses a **weighted, sliding-window** rate limit. Instead of counting
+requests, each call consumes a **weight** from your plan's per-minute budget.
+Heavier endpoints (large aggregates) cost more than light ones.
+
+## Headers
+
+Every response — success or error — carries the current quota state:
+
+| Header | Meaning |
+| --- | --- |
+| `X-RateLimit-Limit` | Your plan's total weight budget per 1-minute window. |
+| `X-RateLimit-Remaining` | Weight remaining in the current window. |
+| `X-RateLimit-Reset` | Unix timestamp (seconds) when the window resets. |
+| `X-RateLimit-Weight-Used` | Weight consumed by this request. |
+
+```
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 997
+X-RateLimit-Reset: 1781857979
+X-RateLimit-Weight-Used: 3
+```
+
+## Endpoint weights
+
+| Domain | Feature | Weight per call |
+| --- | --- | --- |
+| Macro | `macro_data` | 2 |
+| Real Estate | `realestate_data` | 2 |
+| Commodities | `commodities_data` | 3 |
+| Crypto | `crypto_data` | 3 |
+| FX | `fx_data` | 3 (`summary`, `table`) · 6 (`correlation`, `em-stress`) |
+| ETF | `etf_data` | 8 |
+
+<Info>
+  Example: on a plan with a 1,000 weight/minute budget you can make roughly 333
+  macro calls (weight 2) **or** 125 ETF calls (weight 8) per minute. Mixing
+  endpoints draws from the same shared budget.
+</Info>
+
+## Exceeding the limit
+
+When you exhaust your budget the API returns **HTTP 429** with the
+`RATE_LIMIT_EXCEEDED` code and a `Retry-After` header (seconds to wait):
+
+```json
+{
+  "success": false,
+  "statusCode": 429,
+  "error": { "code": "RATE_LIMIT_EXCEEDED", "message": "Rate limit exceeded" },
+  "meta": { "timestamp": "2026-06-19T08:34:09.000Z" }
+}
+```
+
+## Handling 429 gracefully
+
+Read the headers and back off until the window resets.
+
+<CodeGroup>
+```typescript TypeScript
+async function get(url: string, key: string): Promise<Response> {
+  const res = await fetch(url, { headers: { "X-API-Key": key } });
+  if (res.status === 429) {
+    const wait = Number(res.headers.get("Retry-After") ?? 1);
+    await new Promise((r) => setTimeout(r, wait * 1000));
+    return get(url, key);
+  }
+  return res;
+}
+```
+
+```python Python
+import time, requests
+
+def get(url, key):
+    res = requests.get(url, headers={"X-API-Key": key})
+    if res.status_code == 429:
+        time.sleep(int(res.headers.get("Retry-After", 1)))
+        return get(url, key)
+    return res
+```
+</CodeGroup>
+
+<Tip>
+  Watch `X-RateLimit-Remaining` and slow down **before** you hit zero, rather than
+  reacting to 429s after the fact.
+</Tip>

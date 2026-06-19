@@ -1,0 +1,4 @@
+description: Request weight consumed by this call (see each endpoint's weight).
+schema:
+  type: integer
+  example: 3

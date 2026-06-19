@@ -1,0 +1,72 @@
+get:
+  operationId: etfNavGrowth
+  tags:
+    - ETF
+  summary: ETF NAV growth
+  description: |
+    NAV-growth series for a single Vietnamese fund, benchmarked against the
+    VN-Index, across the available period windows. Use the VN fund certificate
+    code (e.g. `VESAF`) as the `{code}` path param. The response shares the
+    comparison shape; the unused `etf2` slot has an empty `etfCode`.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Vietnamese fund certificate code.
+      schema:
+        type: string
+        example: VESAF
+  responses:
+    "200":
+      description: NAV-growth series for the fund and the VN-Index.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfNavGrowthResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              etf1:
+                etfCode: VNDAF
+                data:
+                  3M:
+                    - date: 19-03-2026
+                      growthRate: 0
+                      nav: 19934.64
+                    - date: 20-03-2026
+                      growthRate: 0.07
+                      nav: 19948.69
+              etf2:
+                etfCode: ""
+                data: {}
+              vnIndex:
+                etfCode: VNINDEX
+                data:
+                  3M:
+                    - date: 19-03-2026
+                      growthRate: 0
+                      nav: 1699.13
+              periodAvailability:
+                1M: false
+                3M: true
+                6M: true
+                1Y: true
+                3Y: true
+              startDate: 18-01-2018
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

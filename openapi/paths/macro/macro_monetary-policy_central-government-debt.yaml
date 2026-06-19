@@ -1,0 +1,61 @@
+get:
+  operationId: macroCentralGovernmentDebt
+  tags:
+    - Macro
+  summary: Central government debt (% of GDP)
+  description: |
+    Quarterly central-government debt expressed as a percentage of GDP for a
+    country, with the year-over-year change in the ratio.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: ISO country code.
+      schema:
+        type: string
+        default: US
+        example: US
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 5Y
+          - 10Y
+          - 20Y
+        default: 5Y
+  responses:
+    "200":
+      description: Central-government-debt series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroCentralGovernmentDebtResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - observationDate: "2025-07-01"
+                country: US
+                centralGovernmentDebt: 121.44
+                yoyChange: 0.82
+              - observationDate: "2025-10-01"
+                country: US
+                centralGovernmentDebt: 122.57
+                yoyChange: 1.13
+            meta:
+              timestamp: "2026-06-19T08:50:42.523Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

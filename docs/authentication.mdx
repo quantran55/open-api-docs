@@ -1,0 +1,68 @@
+---
+title: "Authentication"
+description: "A single API key in the X-API-Key header — no request signing."
+---
+
+The HayInsights Open API uses a **single authentication tier**: send your API key
+in the `X-API-Key` header on every request to `/openapi/v1/*`. There is no HMAC
+signing, no timestamp, and no nonce.
+
+```bash
+curl -H "X-API-Key: $HAYINSIGHTS_API_KEY" \
+  "https://api.hayinsights.com/openapi/v1/fx/summary"
+```
+
+| Header      | When   | Value                          |
+| ----------- | ------ | ------------------------------ |
+| `X-API-Key` | Always | Your API key (prefixed `apk_`) |
+
+<Note>
+  The API key is only accepted on the `/openapi/v1/*` surface. The dashboard
+  surface (`/api/v1/*`) uses a separate session-based login, so an API key can
+  never be used to manage itself.
+</Note>
+
+## Managing keys
+
+Create, rotate and revoke keys from the [HayInsights
+dashboard](https://app.hayinsights.com) under **Account → API keys**.
+
+<Steps>
+  <Step title="Create">
+    Generate a key — the full secret (`apk_…`) is shown **once**. Copy it into a
+    secret store or environment variable immediately.
+  </Step>
+  <Step title="Rotate">
+    Rotating issues a new key and revokes the old one in a single step. Update
+    your environment with the new secret.
+  </Step>
+  <Step title="Revoke">
+    Revoking disables the key immediately on the next request.
+  </Step>
+</Steps>
+
+<Warning>
+  Treat your API key like a password. Never commit it to source control or embed
+  it in client-side code. Keep it in an environment variable or secret manager.
+</Warning>
+
+## Access & quota
+
+Your key inherits the **subscription plan** on your account. The plan determines
+both which data domains you can access and your request quota:
+
+- A request for a domain your plan doesn't include returns **403
+  `FEATURE_NOT_IN_PLAN`** — see [Plans & features](/plans-and-features).
+- Exceeding your per-minute weight budget returns **429
+  `RATE_LIMIT_EXCEEDED`** — see [Rate limits](/rate-limits).
+
+## Authentication errors
+
+| Code | Meaning |
+| --- | --- |
+| `API_KEY_REQUIRED` | No `X-API-Key` header was sent. |
+| `API_KEY_INVALID` | The key is unknown or malformed. |
+| `API_KEY_DISABLED` | The key has been revoked. |
+| `API_KEY_EXPIRED` | The key has expired. |
+
+All four return HTTP `401`. See [Error codes](/errors) for the full reference.

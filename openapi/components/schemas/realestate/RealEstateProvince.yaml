@@ -1,0 +1,25 @@
+type: object
+description: A province / city administrative unit available for real-estate queries.
+required:
+  - id
+  - name
+  - code
+properties:
+  id:
+    type: integer
+    description: Province identifier.
+    example: 2
+  name:
+    type: string
+    description: Province / city name (localized by the `lang` query parameter).
+    example: Hà Nội
+  code:
+    type: string
+    description: Short province code.
+    example: HN
+  bbox:
+    type: ["array", "null"]
+    description: Optional geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Currently `null` on staging.
+    items:
+      type: number
+    example: null

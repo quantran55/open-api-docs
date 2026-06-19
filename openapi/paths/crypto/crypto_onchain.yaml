@@ -1,0 +1,48 @@
+get:
+  operationId: cryptoOnchain
+  tags:
+    - Crypto
+  summary: Crypto on-chain metrics
+  description: |
+    On-chain network metrics — Ethereum gas prices, Bitcoin hashrate and active
+    addresses, whale transaction count and the MVRV / NUPL valuation indicators.
+  x-feature-code: crypto_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: On-chain network metrics snapshot.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CryptoOnchainResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              ethGas:
+                safe: 0.084424998
+                standard: 0.08533128
+                fast: 0.093864408
+                baseFee: 0.0843841
+                unit: gwei
+              btcHashrate:
+                value: 1024.72
+                unit: EH/s
+              btcActiveAddresses: 503361
+              whaleTxCount: 29766
+              mvrv:
+                value: 1.1772253837760067
+                zone: fair_value
+              nupl:
+                value: 0.1586
+                zone: hope_fear
+            meta:
+              timestamp: "2026-06-19T08:50:01.004Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

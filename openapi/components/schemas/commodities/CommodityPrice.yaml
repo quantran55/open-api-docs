@@ -1,0 +1,62 @@
+type: object
+description: Latest price snapshot for a single commodity.
+required:
+  - id
+  - name
+  - category
+  - unit
+  - lastClose
+  - currency
+properties:
+  id:
+    type: string
+    description: Commodity slug — use as the `{id}` path param for history.
+    example: zinc-lme
+  name:
+    type: string
+    example: Zinc (LME)
+  category:
+    $ref: "../common/enums/CommodityCategory.yaml"
+  unit:
+    type: string
+    example: USD/ton
+  lastClose:
+    type: number
+    description: Most recent closing price.
+    example: 3588
+  currency:
+    type: string
+    example: USD
+  change1dPct:
+    type: number
+    description: 1-day percentage change.
+    example: 0.53
+  changeMtdPct:
+    type: number
+    description: Month-to-date percentage change.
+    example: 0.28
+  changeYtdPct:
+    type: number
+    description: Year-to-date percentage change.
+    example: 14.63
+  ma50:
+    type: number
+    description: 50-period moving average.
+    example: 3475.3036
+  trend:
+    type: string
+    enum:
+      - bullish
+      - bearish
+      - neutral
+    description: Trend classification derived from the moving average.
+    example: bullish
+  trendline:
+    type: array
+    description: Recent closing prices, oldest→newest, for a sparkline.
+    items:
+      type: number
+  updatedAt:
+    type: string
+    format: date-time
+    example: "2026-06-17T00:00:00.000Z"

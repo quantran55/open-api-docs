@@ -1,0 +1,57 @@
+type: object
+description: One constituent holding of an ETF's underlying basket.
+required:
+  - id
+  - code
+  - name
+  - etfCode
+properties:
+  id:
+    type: integer
+    description: Internal numeric identifier of the holding record.
+    example: 6316032
+  code:
+    type: string
+    description: Ticker symbol of the constituent.
+    example: "1301"
+  name:
+    type: string
+    description: Name of the constituent company.
+    example: KYOKUYO CO LTD
+  exchange:
+    type: string
+    description: Exchange the constituent trades on.
+    example: TSE
+  currency:
+    type: string
+    description: Quote currency of the constituent.
+    example: JPY
+  sharesAmount:
+    type: string
+    description: Number of shares of the constituent held by the fund.
+    example: "350200.000000"
+  stockPrice:
+    type: number
+    description: Latest price of the constituent.
+    example: 4865
+  value:
+    type: string
+    description: Market value of the position, in fund currency.
+    example: "1703723000.000000"
+  etfCode:
+    type: string
+    description: Exchange ticker of the ETF this holding belongs to.
+    example: "1306"
+  sharesOutstanding:
+    type: string
+    description: Total shares outstanding of the ETF.
+    example: "81194626440.000000"
+  fundDate:
+    type: string
+    format: date
+    description: As-of date of the holdings snapshot.
+    example: "2026-04-21"
+  isin:
+    type: string
+    description: ISIN of the constituent.
+    example: JP3257200000

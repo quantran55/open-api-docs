@@ -1,0 +1,8 @@
+type: string
+enum:
+  - energy
+  - metals
+  - agriculture
+  - macro
+description: Commodity category.
+example: metals

@@ -1,0 +1,18 @@
+type: object
+description: One point of a rebased price series (percentage change vs the series start).
+required:
+  - date
+  - value
+properties:
+  date:
+    type: string
+    format: date
+    example: "2026-03-22"
+  pctChange:
+    type: number
+    description: Percentage change versus the first point in the series.
+    example: 0
+  value:
+    type: number
+    description: Raw value on this date.
+    example: 4464.66

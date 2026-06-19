@@ -1,0 +1,52 @@
+get:
+  operationId: fxEmStress
+  tags:
+    - FX
+  summary: Emerging-market FX stress
+  description: |
+    Emerging-market FX stress monitor — for each tracked pair, compares recent
+    realised volatility against its 90-day distribution and classifies the pair
+    as STABLE, WARNING or PANIC.
+  x-feature-code: fx_data
+  x-api-weight: 6
+  responses:
+    "200":
+      description: Emerging-market FX stress readings.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/FxEmStressResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              asOf: "2026-05-14"
+              pairs:
+                - pair: USD/CNY
+                  latestPrice: 6.79
+                  vol30d: 1.42
+                  vol90dMean: 2.39
+                  vol90dSd: 0.63
+                  zScore: -1.52
+                  priceZScore: -2
+                  level: WARNING
+                  sampleN: 90
+                - pair: USD/IDR
+                  latestPrice: 17500.9
+                  vol30d: 3.95
+                  vol90dMean: 3.56
+                  vol90dSd: 0.37
+                  zScore: 1.02
+                  priceZScore: 2.49
+                  level: WARNING
+                  sampleN: 90
+            meta:
+              timestamp: "2026-06-19T08:50:42.383Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

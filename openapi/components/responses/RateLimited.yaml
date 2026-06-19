@@ -1,0 +1,26 @@
+description: |
+  Rate limit exceeded — you have consumed your plan's per-minute weight budget.
+  Wait until `X-RateLimit-Reset` (or `Retry-After` seconds) then retry.
+headers:
+  X-RateLimit-Limit:
+    $ref: "../headers/XRateLimitLimit.yaml"
+  X-RateLimit-Remaining:
+    $ref: "../headers/XRateLimitRemaining.yaml"
+  X-RateLimit-Reset:
+    $ref: "../headers/XRateLimitReset.yaml"
+  X-RateLimit-Weight-Used:
+    $ref: "../headers/XRateLimitWeightUsed.yaml"
+  Retry-After:
+    $ref: "../headers/RetryAfter.yaml"
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 429
+      error:
+        code: RATE_LIMIT_EXCEEDED
+        message: Rate limit exceeded
+      meta:
+        timestamp: "2026-06-19T08:34:09.000Z"

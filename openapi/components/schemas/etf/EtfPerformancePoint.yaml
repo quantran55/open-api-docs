@@ -1,0 +1,19 @@
+type: object
+description: One point in an ETF's cumulative-return performance series.
+required:
+  - date
+  - nav
+  - cumulativeReturn
+properties:
+  date:
+    type: string
+    description: Observation date (DD-MM-YYYY).
+    example: 15-05-2026
+  nav:
+    type: number
+    description: Net asset value per share on the date.
+    example: 409.9
+  cumulativeReturn:
+    type: number
+    description: Cumulative return since the period start, in percent.
+    example: -0.98

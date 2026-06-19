@@ -1,0 +1,62 @@
+get:
+  operationId: realEstateGeoJson
+  tags:
+    - Real Estate
+  summary: Ward choropleth GeoJSON
+  description: |
+    Ward boundary geometry paired with average-price attributes, for rendering a
+    choropleth map. The response can be large (boundary coordinates for every ward);
+    the geometry is modelled permissively. Data is available for `vn`; `jp` is empty.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+  responses:
+    "200":
+      description: Ward features with price attributes and boundary geometry.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateGeoJsonResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              wards:
+                - wardId: 34
+                  wardName: Phú Thuận
+                  areaName: Khu vực II
+                  area: Khu vực II
+                  avgPriceResidentialVt1: 52639.39
+                  avgPriceResidentialVt2: null
+                  avgPriceResidentialVt3: null
+                  avgPriceResidentialVt4: null
+                  minPriceResidential: 36500
+                  maxPriceResidential: 83400
+                  roadCount: 38
+                  unit: k_vnd
+                  coordinates:
+                    - - - 106.751906
+                        - 10.7051207
+                      - - 106.751422
+                        - 10.7074537
+            meta:
+              timestamp: "2026-06-19T08:54:29.621Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

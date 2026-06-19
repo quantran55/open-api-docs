@@ -1,0 +1,28 @@
+type: object
+description: A single coin rendered as a bubble on the market bubble map.
+required:
+  - symbol
+  - name
+  - marketCap
+  - change
+  - size
+properties:
+  symbol:
+    type: string
+    description: Ticker symbol of the coin.
+    example: BTC
+  name:
+    type: string
+    example: Bitcoin
+  marketCap:
+    type: number
+    description: Market capitalisation in USD.
+    example: 1254560380643.96
+  change:
+    type: number
+    description: Price change over the requested timeframe, as a percentage.
+    example: -2.9057
+  size:
+    type: number
+    description: Normalised bubble size (0–1) relative to the largest coin.
+    example: 1

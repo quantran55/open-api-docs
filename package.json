@@ -1,0 +1,18 @@
+{
+  "name": "hayinsights-openapi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HayInsights Open API — OpenAPI 3.1 specification (source of truth for SDK codegen and docs).",
+  "scripts": {
+    "lint": "redocly lint openapi/openapi.yaml",
+    "bundle": "mkdir -p dist && redocly bundle openapi/openapi.yaml -o dist/openapi.yaml && redocly bundle openapi/openapi.yaml -o dist/openapi.json",
+    "preview": "redocly preview-docs openapi/openapi.yaml",
+    "docs:bundle": "redocly bundle openapi/openapi.yaml -o docs/openapi.yaml",
+    "docs:dev": "cd docs && mint dev",
+    "docs:validate": "cd docs && mint validate",
+    "harvest": "node scripts/harvest.mjs"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.25.0"
+  }
+}

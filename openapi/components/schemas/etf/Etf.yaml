@@ -1,0 +1,72 @@
+type: object
+description: |
+  A single exchange-traded fund as returned by the list endpoint. The `etfCode`
+  is the exchange ticker (e.g. a TSE code like `1306`) used as the `{code}` path
+  param for the info / holdings / prices-history / detail endpoints.
+required:
+  - id
+  - etfCode
+  - etfName
+  - managementCompany
+  - country
+  - etfType
+properties:
+  id:
+    type: integer
+    description: Internal numeric identifier of the ETF record.
+    example: 798
+  listingDate:
+    type: string
+    format: date
+    description: Date the ETF was first listed.
+    example: "2001-07-13"
+  etfCode:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1306"
+  etfName:
+    type: string
+    description: Fund name (English / romanised).
+    example: NEXT FUNDS TOPIX Exchange Traded Fund
+  managementCompany:
+    type: string
+    description: Asset manager operating the fund.
+    example: Nomura Asset Management
+  indexName:
+    type: string
+    description: Benchmark index the fund tracks.
+    example: TOPIX Total Return Index
+  tradingUnit:
+    type: integer
+    description: Minimum tradable lot size, in shares.
+    example: 10
+  trustFee:
+    type: number
+    description: Annual trust / management fee, as a fraction (e.g. 0.0505 = 5.05%).
+    example: 0.0505
+  etfNameJP:
+    type: string
+    description: Fund name in Japanese.
+    example: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+  country:
+    type: string
+    description: ISO-style country code of the listing market.
+    example: jp
+  distributionYield:
+    type: number
+    description: Trailing distribution yield, as a fraction.
+    example: 0.0176
+  etfType:
+    type: string
+    description: Asset-class / strategy classification.
+    example: Japanese Equity(Market)
+  price:
+    type: number
+    description: Latest market price.
+    example: 425.5
+  aum:
+    type:
+      - number
+      - "null"
+    description: Assets under management in fund currency; `null` when unavailable.
+    example: 32437253262780

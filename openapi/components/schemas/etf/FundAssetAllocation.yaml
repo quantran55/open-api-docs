@@ -1,0 +1,42 @@
+type: object
+description: Breakdown of a fund's assets across bonds, stocks and other instruments.
+required:
+  - total
+  - currency
+properties:
+  bond:
+    type: number
+    description: Value held in bonds, in fund currency.
+    example: 0
+  stock:
+    type: number
+    description: Value held in stocks, in fund currency.
+    example: 2154943464100
+  others:
+    type: number
+    description: Value held in other instruments, in fund currency.
+    example: 318018107481
+  total:
+    type: number
+    description: Total net asset value, in fund currency.
+    example: 2472961571581
+  bondPercent:
+    type: number
+    description: Bond allocation as a percentage of total.
+    example: 0
+  stockPercent:
+    type: number
+    description: Stock allocation as a percentage of total.
+    example: 87.14
+  othersPercent:
+    type: number
+    description: Other-instrument allocation as a percentage of total.
+    example: 12.86
+  currency:
+    type: string
+    description: Reporting currency.
+    example: VND
+  month:
+    type: string
+    description: Reporting month (YYYY-MM).
+    example: "2026-05"

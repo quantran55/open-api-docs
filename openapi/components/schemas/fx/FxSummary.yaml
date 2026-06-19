@@ -1,0 +1,15 @@
+type: object
+description: |
+  FX dashboard summary — the US Dollar Index (DXY), the USD/JPY rate and a
+  headline emerging-market stress reading.
+required:
+  - dxy
+  - usdJpy
+  - emStress
+properties:
+  dxy:
+    $ref: "./FxRate.yaml"
+  usdJpy:
+    $ref: "./FxRate.yaml"
+  emStress:
+    $ref: "./FxEmStressSummary.yaml"

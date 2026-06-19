@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="32" viewBox="0 0 200 32" fill="none" role="img" aria-label="HayInsights">
+  <rect x="0" y="6" width="20" height="20" rx="5" fill="#2563EB"/>
+  <path d="M6 21V11M10 21v-6M14 21v-9" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="30" y="22" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="700" fill="#0F172A">HayInsights</text>
+</svg>

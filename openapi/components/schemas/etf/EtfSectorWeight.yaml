@@ -1,0 +1,23 @@
+type: object
+description: One sector weight in an ETF's portfolio for a given month.
+required:
+  - weight
+properties:
+  sector:
+    type:
+      - string
+      - "null"
+    description: Sector name; `null` when uncategorised.
+    example: Financials
+  weight:
+    type: number
+    description: Sector weight as a fraction of the portfolio.
+    example: 0.2803
+  month:
+    type: integer
+    description: Reporting month (1–12).
+    example: 4
+  year:
+    type: integer
+    description: Reporting year.
+    example: 2026

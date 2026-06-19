@@ -1,0 +1,19 @@
+type: object
+description: One point in a NAV-growth series.
+required:
+  - date
+  - growthRate
+  - nav
+properties:
+  date:
+    type: string
+    description: Observation date (DD-MM-YYYY).
+    example: 19-03-2026
+  growthRate:
+    type: number
+    description: Cumulative growth rate since the series start, in percent.
+    example: 0.07
+  nav:
+    type: number
+    description: Net asset value per share on the date.
+    example: 19948.69

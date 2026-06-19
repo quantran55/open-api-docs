@@ -1,0 +1,53 @@
+get:
+  operationId: etfTopPerformance
+  tags:
+    - ETF
+  summary: Top-performing ETFs
+  description: |
+    ETFs ranked by NAV change over the requested period, best to worst. Use the
+    `period` query parameter to choose the look-back window.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: Look-back window for the performance ranking.
+      schema:
+        type: string
+        enum:
+          - 1M
+          - 6M
+          - 1Y
+        default: 1M
+  responses:
+    "200":
+      description: ETFs ranked by performance.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfTopPerformanceResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - etfCode: "1321"
+                etfName: NEXT FUNDS Nikkei 225 Exchange Traded Fund
+                currentNav: 61538.17917892439
+                changePercent: 10.96
+              - etfCode: "1348"
+                etfName: MAXIS TOPIX ETF
+                currentNav: 3953.21351900172
+                changePercent: 5.65
+            meta:
+              timestamp: "2026-06-19T08:50:32.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

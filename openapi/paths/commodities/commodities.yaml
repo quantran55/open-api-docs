@@ -1,0 +1,93 @@
+get:
+  operationId: commoditiesList
+  tags:
+    - Commodities
+  summary: List commodity prices
+  description: |
+    Latest price snapshot for every tracked commodity across energy, metals,
+    agriculture and macro categories — including 1-day / MTD / YTD changes, the
+    50-period moving average, a trend classification and a sparkline.
+  x-feature-code: commodities_data
+  x-api-weight: 3
+  parameters:
+    - name: category
+      in: query
+      required: false
+      description: Filter by commodity category.
+      schema:
+        $ref: "../../components/schemas/common/enums/CommodityCategory.yaml"
+    - name: search
+      in: query
+      required: false
+      description: Free-text search on the commodity name.
+      schema:
+        type: string
+        example: gold
+    - name: sort
+      in: query
+      required: false
+      description: Field to sort by.
+      schema:
+        type: string
+        enum:
+          - name
+          - price
+          - change_1d
+          - mtd
+          - ytd
+        default: price
+    - name: order
+      in: query
+      required: false
+      description: Sort direction.
+      schema:
+        $ref: "../../components/schemas/common/enums/SortOrder.yaml"
+  responses:
+    "200":
+      description: List of commodity price snapshots.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CommoditiesListResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - id: zinc-lme
+                name: Zinc (LME)
+                category: metals
+                unit: USD/ton
+                lastClose: 3588
+                currency: USD
+                change1dPct: 0.53
+                changeMtdPct: 0.28
+                changeYtdPct: 14.63
+                ma50: 3475.3036
+                trend: bullish
+                trendline: [3530, 3537, 3555.5, 3491, 3588]
+                updatedAt: "2026-06-17T00:00:00.000Z"
+              - id: wti-crude
+                name: WTI Crude Oil
+                category: energy
+                unit: USD/bbl
+                lastClose: 76.55
+                currency: USD
+                change1dPct: -0.33
+                changeMtdPct: -18.93
+                changeYtdPct: 33.41
+                ma50: 95.1804
+                trend: bearish
+                trendline: [84.29, 81.85, 82.27, 76.8, 76.55]
+                updatedAt: "2026-06-19T00:00:00.000Z"
+            meta:
+              timestamp: "2026-06-19T08:50:00.811Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

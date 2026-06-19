@@ -1,0 +1,76 @@
+type: object
+description: |
+  Derivatives-market metrics — open interest, funding rates, 24h liquidations and
+  the options put/call ratio for the major coins.
+required:
+  - openInterest
+  - fundingRate
+  - liquidations24h
+  - putCallRatio
+properties:
+  openInterest:
+    type: object
+    description: Perpetual-futures open interest per coin.
+    required:
+      - btc
+      - eth
+    properties:
+      btc:
+        $ref: "./CryptoOpenInterest.yaml"
+      eth:
+        $ref: "./CryptoOpenInterest.yaml"
+  fundingRate:
+    type: object
+    description: Perpetual-futures funding rate per coin.
+    required:
+      - btc
+      - eth
+    properties:
+      btc:
+        $ref: "./CryptoFundingRate.yaml"
+      eth:
+        $ref: "./CryptoFundingRate.yaml"
+  liquidations24h:
+    type: object
+    description: Total long and short liquidations over the last 24 hours, in USD.
+    required:
+      - total
+      - long
+      - short
+    properties:
+      total:
+        type: number
+        example: 600914130.33
+      long:
+        type: number
+        description: Value of liquidated long positions.
+        example: 515261276.52
+      short:
+        type: number
+        description: Value of liquidated short positions.
+        example: 85652853.81
+  putCallRatio:
+    type: object
+    description: Options put/call ratio per coin.
+    required:
+      - btc
+    properties:
+      btc:
+        type: object
+        required:
+          - ratio
+          - putOi
+          - callOi
+        properties:
+          ratio:
+            type: number
+            description: Put open interest divided by call open interest.
+            example: 0.633
+          putOi:
+            type: number
+            description: Open interest in put options.
+            example: 169791
+          callOi:
+            type: number
+            description: Open interest in call options.
+            example: 268093

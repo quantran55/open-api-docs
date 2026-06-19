@@ -1,0 +1,92 @@
+type: object
+description: |
+  On-chain network metrics — Ethereum gas prices, Bitcoin hashrate and active
+  addresses, whale transaction count and the MVRV / NUPL valuation indicators.
+required:
+  - ethGas
+  - btcHashrate
+  - btcActiveAddresses
+  - whaleTxCount
+  - mvrv
+  - nupl
+properties:
+  ethGas:
+    type: object
+    description: Ethereum gas price tiers.
+    required:
+      - safe
+      - standard
+      - fast
+      - baseFee
+      - unit
+    properties:
+      safe:
+        type: number
+        description: Gas price for a low-priority (safe) transaction.
+        example: 0.084424998
+      standard:
+        type: number
+        description: Gas price for a standard-priority transaction.
+        example: 0.08533128
+      fast:
+        type: number
+        description: Gas price for a high-priority (fast) transaction.
+        example: 0.093864408
+      baseFee:
+        type: number
+        description: Current network base fee.
+        example: 0.0843841
+      unit:
+        type: string
+        description: Unit the gas prices are expressed in.
+        example: gwei
+  btcHashrate:
+    type: object
+    description: Bitcoin network hashrate.
+    required:
+      - value
+      - unit
+    properties:
+      value:
+        type: number
+        example: 1024.72
+      unit:
+        type: string
+        description: Unit the hashrate is expressed in.
+        example: EH/s
+  btcActiveAddresses:
+    type: integer
+    description: Number of active Bitcoin addresses.
+    example: 503361
+  whaleTxCount:
+    type: integer
+    description: Number of large ("whale") transactions observed.
+    example: 29766
+  mvrv:
+    type: object
+    description: Market-Value-to-Realised-Value ratio and its valuation zone.
+    required:
+      - value
+      - zone
+    properties:
+      value:
+        type: number
+        example: 1.1772253837760067
+      zone:
+        type: string
+        description: Valuation zone derived from the MVRV value.
+        example: fair_value
+  nupl:
+    type: object
+    description: Net Unrealised Profit / Loss and its sentiment zone.
+    required:
+      - value
+      - zone
+    properties:
+      value:
+        type: number
+        example: 0.1586
+      zone:
+        type: string
+        description: Sentiment zone derived from the NUPL value.
+        example: hope_fear

@@ -1,0 +1,66 @@
+get:
+  operationId: commoditiesMovers
+  tags:
+    - Commodities
+  summary: Top movers
+  description: |
+    The biggest gaining and losing commodities over the requested period.
+  x-feature-code: commodities_data
+  x-api-weight: 3
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: Period the movers are computed over.
+      schema:
+        type: string
+        enum:
+          - mtd
+        default: mtd
+    - name: limit
+      in: query
+      required: false
+      description: Number of gainers and losers to return (1–10).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 10
+        default: 3
+  responses:
+    "200":
+      description: Top gaining and losing commodities.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CommoditiesMoversResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              period: mtd
+              gainers:
+                - id: coffee-robusta
+                  name: Coffee Robusta
+                  changePct: 7.35
+                - id: coffee-arabica
+                  name: Coffee Arabica
+                  changePct: 4.28
+              losers:
+                - id: wti-crude
+                  name: WTI Crude Oil
+                  changePct: -18.93
+                - id: baltic-dry
+                  name: Baltic Dry Index (BDI)
+                  changePct: -17.47
+            meta:
+              timestamp: "2026-06-19T08:50:00.846Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

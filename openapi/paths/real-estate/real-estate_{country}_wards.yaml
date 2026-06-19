@@ -1,0 +1,67 @@
+get:
+  operationId: realEstateWards
+  tags:
+    - Real Estate
+  summary: List ward land-price summaries
+  description: |
+    Ward-level land-price summaries for a country — average residential prices across
+    value-position tiers, min/max prices and road counts. Data is available for `vn`;
+    `jp` is empty.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+    - name: lang
+      in: query
+      required: false
+      description: Language for localized names.
+      schema:
+        type: string
+        enum:
+          - vi
+          - en
+        default: vi
+  responses:
+    "200":
+      description: List of ward land-price summaries.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateWardsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - wardId: 1
+                wardName: Sài Gòn
+                area: Khu vực I
+                avgPriceResidentialVt1: 365020
+                avgPriceResidentialVt2: null
+                avgPriceResidentialVt3: null
+                avgPriceResidentialVt4: null
+                minPriceResidential: 191200
+                maxPriceResidential: 687200
+                roadCount: 60
+                year: 2025
+                month: 1
+                unit: k_vnd
+            meta:
+              timestamp: "2026-06-19T08:54:29.621Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

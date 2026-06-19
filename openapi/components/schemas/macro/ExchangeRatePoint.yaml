@@ -1,0 +1,20 @@
+type: object
+description: One closing exchange-rate observation for a currency pair.
+required:
+  - date
+  - close
+  - exchangeRateName
+properties:
+  date:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2024-01-15"
+  close:
+    type: number
+    description: Closing exchange rate for the pair on this date.
+    example: 148.5
+  exchangeRateName:
+    type: string
+    description: Currency pair the rate refers to, formatted `BASE/QUOTE`.
+    example: USD/JPY

@@ -1,0 +1,72 @@
+get:
+  operationId: commoditiesHistory
+  tags:
+    - Commodities
+  summary: Commodity price history
+  description: |
+    Historical closing prices for a single commodity. Use the `id` slug returned
+    by the list endpoint (e.g. `gold`, `wti-crude`).
+  x-feature-code: commodities_data
+  x-api-weight: 3
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: Commodity slug.
+      schema:
+        type: string
+        example: gold
+    - name: period
+      in: query
+      required: false
+      description: History window.
+      schema:
+        type: string
+        enum:
+          - 7d
+          - 1m
+          - 3m
+          - ytd
+          - 1y
+        default: 3m
+    - name: interval
+      in: query
+      required: false
+      description: Sampling interval.
+      schema:
+        type: string
+        enum:
+          - daily
+          - weekly
+        default: daily
+  responses:
+    "200":
+      description: Closing-price history series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CommodityHistoryResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - date: "2026-03-19"
+                close: 4651.73
+              - date: "2026-03-20"
+                close: 4491.15
+              - date: "2026-03-22"
+                close: 4464.66
+            meta:
+              timestamp: "2026-06-19T08:50:01.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

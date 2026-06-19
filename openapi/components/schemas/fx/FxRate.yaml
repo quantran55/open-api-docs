@@ -1,0 +1,25 @@
+type: object
+description: Latest value of a single FX benchmark (index or currency pair).
+required:
+  - value
+  - changePct
+  - asOf
+  - source
+properties:
+  value:
+    type: number
+    description: Most recent value.
+    example: 100.76
+  changePct:
+    type: number
+    description: 1-day percentage change.
+    example: 0.14
+  asOf:
+    type: string
+    format: date
+    description: Date the value is as of.
+    example: "2026-06-19"
+  source:
+    type: string
+    description: Link to the methodology / data source.
+    example: "https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md"

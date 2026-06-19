@@ -1,0 +1,13 @@
+description: Your subscription plan does not include this data feature, or your key's scope denies it.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 403
+      error:
+        code: FEATURE_NOT_IN_PLAN
+        message: Your plan does not include this feature
+      meta:
+        timestamp: "2026-06-19T08:34:08.100Z"

@@ -1,0 +1,24 @@
+type: object
+description: One ETF in the top net-flow ranking.
+required:
+  - etfCode
+  - etfName
+  - netflow
+  - netflowAumPercentage
+properties:
+  etfCode:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1348"
+  etfName:
+    type: string
+    description: Fund name.
+    example: MAXIS TOPIX ETF
+  netflow:
+    type: number
+    description: Net capital flow over the period, in fund currency.
+    example: 21323272800
+  netflowAumPercentage:
+    type: number
+    description: Net flow expressed as a percentage of assets under management.
+    example: 0.47

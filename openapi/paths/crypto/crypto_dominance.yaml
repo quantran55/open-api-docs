@@ -1,0 +1,50 @@
+get:
+  operationId: cryptoDominance
+  tags:
+    - Crypto
+  summary: Crypto market dominance
+  description: |
+    Market-cap dominance breakdown — total market cap and each major coin's
+    share of it, with the freshness of the underlying source data.
+  x-feature-code: crypto_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: Market-cap dominance breakdown.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CryptoDominanceResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              totalMarketCap: 2156391783530.09
+              coins:
+                - symbol: BTC
+                  name: Bitcoin
+                  dominancePercentage: 58.18
+                  marketCap: 1254560380643.96
+                - symbol: ETH
+                  name: Ethereum
+                  dominancePercentage: 9.47
+                  marketCap: 204246767811.64
+                - symbol: USDT
+                  name: Tether USDt
+                  dominancePercentage: 8.64
+                  marketCap: 186279683262.83
+              asOf:
+                globalMetrics: "2026-06-19T08:45:00.000Z"
+                assets: "2026-06-19T08:45:00.040Z"
+                skewSeconds: 0
+                isStale: false
+            meta:
+              timestamp: "2026-06-19T08:50:01.048Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

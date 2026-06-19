@@ -1,0 +1,44 @@
+get:
+  operationId: realEstateCountrySummary
+  tags:
+    - Real Estate
+  summary: Country real-estate summary
+  description: |
+    Top-level real-estate summary for a country. Currently returns an empty array on
+    staging — use the `stats`, `wards`, `land-prices`, `provinces` and `geojson`
+    sub-routes for detailed data. Data is available for `vn`; `jp` is empty.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+  responses:
+    "200":
+      description: Country summary rows (currently empty on staging).
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateCountrySummaryResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data: []
+            meta:
+              timestamp: "2026-06-19T08:54:29.621Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

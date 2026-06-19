@@ -1,0 +1,23 @@
+type: object
+description: Market-cap dominance entry for a single coin.
+required:
+  - symbol
+  - name
+  - dominancePercentage
+  - marketCap
+properties:
+  symbol:
+    type: string
+    description: Ticker symbol of the coin.
+    example: BTC
+  name:
+    type: string
+    example: Bitcoin
+  dominancePercentage:
+    type: number
+    description: Share of total crypto market cap, as a percentage.
+    example: 58.18
+  marketCap:
+    type: number
+    description: Market capitalisation in USD.
+    example: 1254560380643.96

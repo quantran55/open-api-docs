@@ -1,0 +1,45 @@
+type: object
+description: |
+  Market-cap dominance breakdown — total market cap and each major coin's share,
+  with the freshness of the underlying source data.
+required:
+  - totalMarketCap
+  - coins
+  - asOf
+properties:
+  totalMarketCap:
+    type: number
+    description: Total crypto market capitalisation in USD.
+    example: 2156391783530.09
+  coins:
+    type: array
+    description: Per-coin dominance entries, ordered by dominance (largest first).
+    items:
+      $ref: "./CryptoDominanceCoin.yaml"
+  asOf:
+    type: object
+    description: Freshness metadata for the underlying source data.
+    required:
+      - globalMetrics
+      - assets
+      - skewSeconds
+      - isStale
+    properties:
+      globalMetrics:
+        type: string
+        format: date-time
+        description: Timestamp of the global-metrics snapshot.
+        example: "2026-06-19T08:45:00.000Z"
+      assets:
+        type: string
+        format: date-time
+        description: Timestamp of the per-asset snapshot.
+        example: "2026-06-19T08:45:00.040Z"
+      skewSeconds:
+        type: integer
+        description: Skew, in seconds, between the two snapshots.
+        example: 0
+      isStale:
+        type: boolean
+        description: Whether the data is considered stale.
+        example: false

@@ -1,0 +1,61 @@
+get:
+  operationId: commoditiesGoldDxy
+  tags:
+    - Commodities
+  summary: Gold vs DXY correlation
+  description: |
+    Rebased gold price and US Dollar Index (DXY) series over the requested
+    window, for visualising their (typically inverse) correlation.
+  x-feature-code: commodities_data
+  x-api-weight: 3
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 1m
+          - 3m
+          - ytd
+        default: 3m
+  responses:
+    "200":
+      description: Rebased gold and DXY series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CommoditiesGoldDxyResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              period: 3m
+              series:
+                gold:
+                  - date: "2026-03-22"
+                    pctChange: 0
+                    value: 4464.66
+                  - date: "2026-06-19"
+                    pctChange: -6.17
+                    value: 4189.22
+                dxy:
+                  - date: "2026-03-22"
+                    pctChange: 0
+                    value: 99.35
+                  - date: "2026-06-19"
+                    pctChange: 1.42
+                    value: 100.757
+            meta:
+              timestamp: "2026-06-19T08:50:00.912Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

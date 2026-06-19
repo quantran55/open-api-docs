@@ -1,0 +1,151 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "HayInsights Open API",
+  "description": "The official API for the HayInsights financial-data hub — commodities, crypto, ETF, FX, macro and real-estate datasets.",
+  "logo": {
+    "light": "/logo.svg",
+    "dark": "/logo.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#1D4ED8"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "authentication"
+            ]
+          },
+          {
+            "group": "Usage & limits",
+            "pages": [
+              "rate-limits",
+              "plans-and-features"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "errors"
+            ]
+          },
+          {
+            "group": "History",
+            "pages": [
+              "changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "openapi": "openapi.yaml",
+        "groups": [
+          {
+            "group": "Commodities",
+            "pages": [
+              "GET /openapi/v1/commodities",
+              "GET /openapi/v1/commodities/featured",
+              "GET /openapi/v1/commodities/movers",
+              "GET /openapi/v1/commodities/gold-dxy",
+              "GET /openapi/v1/commodities/{id}/history"
+            ]
+          },
+          {
+            "group": "Crypto",
+            "pages": [
+              "GET /openapi/v1/crypto",
+              "GET /openapi/v1/crypto/bubble-map",
+              "GET /openapi/v1/crypto/onchain",
+              "GET /openapi/v1/crypto/derivatives",
+              "GET /openapi/v1/crypto/dominance"
+            ]
+          },
+          {
+            "group": "ETF",
+            "pages": [
+              "GET /openapi/v1/etf",
+              "GET /openapi/v1/etf/top-performance",
+              "GET /openapi/v1/etf/top-netflow",
+              "GET /openapi/v1/etf/heatmap",
+              "GET /openapi/v1/etf/compare/fund-composition",
+              "GET /openapi/v1/etf/compare/nav-growth",
+              "GET /openapi/v1/etf/nav-growth/{code}",
+              "GET /openapi/v1/etf/{code}/info",
+              "GET /openapi/v1/etf/{code}/holdings",
+              "GET /openapi/v1/etf/{code}/prices-history",
+              "GET /openapi/v1/etf/{code}/detail",
+              "GET /openapi/v1/etf/{code}/composition"
+            ]
+          },
+          {
+            "group": "FX",
+            "pages": [
+              "GET /openapi/v1/fx/summary",
+              "GET /openapi/v1/fx/table",
+              "GET /openapi/v1/fx/correlation",
+              "GET /openapi/v1/fx/em-stress"
+            ]
+          },
+          {
+            "group": "Macro",
+            "pages": [
+              "GET /openapi/v1/macro/gdp-growth-rate",
+              "GET /openapi/v1/macro/market-recap",
+              "GET /openapi/v1/macro/economic-data",
+              "GET /openapi/v1/macro/exchange-rate",
+              "GET /openapi/v1/macro/population",
+              "GET /openapi/v1/macro/monetary-policy/central-government-debt",
+              "GET /openapi/v1/macro/monetary-policy/rates-yields"
+            ]
+          },
+          {
+            "group": "Real Estate",
+            "pages": [
+              "GET /openapi/v1/real-estate/{country}/geojson",
+              "GET /openapi/v1/real-estate/{country}/stats",
+              "GET /openapi/v1/real-estate/{country}/wards",
+              "GET /openapi/v1/real-estate/{country}/wards/{wardId}",
+              "GET /openapi/v1/real-estate/{country}/land-prices",
+              "GET /openapi/v1/real-estate/{country}/provinces",
+              "GET /openapi/v1/real-estate/{country}"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Dashboard",
+        "href": "https://app.hayinsights.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API key",
+      "href": "https://app.hayinsights.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "website": "https://hayinsights.com"
+    }
+  }
+}

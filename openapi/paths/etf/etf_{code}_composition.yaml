@@ -1,0 +1,74 @@
+get:
+  operationId: etfComposition
+  tags:
+    - ETF
+  summary: ETF / fund composition
+  description: |
+    Full composition of a single Vietnamese fund certificate — asset allocation,
+    the equity portfolio and the sector breakdown. Use the VN fund code (e.g.
+    `VESAF`) as the `{code}` path param.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Vietnamese fund certificate code.
+      schema:
+        type: string
+        example: VESAF
+  responses:
+    "200":
+      description: Composition of the fund.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfCompositionResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              fundCode: VESAF
+              assetAllocation:
+                bond: 0
+                stock: 2154943464100
+                others: 318018107481
+                total: 2472961571581
+                bondPercent: 0
+                stockPercent: 87.14
+                othersPercent: 12.86
+                currency: VND
+                month: "2026-05"
+              portfolio:
+                - symbol: MBB
+                  price: 25000
+                  volume: 7706790
+                  weightPercent: 7.79
+                  currency: VND
+                  month: "2026-05"
+                - symbol: BVH
+                  price: 67700
+                  volume: 2801910
+                  weightPercent: 7.67
+                  currency: VND
+                  month: "2026-05"
+              sectorAllocation:
+                - sectorName: Ngân hàng
+                  value: 550441424500
+                  percent: 24.39
+                  currency: VND
+                  month: "2026-04"
+            meta:
+              timestamp: "2026-06-19T08:50:42.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

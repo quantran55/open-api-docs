@@ -1,0 +1,26 @@
+extends:
+  - recommended
+
+apis:
+  hayinsights@v0.1.0:
+    root: openapi/openapi.yaml
+
+rules:
+  # Enforce every operation declares an operationId — required for codegen.
+  operation-operationId: error
+  # Every operation's tag must be declared in the root `tags` list.
+  operation-tag-defined: error
+  # Fail if any component is declared but not referenced — keeps the bundle lean.
+  no-unused-components: error
+  # Prevents `/a/{b}` and `/a/{c}` style ambiguity. Kept at `error`; the 5
+  # intentional ETF overlaps (`/etf/nav-growth/{code}` vs `/etf/{code}/*`,
+  # which the real API disambiguates because a fund code is never `info`,
+  # `holdings`, … and `nav-growth` is never a fund code) are listed in
+  # `.redocly.lint-ignore.yaml`. Any NEW ambiguity still fails the build.
+  no-ambiguous-paths: error
+  # Every operation must document at least one 4xx response.
+  operation-4xx-response: error
+
+  # `info.license` intentionally left blank — to be set by product before
+  # publishing. Silence the recommended warning until then.
+  info-license: off

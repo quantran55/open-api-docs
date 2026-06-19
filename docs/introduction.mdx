@@ -1,0 +1,76 @@
+---
+title: "Introduction"
+description: "Programmatic access to the HayInsights financial-data hub."
+---
+
+The **HayInsights Open API** gives you programmatic access to the HayInsights
+financial-data hub — a single API surface under `/openapi/v1/*` covering six data
+domains:
+
+<CardGroup cols={2}>
+  <Card title="Commodities" icon="oil-well">
+    Spot prices, top movers, gold–DXY correlation and historical series.
+  </Card>
+  <Card title="Crypto" icon="bitcoin-sign">
+    Market overview, dominance, bubble map, on-chain and derivatives metrics.
+  </Card>
+  <Card title="ETF" icon="layer-group">
+    Listings, performance & net-flow rankings, holdings, NAV growth, composition.
+  </Card>
+  <Card title="FX" icon="money-bill-transfer">
+    Summary, live table, 90-day correlation matrix and EM stress monitor.
+  </Card>
+  <Card title="Macro" icon="chart-line">
+    GDP, CPI/PCE, exchange rates, population, government debt, rates & yields.
+  </Card>
+  <Card title="Real Estate" icon="building">
+    Statistics, land prices, provinces / wards and choropleth GeoJSON.
+  </Card>
+</CardGroup>
+
+## Base URL
+
+```
+https://api.hayinsights.com
+```
+
+A staging environment is available at `https://stg-api.hayinsights.com`.
+
+## How it works
+
+- **One credential.** Send your API key in the `X-API-Key` header on every
+  request. There is no request signing — see [Authentication](/authentication).
+- **Plan-based access.** Which data domains you can call and how much you can
+  call them are governed by the subscription plan attached to your key — see
+  [Plans & features](/plans-and-features).
+- **Weighted quota.** Each endpoint consumes a weighted amount of your
+  per-minute budget; every response returns `X-RateLimit-*` headers — see
+  [Rate limits](/rate-limits).
+- **Consistent envelope.** Every response is wrapped in
+  `{ success, statusCode, data, meta }`.
+
+## Response envelope
+
+<CodeGroup>
+```json Success
+{
+  "success": true,
+  "statusCode": 200,
+  "data": { "...": "endpoint-specific payload" },
+  "meta": { "timestamp": "2026-06-19T08:31:59.478Z" }
+}
+```
+
+```json Error
+{
+  "success": false,
+  "statusCode": 401,
+  "error": { "code": "API_KEY_INVALID", "message": "Invalid API key" },
+  "meta": { "timestamp": "2026-06-19T08:34:08.023Z" }
+}
+```
+</CodeGroup>
+
+<Card title="Make your first call" icon="rocket" href="/quickstart">
+  Get an API key and fetch live data in under 5 minutes.
+</Card>

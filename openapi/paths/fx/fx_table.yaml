@@ -1,0 +1,57 @@
+get:
+  operationId: fxTable
+  tags:
+    - FX
+  summary: FX table
+  description: |
+    Live table of tracked currency pairs — latest price, 1-day change, a 10-day
+    sparkline and the 52-week high / low for each.
+  x-feature-code: fx_data
+  x-api-weight: 3
+  parameters:
+    - name: pairs
+      in: query
+      required: false
+      description: Comma-separated list of currency pairs to filter by (e.g. `EUR/USD,USD/JPY`). Returns all tracked pairs when omitted.
+      schema:
+        type: string
+        example: EUR/USD,USD/JPY
+  responses:
+    "200":
+      description: Live FX table.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/FxTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              asOf: "2026-06-19"
+              rows:
+                - pair: EUR/USD
+                  lastPrice: 1.14
+                  changePct: -0.23
+                  sparkline10d: [1.15, 1.16, 1.16, 1.16, 1.16, 1.16, 1.16, 1.15, 1.15, 1.14]
+                  high52w: 1.2
+                  low52w: 1.14
+                  asOf: "2026-06-19"
+                - pair: USD/JPY
+                  lastPrice: 161.35
+                  changePct: 0.03
+                  sparkline10d: [160.55, 159.94, 160.23, 160.24, 159.96, 160.33, 160.45, 160.64, 161.3, 161.35]
+                  high52w: 161.35
+                  low52w: 143.58
+                  asOf: "2026-06-19"
+            meta:
+              timestamp: "2026-06-19T08:50:42.336Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

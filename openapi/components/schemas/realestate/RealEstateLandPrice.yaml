@@ -1,0 +1,98 @@
+type: object
+description: |
+  A single priced road segment. Each segment carries residential, commercial and
+  production prices across four value-position tiers (`Vt1..4`, frontage → rear).
+  Tiers or price types that do not apply to a segment are `null`.
+required:
+  - wardId
+  - wardName
+  - area
+  - roadName
+  - unit
+  - year
+  - month
+properties:
+  wardId:
+    type: integer
+    description: Ward identifier the segment belongs to.
+    example: 169
+  wardName:
+    type: string
+    description: Ward name.
+    example: Khu vực 1
+  area:
+    type: string
+    description: Area / land-value zone label (localized).
+    example: Khu vực 1
+  roadName:
+    type: string
+    description: Road name.
+    example: Nhà Thờ
+  segmentFrom:
+    type: ["string", "null"]
+    description: Start of the priced segment.
+    example: Đầu đường
+  segmentTo:
+    type: ["string", "null"]
+    description: End of the priced segment.
+    example: Cuối đường
+  priceResidentialVt1:
+    type: ["number", "null"]
+    description: Residential price, value-position tier 1.
+    example: 702194
+  priceResidentialVt2:
+    type: ["number", "null"]
+    description: Residential price, value-position tier 2.
+    example: 316389
+  priceResidentialVt3:
+    type: ["number", "null"]
+    description: Residential price, value-position tier 3.
+    example: 229626
+  priceResidentialVt4:
+    type: ["number", "null"]
+    description: Residential price, value-position tier 4.
+    example: 196388
+  priceCommercialVt1:
+    type: ["number", "null"]
+    description: Commercial price, value-position tier 1.
+    example: null
+  priceCommercialVt2:
+    type: ["number", "null"]
+    description: Commercial price, value-position tier 2.
+    example: null
+  priceCommercialVt3:
+    type: ["number", "null"]
+    description: Commercial price, value-position tier 3.
+    example: null
+  priceCommercialVt4:
+    type: ["number", "null"]
+    description: Commercial price, value-position tier 4.
+    example: null
+  priceProductionVt1:
+    type: ["number", "null"]
+    description: Production / manufacturing price, value-position tier 1.
+    example: null
+  priceProductionVt2:
+    type: ["number", "null"]
+    description: Production / manufacturing price, value-position tier 2.
+    example: null
+  priceProductionVt3:
+    type: ["number", "null"]
+    description: Production / manufacturing price, value-position tier 3.
+    example: null
+  priceProductionVt4:
+    type: ["number", "null"]
+    description: Production / manufacturing price, value-position tier 4.
+    example: null
+  unit:
+    type: string
+    description: Price unit. `k_vnd` means thousands of VND per square metre.
+    example: k_vnd
+  year:
+    type: integer
+    description: Year the price schedule applies to.
+    example: 2026
+  month:
+    type: integer
+    description: Month the price schedule applies to.
+    example: 1

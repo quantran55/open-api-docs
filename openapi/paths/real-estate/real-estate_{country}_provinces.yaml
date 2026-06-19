@@ -1,0 +1,61 @@
+get:
+  operationId: realEstateProvinces
+  tags:
+    - Real Estate
+  summary: List provinces
+  description: |
+    Provinces / cities available for real-estate queries in a country. Data is
+    available for `vn`; `jp` is empty.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+    - name: lang
+      in: query
+      required: false
+      description: Language for localized names.
+      schema:
+        type: string
+        enum:
+          - vi
+          - en
+        default: vi
+  responses:
+    "200":
+      description: List of provinces / cities.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateProvincesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - id: 2
+                name: Hà Nội
+                code: HN
+                bbox: null
+              - id: 1
+                name: Hồ Chí Minh
+                code: HCM
+                bbox: null
+            meta:
+              timestamp: "2026-06-19T08:54:29.672Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

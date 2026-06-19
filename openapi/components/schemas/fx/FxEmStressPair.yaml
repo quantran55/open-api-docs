@@ -1,0 +1,55 @@
+type: object
+description: |
+  Emerging-market FX stress reading for a single currency pair — comparing
+  recent realised volatility against its 90-day distribution.
+required:
+  - pair
+  - latestPrice
+  - vol30d
+  - vol90dMean
+  - vol90dSd
+  - zScore
+  - priceZScore
+  - level
+  - sampleN
+properties:
+  pair:
+    type: string
+    description: Currency-pair symbol.
+    example: USD/CNY
+  latestPrice:
+    type: number
+    description: Most recent price.
+    example: 6.79
+  vol30d:
+    type: number
+    description: Annualised 30-day realised volatility (%).
+    example: 1.42
+  vol90dMean:
+    type: number
+    description: Mean of the 90-day realised-volatility distribution (%).
+    example: 2.39
+  vol90dSd:
+    type: number
+    description: Standard deviation of the 90-day realised-volatility distribution (%).
+    example: 0.63
+  zScore:
+    type: number
+    description: Z-score of current volatility versus its 90-day distribution.
+    example: -1.52
+  priceZScore:
+    type: number
+    description: Z-score of the latest price versus its 90-day distribution.
+    example: -2
+  level:
+    type: string
+    enum:
+      - STABLE
+      - WARNING
+      - PANIC
+    description: Stress classification for this pair.
+    example: WARNING
+  sampleN:
+    type: integer
+    description: Number of observations in the sample.
+    example: 90

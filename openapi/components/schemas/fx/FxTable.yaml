@@ -1,0 +1,15 @@
+type: object
+description: Live FX table — one row per tracked currency pair.
+required:
+  - asOf
+  - rows
+properties:
+  asOf:
+    type: string
+    format: date
+    description: Date the table is as of.
+    example: "2026-06-19"
+  rows:
+    type: array
+    items:
+      $ref: "./FxTableRow.yaml"

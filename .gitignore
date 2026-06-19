@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+.env
+# Raw harvested responses — working artifacts; the trimmed examples committed in
+# the spec are the source of truth. Re-generate with `npm run harvest`.
+examples/

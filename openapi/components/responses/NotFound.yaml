@@ -1,0 +1,15 @@
+description: The requested resource was not found.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 404
+      error:
+        code: INTERNAL_ERROR
+        message: "Commodity 'zzz-nope' not found"
+      meta:
+        error: Not Found
+        statusCode: 404
+        timestamp: "2026-06-19T08:34:08.205Z"

@@ -1,0 +1,59 @@
+get:
+  operationId: etfHeatmap
+  tags:
+    - ETF
+  summary: ETF market heatmap
+  description: |
+    Snapshot of every tracked ETF for rendering a treemap heatmap — closing
+    price, volume, market cap, price fluctuation and each fund's contribution to
+    the aggregate index movement. `contributionArea` is the relative tile size.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters: []
+  responses:
+    "200":
+      description: Heatmap cells for every tracked ETF.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfHeatmapResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - code: "1305"
+                name: iFreeETF TOPIX (Yearly Dividend Type)
+                currency: JPY
+                currentDate: "2026-06-16T17:00:00.000Z"
+                closePrice: 4299
+                volume: 71520
+                marketCap: 307464480
+                tradingValue: 307464480
+                priceFluctuation: 19
+                priceFluctuationPercent: 0.44
+                contributionValue: 1352843.7119999998
+                marketCapChange: -1835060720
+                contributionArea: 0.07973
+              - code: "1306"
+                name: NEXT FUNDS TOPIX Exchange Traded Fund
+                currency: JPY
+                currentDate: "2026-06-16T17:00:00.000Z"
+                closePrice: 425.5
+                volume: 11852430
+                marketCap: 5043208965
+                tradingValue: 5043208965
+                priceFluctuation: 2.4
+                priceFluctuationPercent: 0.57
+                contributionValue: 28746291.1005
+                marketCapChange: -2150997271
+                contributionArea: 1.69419
+            meta:
+              timestamp: "2026-06-19T08:50:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

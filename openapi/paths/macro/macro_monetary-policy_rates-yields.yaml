@@ -1,0 +1,61 @@
+get:
+  operationId: macroRatesYields
+  tags:
+    - Macro
+  summary: Policy rates & bond yields
+  description: |
+    Monthly policy / overnight call rate alongside the 10-year government bond
+    yield for a country, over a chosen look-back window.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: ISO country code.
+      schema:
+        type: string
+        default: JP
+        example: JP
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 1Y
+          - 3Y
+          - 10Y
+        default: 10Y
+  responses:
+    "200":
+      description: Policy-rate and bond-yield series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroRatesYieldsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - observationDate: "2026-02-01"
+                country: JP
+                tenYearsGovernmentBondYieldsPct: 2.31
+                overnightCallRate: 0.71
+              - observationDate: "2026-03-01"
+                country: JP
+                tenYearsGovernmentBondYieldsPct: 2.35
+                overnightCallRate: 0.73
+            meta:
+              timestamp: "2026-06-19T08:50:42.552Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

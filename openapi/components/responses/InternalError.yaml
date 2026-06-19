@@ -1,0 +1,13 @@
+description: Unexpected server error. Retry after a short exponential backoff.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 500
+      error:
+        code: INTERNAL_ERROR
+        message: Internal server error
+      meta:
+        timestamp: "2026-06-19T08:34:10.000Z"

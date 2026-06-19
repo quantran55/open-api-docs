@@ -1,0 +1,47 @@
+get:
+  operationId: commoditiesFeatured
+  tags:
+    - Commodities
+  summary: Featured commodities
+  description: |
+    A curated set of headline commodities (gold, crude oil, copper, …) with the
+    latest close, 1-day change and a short price sparkline.
+  x-feature-code: commodities_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: List of featured commodities.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CommoditiesFeaturedResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - id: gold
+                name: Gold
+                unit: USD/oz
+                lastClose: 4189.22
+                currency: USD
+                change1dPct: 0.02
+                changeValue: 0.77
+                trendline: [4258.86, 4188.45, 4189.22]
+              - id: wti-crude
+                name: WTI Crude Oil
+                unit: USD/bbl
+                lastClose: 76.55
+                currency: USD
+                change1dPct: -0.33
+                changeValue: -0.25
+                trendline: [76.6, 76.8, 76.55]
+            meta:
+              timestamp: "2026-06-19T08:50:00.811Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,102 @@
+---
+title: "Quickstart"
+description: "Make your first request in under 5 minutes — just one header."
+---
+
+Every HayInsights endpoint needs a single header, `X-API-Key`. No request
+signing, no token exchange.
+
+<Steps>
+  <Step title="Get an API key">
+    Sign in to the [HayInsights dashboard](https://app.hayinsights.com) and go to
+    **Account → API keys** to create a key. It looks like `apk_…`.
+
+    Store it as an environment variable:
+
+    ```bash
+    export HAYINSIGHTS_API_KEY="apk_your_key_here"
+    ```
+  </Step>
+
+  <Step title="Make your first request">
+    Fetch crypto market dominance:
+
+    <CodeGroup>
+    ```bash cURL
+    curl -H "X-API-Key: $HAYINSIGHTS_API_KEY" \
+      "https://api.hayinsights.com/openapi/v1/crypto/dominance"
+    ```
+
+    ```typescript TypeScript
+    const res = await fetch(
+      "https://api.hayinsights.com/openapi/v1/crypto/dominance",
+      { headers: { "X-API-Key": process.env.HAYINSIGHTS_API_KEY! } }
+    );
+    const json = await res.json();
+    console.log(json.data);
+    ```
+
+    ```python Python
+    import os, requests
+
+    res = requests.get(
+        "https://api.hayinsights.com/openapi/v1/crypto/dominance",
+        headers={"X-API-Key": os.environ["HAYINSIGHTS_API_KEY"]},
+    )
+    print(res.json()["data"])
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Read the response">
+    Every response uses the standard envelope. The payload is in `data`:
+
+    ```json
+    {
+      "success": true,
+      "statusCode": 200,
+      "data": {
+        "totalMarketCap": 2157717188047.44,
+        "coins": [
+          { "symbol": "BTC", "name": "Bitcoin", "dominancePercentage": 58.16, "marketCap": 1254870895730.76 },
+          { "symbol": "ETH", "name": "Ethereum", "dominancePercentage": 9.48, "marketCap": 204564386727.13 }
+        ]
+      },
+      "meta": { "timestamp": "2026-06-19T08:31:59.478Z" }
+    }
+    ```
+
+    `success: true` means the call worked. On an error, `success` is `false` and
+    the details are in `error` — see [Error codes](/errors).
+  </Step>
+
+  <Step title="Check your quota">
+    Every response carries rate-limit headers so you can self-throttle:
+
+    ```
+    X-RateLimit-Limit: 1000
+    X-RateLimit-Remaining: 997
+    X-RateLimit-Reset: 1781857979
+    X-RateLimit-Weight-Used: 3
+    ```
+
+    See [Rate limits](/rate-limits) for the weighting model.
+  </Step>
+</Steps>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/authentication">
+    How API keys work and how to rotate them.
+  </Card>
+  <Card title="Browse the API" icon="book" href="/api-reference">
+    All 40 endpoints across the six data domains.
+  </Card>
+  <Card title="Plans & features" icon="layer-group" href="/plans-and-features">
+    Which plan unlocks which datasets.
+  </Card>
+  <Card title="Rate limits" icon="gauge-high" href="/rate-limits">
+    Weighted quota and the `X-RateLimit-*` headers.
+  </Card>
+</CardGroup>

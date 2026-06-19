@@ -1,0 +1,23 @@
+type: object
+description: One net-flow observation in an ETF's net-flow history.
+required:
+  - date
+  - netflow
+properties:
+  date:
+    type: string
+    format: date
+    description: Observation date.
+    example: "2025-10-17"
+  aum:
+    type: number
+    description: Assets under management on the date, in fund currency.
+    example: 26913496133220
+  netflow:
+    type: number
+    description: Net capital flow on the date, in fund currency.
+    example: -26107300968
+  netflowAumPct:
+    type: number
+    description: Net flow as a percentage of assets under management.
+    example: -0.097

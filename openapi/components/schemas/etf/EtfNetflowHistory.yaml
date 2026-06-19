@@ -1,0 +1,20 @@
+type: object
+description: An ETF's net-flow history with the set of available period windows.
+required:
+  - data
+  - periodAvailability
+properties:
+  data:
+    type: array
+    description: Net-flow observations, ordered oldest to newest.
+    items:
+      $ref: "./EtfNetflowPoint.yaml"
+  periodAvailability:
+    type: object
+    description: Which period windows have data, keyed by period.
+    additionalProperties:
+      type: boolean
+    example:
+      1M: true
+      3M: true
+      6M: true

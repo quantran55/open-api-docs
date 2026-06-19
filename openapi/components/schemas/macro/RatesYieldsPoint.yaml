@@ -1,0 +1,25 @@
+type: object
+description: One observation of the policy rate and the 10-year government bond yield.
+required:
+  - observationDate
+  - country
+  - tenYearsGovernmentBondYieldsPct
+  - overnightCallRate
+properties:
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2026-03-01"
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: JP
+  tenYearsGovernmentBondYieldsPct:
+    type: number
+    description: 10-year government bond yield, in percent.
+    example: 2.35
+  overnightCallRate:
+    type: number
+    description: Overnight policy / call rate, in percent.
+    example: 0.73

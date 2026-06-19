@@ -1,0 +1,17 @@
+type: object
+description: A single commodity in a movers (gainers / losers) list.
+required:
+  - id
+  - name
+  - changePct
+properties:
+  id:
+    type: string
+    example: coffee-robusta
+  name:
+    type: string
+    example: Coffee Robusta
+  changePct:
+    type: number
+    description: Percentage change over the requested period.
+    example: 7.35

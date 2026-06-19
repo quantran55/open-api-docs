@@ -1,0 +1,56 @@
+get:
+  operationId: etfInfo
+  tags:
+    - ETF
+  summary: ETF info
+  description: |
+    Core descriptive metadata for a single ETF — manager, benchmark index,
+    listing date, trust fee and distribution yield. Use the exchange ticker
+    (e.g. a TSE code like `1306`) as the `{code}` path param.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Exchange ticker for the ETF (e.g. a TSE code like `1306`).
+      schema:
+        type: string
+        example: "1306"
+  responses:
+    "200":
+      description: Descriptive metadata for the ETF.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfInfoResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              id: 798
+              listingDate: "2001-07-13"
+              etfCode: "1306"
+              etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+              managementCompany: Nomura Asset Management
+              indexName: TOPIX Total Return Index
+              tradingUnit: 10
+              trustFee: 0.0505
+              etfNameJP: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+              country: jp
+              distributionYield: 0.0176
+              etfType: Japanese Equity(Market)
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

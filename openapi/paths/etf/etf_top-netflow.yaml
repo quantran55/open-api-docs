@@ -1,0 +1,52 @@
+get:
+  operationId: etfTopNetflow
+  tags:
+    - ETF
+  summary: Top ETFs by net flow
+  description: |
+    ETFs ranked by net capital flow. Set `type` to `positive` for the largest
+    inflows or `negative` for the largest outflows.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters:
+    - name: type
+      in: query
+      required: false
+      description: Whether to rank by inflows (`positive`) or outflows (`negative`).
+      schema:
+        type: string
+        enum:
+          - positive
+          - negative
+        default: positive
+  responses:
+    "200":
+      description: ETFs ranked by net flow.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfTopNetflowResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - etfCode: "1348"
+                etfName: MAXIS TOPIX ETF
+                netflow: 21323272800
+                netflowAumPercentage: 0.47
+              - etfCode: "518A"
+                etfName: NEXT FUNDS FTSE Japan ex-REITs High Income Cash Flow 50 Index Exchange Traded Fund
+                netflow: 4755004000
+                netflowAumPercentage: 74.79
+            meta:
+              timestamp: "2026-06-19T08:50:39.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

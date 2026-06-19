@@ -1,0 +1,9 @@
+# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
+# See https://redocly.com/docs/cli/ for more information.
+openapi/openapi.yaml:
+  no-ambiguous-paths:
+    - '#/paths/~1openapi~1v1~1etf~1{code}~1info'
+    - '#/paths/~1openapi~1v1~1etf~1{code}~1holdings'
+    - '#/paths/~1openapi~1v1~1etf~1{code}~1prices-history'
+    - '#/paths/~1openapi~1v1~1etf~1{code}~1detail'
+    - '#/paths/~1openapi~1v1~1etf~1{code}~1composition'

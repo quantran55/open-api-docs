@@ -1,0 +1,45 @@
+type: object
+description: One daily OHLCV bar in an ETF's price history.
+required:
+  - id
+  - date
+  - etfCode
+  - close
+properties:
+  id:
+    type: integer
+    description: Internal numeric identifier of the bar.
+    example: 346280
+  date:
+    type: string
+    format: date
+    description: Trading date of the bar.
+    example: "2021-06-14"
+  etfCode:
+    type: string
+    description: Exchange ticker for the ETF.
+    example: "1306"
+  open:
+    type: number
+    description: Opening price.
+    example: 2065
+  high:
+    type: number
+    description: Session high.
+    example: 2068
+  low:
+    type: number
+    description: Session low.
+    example: 2051
+  close:
+    type: number
+    description: Closing price.
+    example: 2056
+  volume:
+    type: string
+    description: Traded volume for the session.
+    example: "573610.000000"
+  currency:
+    type: string
+    description: Quote currency.
+    example: JPY

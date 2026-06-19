@@ -1,0 +1,20 @@
+type: object
+description: Standard error envelope returned for every 4xx / 5xx response.
+required:
+  - success
+  - statusCode
+  - error
+properties:
+  success:
+    type: boolean
+    const: false
+    description: Always `false` for an error response.
+    example: false
+  statusCode:
+    type: integer
+    description: Mirrors the HTTP status code.
+    example: 401
+  error:
+    $ref: "./ErrorDetail.yaml"
+  meta:
+    $ref: "./Meta.yaml"

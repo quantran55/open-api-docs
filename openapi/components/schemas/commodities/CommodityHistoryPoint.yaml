@@ -1,0 +1,13 @@
+type: object
+description: One closing price in a commodity's history series.
+required:
+  - date
+  - close
+properties:
+  date:
+    type: string
+    format: date
+    example: "2026-03-19"
+  close:
+    type: number
+    example: 4651.73

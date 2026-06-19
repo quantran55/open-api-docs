@@ -1,0 +1,27 @@
+type: object
+description: |
+  Full composition of a Vietnamese fund certificate — asset allocation, the
+  equity portfolio and the sector breakdown. Identified by the VN fund code
+  (e.g. `VESAF`).
+required:
+  - fundCode
+  - assetAllocation
+  - portfolio
+  - sectorAllocation
+properties:
+  fundCode:
+    type: string
+    description: Vietnamese fund certificate code.
+    example: VESAF
+  assetAllocation:
+    $ref: "./FundAssetAllocation.yaml"
+  portfolio:
+    type: array
+    description: Equity positions held by the fund.
+    items:
+      $ref: "./FundPortfolioHolding.yaml"
+  sectorAllocation:
+    type: array
+    description: Sector-level allocation breakdown.
+    items:
+      $ref: "./FundSectorAllocation.yaml"

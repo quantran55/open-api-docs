@@ -1,0 +1,4 @@
+description: Remaining request weight in the current 1-minute window.
+schema:
+  type: integer
+  example: 997

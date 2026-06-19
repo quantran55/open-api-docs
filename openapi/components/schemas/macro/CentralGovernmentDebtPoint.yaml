@@ -1,0 +1,26 @@
+type: object
+description: One observation of central-government debt as a share of GDP.
+required:
+  - observationDate
+  - country
+  - centralGovernmentDebt
+properties:
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2025-10-01"
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: US
+  centralGovernmentDebt:
+    type: number
+    description: Central-government debt as a percentage of GDP.
+    example: 122.57
+  yoyChange:
+    type: ["number", "null"]
+    description: |
+      Year-over-year change in the debt ratio, in percentage points; `null`
+      for the earliest observations where no prior-year value exists.
+    example: 1.13

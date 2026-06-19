@@ -1,0 +1,97 @@
+---
+title: "Error codes"
+description: "HTTP status mapping, the error envelope, and how to handle errors."
+---
+
+Errors carry two signals:
+
+- The **HTTP status** (4xx / 5xx).
+- An **error envelope** in the body.
+
+```json
+{
+  "success": false,
+  "statusCode": 401,
+  "error": { "code": "API_KEY_INVALID", "message": "Invalid API key" },
+  "meta": { "timestamp": "2026-06-19T08:34:08.023Z" }
+}
+```
+
+`error.message` is usually a string, but for validation errors (400) it can be an
+**array** of messages. `error.code` is specific for authentication and quota
+errors; for validation and not-found it is `INTERNAL_ERROR` and the HTTP status
+carries the meaning.
+
+## HTTP status reference
+
+| Status | Meaning | When |
+| --- | --- | --- |
+| `200` | OK | Success — payload in `data`. |
+| `400` | Bad Request | Missing or invalid parameter. |
+| `401` | Unauthorized | Missing, invalid, disabled or expired API key. |
+| `403` | Forbidden | Your plan doesn't include this feature. |
+| `404` | Not Found | The requested resource does not exist. |
+| `429` | Too Many Requests | Rate limit exceeded — see [Rate limits](/rate-limits). |
+| `500` | Internal Server Error | Unexpected server error — retry with backoff. |
+
+## Authentication errors (401)
+
+<AccordionGroup>
+  <Accordion title="API_KEY_REQUIRED" icon="key">
+    No `X-API-Key` header was sent. Every `/openapi/v1/*` request requires one.
+  </Accordion>
+  <Accordion title="API_KEY_INVALID" icon="ban">
+    The key is unknown or malformed. Check for stray whitespace or a truncated
+    value.
+  </Accordion>
+  <Accordion title="API_KEY_DISABLED" icon="circle-xmark">
+    The key has been revoked. Create a new one in the dashboard.
+  </Accordion>
+  <Accordion title="API_KEY_EXPIRED" icon="clock">
+    The key has expired. Create a new one in the dashboard.
+  </Accordion>
+</AccordionGroup>
+
+## Authorization & quota errors
+
+<AccordionGroup>
+  <Accordion title="FEATURE_NOT_IN_PLAN (403)" icon="lock">
+    Your subscription plan doesn't include the requested data domain. Upgrade
+    from the dashboard — see [Plans & features](/plans-and-features).
+  </Accordion>
+  <Accordion title="RATE_LIMIT_EXCEEDED (429)" icon="gauge-high">
+    You've consumed your plan's per-minute weight budget. Wait until
+    `X-RateLimit-Reset` (or `Retry-After` seconds) then retry — see
+    [Rate limits](/rate-limits).
+  </Accordion>
+</AccordionGroup>
+
+## Validation & not-found (400 / 404)
+
+<AccordionGroup>
+  <Accordion title="Missing or invalid parameter (400)" icon="triangle-exclamation">
+    A required query parameter is missing or a value is out of range. `error.message`
+    lists the specific problems, e.g. `"Type parameter is required"`.
+  </Accordion>
+  <Accordion title="Resource not found (404)" icon="magnifying-glass">
+    The path references something that doesn't exist (e.g. an unknown commodity
+    slug or fund code).
+  </Accordion>
+</AccordionGroup>
+
+## Handling strategy
+
+<Steps>
+  <Step title="Check the HTTP status first">
+    `2xx` → read `data`. `4xx` / `5xx` → read `error.code` to classify.
+  </Step>
+  <Step title="Retry only the right cases">
+    Retry with backoff on `429` (until `Retry-After` / `X-RateLimit-Reset`) and
+    `5xx` (exponential backoff, a few attempts). Do **not** retry `400`, `401` or
+    `403` — fix the root cause first.
+  </Step>
+  <Step title="Log enough context">
+    Capture `error.code`, `error.message`, `meta.timestamp`, the HTTP status and
+    the request path when reporting an issue.
+  </Step>
+</Steps>

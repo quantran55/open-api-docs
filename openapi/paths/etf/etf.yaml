@@ -1,0 +1,62 @@
+get:
+  operationId: etfList
+  tags:
+    - ETF
+  summary: List ETFs
+  description: |
+    The full catalogue of tracked exchange-traded funds, with descriptive
+    metadata (manager, benchmark index, trust fee), the latest price and assets
+    under management. Use an entry's `etfCode` as the `{code}` path param for the
+    info, holdings, prices-history and detail endpoints.
+  x-feature-code: etf_data
+  x-api-weight: 8
+  parameters: []
+  responses:
+    "200":
+      description: List of ETFs.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EtfListResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - id: 794
+                listingDate: "2001-07-13"
+                etfCode: "1305"
+                etfName: iFreeETF TOPIX (Yearly Dividend Type)
+                managementCompany: Daiwa Asset Management
+                indexName: TOPIX Total Return Index
+                tradingUnit: 10
+                trustFee: 0.06
+                etfNameJP: iFreeETF TOPIX（年1回決算型）
+                country: jp
+                distributionYield: 0.0177
+                etfType: Japanese Equity(Market)
+                price: 4299
+                aum: null
+              - id: 798
+                listingDate: "2001-07-13"
+                etfCode: "1306"
+                etfName: NEXT FUNDS TOPIX Exchange Traded Fund
+                managementCompany: Nomura Asset Management
+                indexName: TOPIX Total Return Index
+                tradingUnit: 10
+                trustFee: 0.0505
+                etfNameJP: ＮＥＸＴ ＦＵＮＤＳ ＴＯＰＩＸ連動型上場投信
+                country: jp
+                distributionYield: 0.0176
+                etfType: Japanese Equity(Market)
+                price: 425.5
+                aum: 32437253262780
+            meta:
+              timestamp: "2026-06-19T08:50:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

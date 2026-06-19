@@ -1,0 +1,38 @@
+type: object
+description: One currency pair in the FX table, with a 10-day sparkline and 52-week range.
+required:
+  - pair
+  - lastPrice
+  - changePct
+  - asOf
+properties:
+  pair:
+    type: string
+    description: Currency-pair symbol.
+    example: EUR/USD
+  lastPrice:
+    type: number
+    description: Most recent price.
+    example: 1.14
+  changePct:
+    type: number
+    description: 1-day percentage change.
+    example: -0.23
+  sparkline10d:
+    type: array
+    description: Last 10 daily prices, oldest→newest, for a sparkline.
+    items:
+      type: number
+  high52w:
+    type: number
+    description: 52-week high.
+    example: 1.2
+  low52w:
+    type: number
+    description: 52-week low.
+    example: 1.14
+  asOf:
+    type: string
+    format: date
+    description: Date the row is as of.
+    example: "2026-06-19"

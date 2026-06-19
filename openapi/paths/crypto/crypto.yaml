@@ -1,0 +1,57 @@
+get:
+  operationId: cryptoOverview
+  tags:
+    - Crypto
+  summary: Crypto market overview
+  description: |
+    Snapshot of the crypto market — total market capitalisation, 24h volume,
+    major-coin dominance split, the Fear & Greed index and trending coins.
+  x-feature-code: crypto_data
+  x-api-weight: 3
+  responses:
+    "200":
+      description: Crypto market overview snapshot.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CryptoOverviewResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              totalMarketCap: 2156391783530.09
+              volume24h: 74938670897.24
+              marketCapChange24h: -2.6314
+              volumeChange24h: -11.6008
+              dominance:
+                btc: 58.148
+                eth: 9.476
+                bnb: 3.585
+                sol: 1.843
+                xrp: 3.242
+                other: 23.706
+              fearGreed:
+                value: 19
+                classification: Extreme fear
+                date: "2026-06-18"
+              trending:
+                - symbol: FF
+                  name: Falcon Finance
+                  rank: 98
+                  priceChange24h: 99.3142
+                  tag: gainer
+                - symbol: DASH
+                  name: Dash
+                  rank: 74
+                  priceChange24h: 28.9689
+                  tag: gainer
+            meta:
+              timestamp: "2026-06-19T08:50:00.956Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

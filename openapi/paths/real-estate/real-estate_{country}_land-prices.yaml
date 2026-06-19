@@ -1,0 +1,107 @@
+get:
+  operationId: realEstateLandPrices
+  tags:
+    - Real Estate
+  summary: List priced road segments
+  description: |
+    Priced road segments for a country, with residential, commercial and production
+    prices across value-position tiers. Filter by land-use `type`, `area`, `ward_id` or
+    a free-text search, and cap the result count with `limit`. Data is available for `vn`.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+    - name: type
+      in: query
+      required: false
+      description: Filter by land-use type.
+      schema:
+        type: string
+        enum:
+          - residential
+          - commercial
+          - production
+    - name: area
+      in: query
+      required: false
+      description: Filter by area / land-value zone.
+      schema:
+        type: string
+        enum:
+          - I
+          - II
+          - III
+          - IV
+    - name: ward_id
+      in: query
+      required: false
+      description: Filter by ward identifier.
+      schema:
+        type: integer
+        example: 169
+    - name: q
+      in: query
+      required: false
+      description: Free-text search on road / ward name.
+      schema:
+        type: string
+        example: Hai Bà Trưng
+    - name: limit
+      in: query
+      required: false
+      description: Maximum number of segments to return.
+      schema:
+        type: integer
+        example: 100
+  responses:
+    "200":
+      description: List of priced road segments.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateLandPricesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - wardId: 169
+                wardName: Khu vực 1
+                area: Khu vực 1
+                roadName: Nhà Thờ
+                segmentFrom: Đầu đường
+                segmentTo: Cuối đường
+                priceResidentialVt1: 702194
+                priceResidentialVt2: 316389
+                priceResidentialVt3: 229626
+                priceResidentialVt4: 196388
+                priceCommercialVt1: null
+                priceCommercialVt2: null
+                priceCommercialVt3: null
+                priceCommercialVt4: null
+                priceProductionVt1: null
+                priceProductionVt2: null
+                priceProductionVt3: null
+                priceProductionVt4: null
+                unit: k_vnd
+                year: 2026
+                month: 1
+            meta:
+              timestamp: "2026-06-19T08:54:29.621Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,62 @@
+get:
+  operationId: realEstateStats
+  tags:
+    - Real Estate
+  summary: Country land-price statistics
+  description: |
+    Aggregate land-price statistics for a country — overall ward / segment totals, the
+    observed price range, per-area breakdowns and the highest-priced roads. Data is
+    available for `vn`; `jp` is empty.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code, lowercase.
+      schema:
+        type: string
+        example: vn
+  responses:
+    "200":
+      description: Aggregate land-price statistics.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateStatsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              totalWards: 185
+              totalSegments: 13674
+              priceRange:
+                min: 0
+                max: 702194
+                unit: k_vnd
+              byArea:
+                - area: Khu vực I
+                  avgPrice: 165462
+                  minPrice: 48600
+                  maxPrice: 687200
+                  wardCount: 32
+                  segmentCount: 1026
+              topRoads:
+                - roadName: Hai Bà Trưng
+                  wardName: Khu vực 1
+                  area: Khu vực 1
+                  priceResidential: 702194
+            meta:
+              timestamp: "2026-06-19T08:54:29.621Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,188 @@
+openapi: 3.1.0
+
+info:
+  title: HayInsights Open API
+  version: 0.1.0
+  description: |
+    Programmatic access to the **HayInsights** financial-data hub — commodities,
+    crypto, ETF, FX, macroeconomic and real-estate datasets, served from a single
+    API surface under `/openapi/v1/*`.
+
+    This specification is the **single source of truth** for the public API
+    surface — shared by SDK codegen, the reference docs, and (later) the mock
+    server / contract tests.
+
+    ## Authentication
+
+    Every request must carry your API key in the `X-API-Key` header. There is a
+    single authentication tier — no request signing. Create and manage keys in
+    the HayInsights dashboard (Account → API keys). See **Authentication**.
+
+    ## Plans & quota
+
+    Access to each data domain and your request quota are governed by the
+    subscription plan attached to your key. Each endpoint consumes a **weighted**
+    amount of your per-minute quota; every response carries `X-RateLimit-*`
+    headers. See **Rate limits** and **Plans & features**.
+  contact: {}
+
+servers:
+  - url: https://api.hayinsights.com
+    description: Production
+  - url: https://stg-api.hayinsights.com
+    description: Staging
+
+# Baseline: every request must carry X-API-Key. Single auth tier — no signing.
+security:
+  - HayInsightsApiKey: []
+
+# Machine-readable description of the weighted rate-limit model, so codegen /
+# tooling can surface quota behaviour. Informational — not an auth declaration.
+x-hayinsights-quota:
+  model: weighted-sliding-window
+  window: 1m
+  unit: weight
+  description: |
+    Each call consumes its endpoint's weight from your plan's per-minute budget.
+    When the budget is exhausted the API returns 429 until the window resets.
+  headers:
+    limit: X-RateLimit-Limit
+    remaining: X-RateLimit-Remaining
+    reset: X-RateLimit-Reset
+    weightUsed: X-RateLimit-Weight-Used
+  exceeded:
+    status: 429
+    code: RATE_LIMIT_EXCEEDED
+    retryAfterHeader: Retry-After
+  weightsByTag:
+    Macro: 2
+    Real Estate: 2
+    Commodities: 3
+    Crypto: 3
+    FX: "3-6"
+    ETF: 8
+
+tags:
+  - name: Commodities
+    description: Spot prices, top movers, gold–DXY correlation and historical series for energy, metals and agricultural commodities.
+  - name: Crypto
+    description: Crypto market overview, dominance, bubble map, on-chain and derivatives metrics.
+  - name: ETF
+    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth and fund composition.
+  - name: FX
+    description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
+  - name: Macro
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
+  - name: Real Estate
+    description: Real-estate statistics, land prices, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+
+x-tagGroups:
+  - name: Market Data
+    tags:
+      - Commodities
+      - Crypto
+      - ETF
+      - FX
+      - Macro
+      - Real Estate
+
+# Populated per-domain during Phase 2/3. Keep static/specific routes BEFORE
+# `{param}` catch-alls to avoid no-ambiguous-paths violations.
+paths:
+  # ── Commodities ────────────────────────────────────────────────────────
+  /openapi/v1/commodities:
+    $ref: "./paths/commodities/commodities.yaml"
+  /openapi/v1/commodities/featured:
+    $ref: "./paths/commodities/commodities_featured.yaml"
+  /openapi/v1/commodities/movers:
+    $ref: "./paths/commodities/commodities_movers.yaml"
+  /openapi/v1/commodities/gold-dxy:
+    $ref: "./paths/commodities/commodities_gold-dxy.yaml"
+  /openapi/v1/commodities/{id}/history:
+    $ref: "./paths/commodities/commodities_{id}_history.yaml"
+
+  # ── Crypto ─────────────────────────────────────────────────────────────
+  /openapi/v1/crypto:
+    $ref: "./paths/crypto/crypto.yaml"
+  /openapi/v1/crypto/bubble-map:
+    $ref: "./paths/crypto/crypto_bubble-map.yaml"
+  /openapi/v1/crypto/onchain:
+    $ref: "./paths/crypto/crypto_onchain.yaml"
+  /openapi/v1/crypto/derivatives:
+    $ref: "./paths/crypto/crypto_derivatives.yaml"
+  /openapi/v1/crypto/dominance:
+    $ref: "./paths/crypto/crypto_dominance.yaml"
+
+  # ── ETF ────────────────────────────────────────────────────────────────
+  /openapi/v1/etf:
+    $ref: "./paths/etf/etf.yaml"
+  /openapi/v1/etf/top-performance:
+    $ref: "./paths/etf/etf_top-performance.yaml"
+  /openapi/v1/etf/top-netflow:
+    $ref: "./paths/etf/etf_top-netflow.yaml"
+  /openapi/v1/etf/heatmap:
+    $ref: "./paths/etf/etf_heatmap.yaml"
+  /openapi/v1/etf/compare/fund-composition:
+    $ref: "./paths/etf/etf_compare_fund-composition.yaml"
+  /openapi/v1/etf/compare/nav-growth:
+    $ref: "./paths/etf/etf_compare_nav-growth.yaml"
+  /openapi/v1/etf/nav-growth/{code}:
+    $ref: "./paths/etf/etf_nav-growth_{code}.yaml"
+  /openapi/v1/etf/{code}/info:
+    $ref: "./paths/etf/etf_{code}_info.yaml"
+  /openapi/v1/etf/{code}/holdings:
+    $ref: "./paths/etf/etf_{code}_holdings.yaml"
+  /openapi/v1/etf/{code}/prices-history:
+    $ref: "./paths/etf/etf_{code}_prices-history.yaml"
+  /openapi/v1/etf/{code}/detail:
+    $ref: "./paths/etf/etf_{code}_detail.yaml"
+  /openapi/v1/etf/{code}/composition:
+    $ref: "./paths/etf/etf_{code}_composition.yaml"
+
+  # ── FX ─────────────────────────────────────────────────────────────────
+  /openapi/v1/fx/summary:
+    $ref: "./paths/fx/fx_summary.yaml"
+  /openapi/v1/fx/table:
+    $ref: "./paths/fx/fx_table.yaml"
+  /openapi/v1/fx/correlation:
+    $ref: "./paths/fx/fx_correlation.yaml"
+  /openapi/v1/fx/em-stress:
+    $ref: "./paths/fx/fx_em-stress.yaml"
+
+  # ── Macro ──────────────────────────────────────────────────────────────
+  /openapi/v1/macro/gdp-growth-rate:
+    $ref: "./paths/macro/macro_gdp-growth-rate.yaml"
+  /openapi/v1/macro/market-recap:
+    $ref: "./paths/macro/macro_market-recap.yaml"
+  /openapi/v1/macro/economic-data:
+    $ref: "./paths/macro/macro_economic-data.yaml"
+  /openapi/v1/macro/exchange-rate:
+    $ref: "./paths/macro/macro_exchange-rate.yaml"
+  /openapi/v1/macro/population:
+    $ref: "./paths/macro/macro_population.yaml"
+  /openapi/v1/macro/monetary-policy/central-government-debt:
+    $ref: "./paths/macro/macro_monetary-policy_central-government-debt.yaml"
+  /openapi/v1/macro/monetary-policy/rates-yields:
+    $ref: "./paths/macro/macro_monetary-policy_rates-yields.yaml"
+
+  # ── Real Estate ────────────────────────────────────────────────────────
+  # Static / deeper routes BEFORE the single-segment `{country}` catch-all.
+  /openapi/v1/real-estate/{country}/geojson:
+    $ref: "./paths/real-estate/real-estate_{country}_geojson.yaml"
+  /openapi/v1/real-estate/{country}/stats:
+    $ref: "./paths/real-estate/real-estate_{country}_stats.yaml"
+  /openapi/v1/real-estate/{country}/wards:
+    $ref: "./paths/real-estate/real-estate_{country}_wards.yaml"
+  /openapi/v1/real-estate/{country}/wards/{wardId}:
+    $ref: "./paths/real-estate/real-estate_{country}_wards_{wardId}.yaml"
+  /openapi/v1/real-estate/{country}/land-prices:
+    $ref: "./paths/real-estate/real-estate_{country}_land-prices.yaml"
+  /openapi/v1/real-estate/{country}/provinces:
+    $ref: "./paths/real-estate/real-estate_{country}_provinces.yaml"
+  /openapi/v1/real-estate/{country}:
+    $ref: "./paths/real-estate/real-estate_{country}.yaml"
+
+components:
+  securitySchemes:
+    HayInsightsApiKey:
+      $ref: "./components/securitySchemes/HayInsightsApiKey.yaml"

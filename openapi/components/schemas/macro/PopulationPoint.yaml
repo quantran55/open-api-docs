@@ -1,0 +1,25 @@
+type: object
+description: One monthly observation of population and the unemployment rate.
+required:
+  - country
+  - observationDate
+  - population
+  - unemploymentRate
+properties:
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: JP
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2026-03-01"
+  population:
+    type: integer
+    description: Total population for the period.
+    example: 122850000
+  unemploymentRate:
+    type: number
+    description: Unemployment rate, in percent.
+    example: 2.7

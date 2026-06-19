@@ -1,0 +1,21 @@
+type: object
+description: |
+  Bubble-map dataset — the top coins by market cap with their price change over a
+  selected timeframe and a normalised bubble size for visualisation.
+required:
+  - timeframe
+  - coins
+properties:
+  timeframe:
+    type: string
+    enum:
+      - 1h
+      - 1d
+      - 1w
+    description: Timeframe the price changes are computed over.
+    example: 1d
+  coins:
+    type: array
+    description: Coins to render as bubbles, ordered by market cap (largest first).
+    items:
+      $ref: "./CryptoBubbleCoin.yaml"

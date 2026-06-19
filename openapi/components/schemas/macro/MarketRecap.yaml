@@ -1,0 +1,137 @@
+type: object
+description: |
+  Latest macroeconomic market recap — a snapshot of Japanese equity / commodity
+  indices, REITs, TOPIX, 3-month interbank rates and key currency rates.
+
+  Schema derived from the API's `MarketRecapResponseDto`: the live staging
+  endpoint currently returns HTTP 500 (a known server-side bug), so this shape
+  and its example are authored from the source DTO rather than harvested.
+required:
+  - updateTime
+  - nikkeiJpxGold
+  - nikkeiJpxOil
+  - tokyoStockExchangeReit
+  - topix
+  - interbankRates3m
+  - currencyRate
+properties:
+  updateTime:
+    type: string
+    description: Timestamp of the recap snapshot.
+    example: "2024-01-15T15:30:00"
+  nikkeiJpxGold:
+    type: array
+    description: Nikkei / JPX gold index series.
+    items:
+      $ref: "#/$defs/MarketIndexData"
+  nikkeiJpxOil:
+    type: array
+    description: Nikkei / JPX oil index series.
+    items:
+      $ref: "#/$defs/MarketIndexData"
+  tokyoStockExchangeReit:
+    type: array
+    description: Tokyo Stock Exchange REIT index series.
+    items:
+      $ref: "#/$defs/MarketIndexData"
+  topix:
+    type: array
+    description: TOPIX index series.
+    items:
+      $ref: "#/$defs/MarketIndexData"
+  interbankRates3m:
+    type: array
+    description: 3-month interbank reference rates.
+    items:
+      $ref: "#/$defs/InterbankRateData"
+  currencyRate:
+    type: array
+    description: Key currency-pair exchange rates.
+    items:
+      $ref: "#/$defs/ExchangeRateData"
+$defs:
+  MarketIndexData:
+    type: object
+    description: A single market-index quote.
+    required:
+      - index
+      - datetime
+      - atClose
+    properties:
+      index:
+        type: string
+        example: Nikkei 225
+      value:
+        type: ["number", "null"]
+        example: 38500.5
+      changeValue:
+        type: ["number", "null"]
+        description: Absolute change versus the previous close.
+        example: 120.3
+      changePercent:
+        type: ["number", "null"]
+        description: Percentage change versus the previous close.
+        example: 0.31
+      datetime:
+        type: string
+        example: "2024-01-15T15:30:00"
+      atClose:
+        type: string
+        example: "2024-01-15T15:30:00"
+  InterbankRateData:
+    type: object
+    description: A single 3-month interbank rate quote.
+    required:
+      - index
+      - value
+      - datetime
+      - atClose
+    properties:
+      index:
+        type: string
+        example: TIBOR 3M
+      value:
+        type: number
+        example: 0.08
+      changeValue:
+        type: ["number", "null"]
+        description: Absolute change versus the previous close.
+        example: 0.01
+      changePercent:
+        type: ["number", "null"]
+        description: Percentage change versus the previous close.
+        example: null
+      datetime:
+        type: string
+        example: "2024-01-15T15:30:00"
+      atClose:
+        type: string
+        example: "2024-01-15T15:30:00"
+  ExchangeRateData:
+    type: object
+    description: A single currency-pair quote.
+    required:
+      - index
+      - datetime
+      - atClose
+    properties:
+      index:
+        type: string
+        example: USD/JPY
+      value:
+        type: ["number", "null"]
+        example: 148.5
+      changeValue:
+        type: ["number", "null"]
+        description: Absolute change versus the previous close.
+        example: 0.3
+      changePercent:
+        type: ["number", "null"]
+        description: Percentage change versus the previous close.
+        example: 0.2
+      datetime:
+        type: string
+        example: "2024-01-15T15:30:00"
+      atClose:
+        type: string
+        example: "2024-01-15T15:30:00"

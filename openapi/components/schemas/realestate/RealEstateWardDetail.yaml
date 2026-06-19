@@ -1,0 +1,120 @@
+type: object
+description: |
+  Full land-price detail for a single ward — an aggregate `summary` plus the list of
+  priced `roads`. The `Vt1..4` suffixes denote value-position tiers (frontage → rear);
+  tiers that do not apply are `null`.
+required:
+  - wardId
+  - wardName
+  - area
+  - summary
+  - roads
+properties:
+  wardId:
+    type: integer
+    description: Ward identifier.
+    example: 1
+  wardName:
+    type: string
+    description: Ward name.
+    example: Sài Gòn
+  area:
+    type: string
+    description: Area / land-value zone label (localized).
+    example: Khu vực I
+  summary:
+    type: object
+    description: Aggregate price summary for the ward.
+    required:
+      - minPriceResidential
+      - maxPriceResidential
+      - roadCount
+      - year
+      - month
+      - unit
+    properties:
+      avgPriceResidentialVt1:
+        type: ["number", "null"]
+        description: Average residential price, value-position tier 1.
+        example: 365020
+      avgPriceResidentialVt2:
+        type: ["number", "null"]
+        description: Average residential price, value-position tier 2.
+        example: null
+      avgPriceResidentialVt3:
+        type: ["number", "null"]
+        description: Average residential price, value-position tier 3.
+        example: null
+      avgPriceResidentialVt4:
+        type: ["number", "null"]
+        description: Average residential price, value-position tier 4.
+        example: null
+      minPriceResidential:
+        type: ["number", "null"]
+        description: Minimum residential price in the ward.
+        example: 191200
+      maxPriceResidential:
+        type: ["number", "null"]
+        description: Maximum residential price in the ward.
+        example: 687200
+      roadCount:
+        type: string
+        description: Number of priced roads in the ward (returned as a string).
+        example: "60"
+      year:
+        type: integer
+        description: Year the price schedule applies to.
+        example: 2025
+      month:
+        type: integer
+        description: Month the price schedule applies to.
+        example: 1
+      unit:
+        type: string
+        description: Price unit. `k_vnd` means thousands of VND per square metre.
+        example: k_vnd
+  roads:
+    type: array
+    description: Priced road segments within the ward.
+    items:
+      type: object
+      required:
+        - roadName
+        - priceResidentialVt1
+      properties:
+        roadName:
+          type: string
+          description: Road name.
+          example: NGUYỄN HUỆ
+        segmentFrom:
+          type: ["string", "null"]
+          description: Start of the priced segment (or `TRỌN ĐƯỜNG` for the whole road).
+          example: TRỌN ĐƯỜNG
+        segmentTo:
+          type: ["string", "null"]
+          description: End of the priced segment.
+          example: null
+        priceResidentialVt1:
+          type: ["number", "null"]
+          description: Residential price, value-position tier 1.
+          example: 687200
+        priceResidentialVt2:
+          type: ["number", "null"]
+          description: Residential price, value-position tier 2.
+          example: null
+        priceResidentialVt3:
+          type: ["number", "null"]
+          description: Residential price, value-position tier 3.
+          example: null
+        priceResidentialVt4:
+          type: ["number", "null"]
+          description: Residential price, value-position tier 4.
+          example: null
+        priceCommercialVt1:
+          type: ["number", "null"]
+          description: Commercial price, value-position tier 1.
+          example: 481000
+        priceProductionVt1:
+          type: ["number", "null"]
+          description: Production / manufacturing price, value-position tier 1.
+          example: 412300

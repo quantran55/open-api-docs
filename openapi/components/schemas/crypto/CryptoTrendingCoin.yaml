@@ -1,0 +1,31 @@
+type: object
+description: A trending coin in the market overview — a notable 24h gainer or loser.
+required:
+  - symbol
+  - name
+  - rank
+  - priceChange24h
+  - tag
+properties:
+  symbol:
+    type: string
+    description: Ticker symbol of the coin.
+    example: FF
+  name:
+    type: string
+    example: Falcon Finance
+  rank:
+    type: integer
+    description: Market-cap rank of the coin.
+    example: 98
+  priceChange24h:
+    type: number
+    description: 24-hour price change, as a percentage.
+    example: 99.3142
+  tag:
+    type: string
+    enum:
+      - gainer
+      - loser
+    description: Whether the coin is a top gainer or loser.
+    example: gainer

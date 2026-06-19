@@ -1,0 +1,19 @@
+type: object
+description: |
+  Standard success envelope shared by every endpoint. Each operation's response
+  wrapper extends this (via `allOf`) and adds a typed `data` property.
+required:
+  - success
+  - statusCode
+properties:
+  success:
+    type: boolean
+    const: true
+    description: Always `true` for a successful response.
+    example: true
+  statusCode:
+    type: integer
+    description: Mirrors the HTTP status code.
+    example: 200
+  meta:
+    $ref: "./Meta.yaml"

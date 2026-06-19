@@ -1,0 +1,83 @@
+get:
+  operationId: macroEconomicData
+  tags:
+    - Macro
+  summary: Economic data series
+  description: |
+    Time series for a selected macroeconomic indicator — GDP, CPI, PCE or
+    import-export — for a country, over a chosen look-back window.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: type
+      in: query
+      required: true
+      description: Indicator to return.
+      schema:
+        type: string
+        enum:
+          - gdp
+          - cpi
+          - pce
+          - import-export
+        example: gdp
+    - name: country
+      in: query
+      required: false
+      description: ISO country code.
+      schema:
+        type: string
+        default: JP
+        example: JP
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 1Y
+          - 3Y
+          - 10Y
+        default: 10Y
+  responses:
+    "200":
+      description: Selected economic data series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroEconomicDataResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - country: JP
+                quarter: Q4 2025
+                gdp: "672199.300"
+                gdpUnit: Billion JPY
+                growthRate: 0.6
+                realGdp: null
+                realGrowthRate: null
+                dateFrom: "2025-10-01T00:00:00.000Z"
+                dateTo: "2025-12-31T23:59:59.999Z"
+              - country: JP
+                quarter: Q1 2026
+                gdp: "677233.400"
+                gdpUnit: Billion JPY
+                growthRate: 0.8
+                realGdp: null
+                realGrowthRate: null
+                dateFrom: "2026-01-01T00:00:00.000Z"
+                dateTo: "2026-03-31T23:59:59.999Z"
+            meta:
+              timestamp: "2026-06-19T08:50:42.471Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,74 @@
+type: object
+description: |
+  Choropleth payload: a collection of ward features carrying both their average-price
+  attributes and their boundary geometry. The geometry (`coordinates`) is intentionally
+  modelled permissively — it is a nested array of `[longitude, latitude]` coordinate
+  rings and can be large; clients typically pass it straight to a mapping library.
+required:
+  - wards
+properties:
+  wards:
+    type: array
+    description: Ward features with price attributes and boundary geometry.
+    items:
+      type: object
+      required:
+        - wardId
+        - wardName
+        - area
+      properties:
+        wardId:
+          type: integer
+          description: Ward identifier.
+          example: 34
+        wardName:
+          type: string
+          description: Ward name.
+          example: Phú Thuận
+        areaName:
+          type: string
+          description: Area / zone display name (localized).
+          example: Khu vực II
+        area:
+          type: string
+          description: Area / land-value zone label (localized).
+          example: Khu vực II
+        avgPriceResidentialVt1:
+          type: ["number", "null"]
+          description: Average residential price, value-position tier 1.
+          example: 52639.39
+        avgPriceResidentialVt2:
+          type: ["number", "null"]
+          description: Average residential price, value-position tier 2.
+          example: null
+        avgPriceResidentialVt3:
+          type: ["number", "null"]
+          description: Average residential price, value-position tier 3.
+          example: null
+        avgPriceResidentialVt4:
+          type: ["number", "null"]
+          description: Average residential price, value-position tier 4.
+          example: null
+        minPriceResidential:
+          type: ["number", "null"]
+          description: Minimum residential price in the ward.
+          example: 36500
+        maxPriceResidential:
+          type: ["number", "null"]
+          description: Maximum residential price in the ward.
+          example: 83400
+        roadCount:
+          type: integer
+          description: Number of priced roads in the ward.
+          example: 38
+        unit:
+          type: string
+          description: Price unit. `k_vnd` means thousands of VND per square metre.
+          example: k_vnd
+        coordinates:
+          description: |
+            Boundary geometry as nested coordinate arrays (polygon / multipolygon rings of
+            `[longitude, latitude]` points). Permissive by design — pass through to a map.
+          type: array
+          items: {}
+      additionalProperties: true

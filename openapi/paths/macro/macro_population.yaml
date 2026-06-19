@@ -1,0 +1,61 @@
+get:
+  operationId: macroPopulation
+  tags:
+    - Macro
+  summary: Population & unemployment
+  description: |
+    Monthly total-population figures alongside the unemployment rate for a
+    country, over a chosen look-back window.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: ISO country code.
+      schema:
+        type: string
+        default: JP
+        example: JP
+    - name: period
+      in: query
+      required: false
+      description: Look-back window.
+      schema:
+        type: string
+        enum:
+          - 1Y
+          - 3Y
+          - 10Y
+        default: 1Y
+  responses:
+    "200":
+      description: Population and unemployment series.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroPopulationResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - country: JP
+                observationDate: "2026-02-01"
+                population: 122860000
+                unemploymentRate: 2.6
+              - country: JP
+                observationDate: "2026-03-01"
+                population: 122850000
+                unemploymentRate: 2.7
+            meta:
+              timestamp: "2026-06-19T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

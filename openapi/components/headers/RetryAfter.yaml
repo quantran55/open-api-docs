@@ -1,0 +1,4 @@
+description: Seconds to wait before retrying. Present on 429 responses.
+schema:
+  type: integer
+  example: 30

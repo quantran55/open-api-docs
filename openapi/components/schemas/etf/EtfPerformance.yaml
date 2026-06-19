@@ -1,0 +1,32 @@
+type: object
+description: An ETF's cumulative-return performance, grouped by period window.
+required:
+  - periodAvailability
+  - periods
+properties:
+  periodAvailability:
+    type: object
+    description: Which period windows have data, keyed by period.
+    additionalProperties:
+      type: boolean
+    example:
+      1M: true
+      3M: true
+      6M: true
+      1Y: true
+      3Y: true
+  periods:
+    type: object
+    description: Performance series grouped by period window (e.g. `1M`, `1Y`).
+    additionalProperties:
+      type: array
+      items:
+        $ref: "./EtfPerformancePoint.yaml"
+    example:
+      1M:
+        - date: 15-05-2026
+          nav: 409.9
+          cumulativeReturn: 0
+        - date: 18-05-2026
+          nav: 405.9
+          cumulativeReturn: -0.98

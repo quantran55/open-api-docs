@@ -1,0 +1,13 @@
+description: Missing, invalid, disabled or expired API key. Send a valid key in the `X-API-Key` header.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 401
+      error:
+        code: API_KEY_INVALID
+        message: Invalid API key
+      meta:
+        timestamp: "2026-06-19T08:34:08.023Z"

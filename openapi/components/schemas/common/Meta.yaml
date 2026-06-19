@@ -1,0 +1,12 @@
+type: object
+description: Response metadata. Always present; `timestamp` is the server time the response was generated.
+required:
+  - timestamp
+properties:
+  timestamp:
+    type: string
+    format: date-time
+    description: Server time when the response was generated (ISO 8601).
+    example: "2026-06-19T08:31:59.478Z"
+# Some responses add extra keys here (e.g. `error`, `statusCode` on errors).
+additionalProperties: true

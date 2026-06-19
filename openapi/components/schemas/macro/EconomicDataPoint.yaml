@@ -1,0 +1,53 @@
+type: object
+description: |
+  One observation in an economic data series (GDP / CPI / PCE / import-export).
+  Shared by the GDP growth-rate and economic-data endpoints.
+required:
+  - country
+  - quarter
+  - gdp
+  - gdpUnit
+  - growthRate
+  - dateFrom
+  - dateTo
+properties:
+  country:
+    type: string
+    description: ISO country code the series belongs to.
+    example: JP
+  quarter:
+    type: string
+    description: Human-readable observation period.
+    example: Q1 2026
+  gdp:
+    type: string
+    description: |
+      Nominal value for the period. Delivered as a string on the wire to
+      preserve full numeric precision.
+    example: "677233.400"
+  gdpUnit:
+    type: string
+    description: Unit the value is expressed in.
+    example: Billion JPY
+  growthRate:
+    type: number
+    description: Period-over-period nominal growth rate, in percent.
+    example: 0.8
+  realGdp:
+    type: ["number", "null"]
+    description: Inflation-adjusted value; `null` when not published for the period.
+    example: null
+  realGrowthRate:
+    type: ["number", "null"]
+    description: Inflation-adjusted growth rate, in percent; `null` when unavailable.
+    example: null
+  dateFrom:
+    type: string
+    format: date-time
+    description: Inclusive start of the observation period.
+    example: "2026-01-01T00:00:00.000Z"
+  dateTo:
+    type: string
+    format: date-time
+    description: Inclusive end of the observation period.
+    example: "2026-03-31T23:59:59.999Z"

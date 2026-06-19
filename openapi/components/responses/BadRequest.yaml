@@ -1,0 +1,17 @@
+description: Invalid or missing parameter — bad enum, range, format, or a missing required query parameter.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/common/ErrorBody.yaml"
+    example:
+      success: false
+      statusCode: 400
+      error:
+        code: INTERNAL_ERROR
+        message:
+          - 'Invalid type parameter. Must be "gdp", "cpi", "pce", or "import-export"'
+          - Type parameter is required
+      meta:
+        error: Bad Request
+        statusCode: 400
+        timestamp: "2026-06-19T08:34:08.081Z"

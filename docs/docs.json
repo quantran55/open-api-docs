@@ -16,43 +16,6 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "introduction",
-              "quickstart"
-            ]
-          },
-          {
-            "group": "Authentication",
-            "pages": [
-              "authentication"
-            ]
-          },
-          {
-            "group": "Usage & limits",
-            "pages": [
-              "rate-limits",
-              "plans-and-features"
-            ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "errors"
-            ]
-          },
-          {
-            "group": "History",
-            "pages": [
-              "changelog"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "API Reference",
         "openapi": "openapi.yaml",
         "groups": [
@@ -124,6 +87,43 @@
               "GET /openapi/v1/real-estate/{country}/land-prices",
               "GET /openapi/v1/real-estate/{country}/provinces",
               "GET /openapi/v1/real-estate/{country}"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "authentication"
+            ]
+          },
+          {
+            "group": "Usage & limits",
+            "pages": [
+              "rate-limits",
+              "plans-and-features"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "errors"
+            ]
+          },
+          {
+            "group": "History",
+            "pages": [
+              "changelog"
             ]
           }
         ]

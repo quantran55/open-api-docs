@@ -5,7 +5,7 @@
   "description": "The official API for the HayInsights financial-data hub — commodities, crypto, ETF, FX, macro and real-estate datasets.",
   "logo": {
     "light": "/logo.svg",
-    "dark": "/logo.svg"
+    "dark": "/logo-dark.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {

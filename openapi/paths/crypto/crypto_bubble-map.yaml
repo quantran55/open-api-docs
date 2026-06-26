@@ -12,7 +12,14 @@ get:
     - name: timeframe
       in: query
       required: false
-      description: Timeframe the price changes are computed over.
+      description: |
+        Timeframe the price changes are computed over.
+
+        | Value | Description |
+        | --- | --- |
+        | `1h` | Last 1 hour |
+        | `1d` | Last 1 day |
+        | `1w` | Last 1 week |
       schema:
         type: string
         enum:

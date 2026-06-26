@@ -20,7 +20,14 @@ get:
     - name: period
       in: query
       required: false
-      description: Look-back window.
+      description: |
+        Look-back window.
+
+        | Value | Description |
+        | --- | --- |
+        | `1Y` | Last 1 year |
+        | `3Y` | Last 3 years |
+        | `10Y` | Last 10 years |
       schema:
         type: string
         enum:

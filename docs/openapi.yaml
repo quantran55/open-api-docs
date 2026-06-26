@@ -61,7 +61,15 @@ paths:
         - name: category
           in: query
           required: false
-          description: Filter by commodity category.
+          description: |
+            Filter by commodity category.
+
+            | Value | Description |
+            | --- | --- |
+            | `energy` | Energy (crude oil, natural gas, …) |
+            | `metals` | Metals (gold, silver, copper, …) |
+            | `agriculture` | Agricultural commodities (grains, softs, …) |
+            | `macro` | Macro indices (US Dollar Index, …) |
           schema:
             $ref: '#/components/schemas/CommodityCategory'
         - name: search
@@ -74,7 +82,16 @@ paths:
         - name: sort
           in: query
           required: false
-          description: Field to sort by.
+          description: |
+            Field to sort by.
+
+            | Value | Description |
+            | --- | --- |
+            | `name` | Commodity name |
+            | `price` | Latest price |
+            | `change_1d` | 1-day price change |
+            | `mtd` | Month-to-date change |
+            | `ytd` | Year-to-date change |
           schema:
             type: string
             enum:
@@ -87,7 +104,13 @@ paths:
         - name: order
           in: query
           required: false
-          description: Sort direction.
+          description: |
+            Sort direction.
+
+            | Value | Description |
+            | --- | --- |
+            | `asc` | Ascending |
+            | `desc` | Descending |
           schema:
             $ref: '#/components/schemas/SortOrder'
       responses:
@@ -217,7 +240,12 @@ paths:
         - name: period
           in: query
           required: false
-          description: Period the movers are computed over.
+          description: |
+            Period the movers are computed over.
+
+            | Value | Description |
+            | --- | --- |
+            | `mtd` | Month-to-date |
           schema:
             type: string
             enum:
@@ -285,7 +313,14 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window.
+          description: |
+            Look-back window.
+
+            | Value | Description |
+            | --- | --- |
+            | `1m` | Last 1 month |
+            | `3m` | Last 3 months |
+            | `ytd` | Year-to-date |
           schema:
             type: string
             enum:
@@ -354,7 +389,16 @@ paths:
         - name: period
           in: query
           required: false
-          description: History window.
+          description: |
+            History window.
+
+            | Value | Description |
+            | --- | --- |
+            | `7d` | Last 7 days |
+            | `1m` | Last 1 month |
+            | `3m` | Last 3 months |
+            | `ytd` | Year-to-date |
+            | `1y` | Last 1 year |
           schema:
             type: string
             enum:
@@ -367,7 +411,13 @@ paths:
         - name: interval
           in: query
           required: false
-          description: Sampling interval.
+          description: |
+            Sampling interval.
+
+            | Value | Description |
+            | --- | --- |
+            | `daily` | One data point per day |
+            | `weekly` | One data point per week |
           schema:
             type: string
             enum:
@@ -478,7 +528,14 @@ paths:
         - name: timeframe
           in: query
           required: false
-          description: Timeframe the price changes are computed over.
+          description: |
+            Timeframe the price changes are computed over.
+
+            | Value | Description |
+            | --- | --- |
+            | `1h` | Last 1 hour |
+            | `1d` | Last 1 day |
+            | `1w` | Last 1 week |
           schema:
             type: string
             enum:
@@ -770,7 +827,14 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window for the performance ranking.
+          description: |
+            Look-back window for the performance ranking.
+
+            | Value | Description |
+            | --- | --- |
+            | `1M` | Last 1 month |
+            | `6M` | Last 6 months |
+            | `1Y` | Last 1 year |
           schema:
             type: string
             enum:
@@ -824,7 +888,13 @@ paths:
         - name: type
           in: query
           required: false
-          description: Whether to rank by inflows (`positive`) or outflows (`negative`).
+          description: |
+            Whether to rank by inflows (`positive`) or outflows (`negative`).
+
+            | Value | Description |
+            | --- | --- |
+            | `positive` | Largest inflows |
+            | `negative` | Largest outflows |
           schema:
             type: string
             enum:
@@ -1884,7 +1954,15 @@ paths:
         - name: type
           in: query
           required: true
-          description: Indicator to return.
+          description: |
+            Macroeconomic indicator to return.
+
+            | Value | Description |
+            | --- | --- |
+            | `gdp` | Gross Domestic Product |
+            | `cpi` | Consumer Price Index |
+            | `pce` | Personal Consumption Expenditures |
+            | `import-export` | Import & export trade |
           schema:
             type: string
             enum:
@@ -1982,7 +2060,15 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window.
+          description: |
+            Look-back window.
+
+            | Value | Description |
+            | --- | --- |
+            | `1Y` | Last 1 year |
+            | `3Y` | Last 3 years |
+            | `5Y` | Last 5 years |
+            | `10Y` | Last 10 years |
           schema:
             type: string
             enum:
@@ -2051,7 +2137,14 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window.
+          description: |
+            Look-back window.
+
+            | Value | Description |
+            | --- | --- |
+            | `1Y` | Last 1 year |
+            | `3Y` | Last 3 years |
+            | `10Y` | Last 10 years |
           schema:
             type: string
             enum:
@@ -2113,7 +2206,14 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window.
+          description: |
+            Look-back window.
+
+            | Value | Description |
+            | --- | --- |
+            | `5Y` | Last 5 years |
+            | `10Y` | Last 10 years |
+            | `20Y` | Last 20 years |
           schema:
             type: string
             enum:
@@ -2175,7 +2275,14 @@ paths:
         - name: period
           in: query
           required: false
-          description: Look-back window.
+          description: |
+            Look-back window.
+
+            | Value | Description |
+            | --- | --- |
+            | `1Y` | Last 1 year |
+            | `3Y` | Last 3 years |
+            | `10Y` | Last 10 years |
           schema:
             type: string
             enum:
@@ -2363,7 +2470,13 @@ paths:
         - name: lang
           in: query
           required: false
-          description: Language for localized names.
+          description: |
+            Language for localized names.
+
+            | Value | Description |
+            | --- | --- |
+            | `vi` | Vietnamese |
+            | `en` | English |
           schema:
             type: string
             enum:
@@ -2507,7 +2620,14 @@ paths:
         - name: type
           in: query
           required: false
-          description: Filter by land-use type.
+          description: |
+            Filter by land-use type.
+
+            | Value | Description |
+            | --- | --- |
+            | `residential` | Residential land |
+            | `commercial` | Commercial land |
+            | `production` | Production / industrial land |
           schema:
             type: string
             enum:
@@ -2517,7 +2637,15 @@ paths:
         - name: area
           in: query
           required: false
-          description: Filter by area / land-value zone.
+          description: |
+            Filter by area / land-value zone.
+
+            | Value | Description |
+            | --- | --- |
+            | `I` | Value zone I (highest) |
+            | `II` | Value zone II |
+            | `III` | Value zone III |
+            | `IV` | Value zone IV (lowest) |
           schema:
             type: string
             enum:
@@ -2614,7 +2742,13 @@ paths:
         - name: lang
           in: query
           required: false
-          description: Language for localized names.
+          description: |
+            Language for localized names.
+
+            | Value | Description |
+            | --- | --- |
+            | `vi` | Vietnamese |
+            | `en` | English |
           schema:
             type: string
             enum:

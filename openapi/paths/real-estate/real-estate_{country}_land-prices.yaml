@@ -20,7 +20,14 @@ get:
     - name: type
       in: query
       required: false
-      description: Filter by land-use type.
+      description: |
+        Filter by land-use type.
+
+        | Value | Description |
+        | --- | --- |
+        | `residential` | Residential land |
+        | `commercial` | Commercial land |
+        | `production` | Production / industrial land |
       schema:
         type: string
         enum:
@@ -30,7 +37,15 @@ get:
     - name: area
       in: query
       required: false
-      description: Filter by area / land-value zone.
+      description: |
+        Filter by area / land-value zone.
+
+        | Value | Description |
+        | --- | --- |
+        | `I` | Value zone I (highest) |
+        | `II` | Value zone II |
+        | `III` | Value zone III |
+        | `IV` | Value zone IV (lowest) |
       schema:
         type: string
         enum:

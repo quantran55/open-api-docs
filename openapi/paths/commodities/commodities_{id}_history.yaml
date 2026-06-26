@@ -19,7 +19,16 @@ get:
     - name: period
       in: query
       required: false
-      description: History window.
+      description: |
+        History window.
+
+        | Value | Description |
+        | --- | --- |
+        | `7d` | Last 7 days |
+        | `1m` | Last 1 month |
+        | `3m` | Last 3 months |
+        | `ytd` | Year-to-date |
+        | `1y` | Last 1 year |
       schema:
         type: string
         enum:
@@ -32,7 +41,13 @@ get:
     - name: interval
       in: query
       required: false
-      description: Sampling interval.
+      description: |
+        Sampling interval.
+
+        | Value | Description |
+        | --- | --- |
+        | `daily` | One data point per day |
+        | `weekly` | One data point per week |
       schema:
         type: string
         enum:

@@ -11,7 +11,12 @@ get:
     - name: period
       in: query
       required: false
-      description: Period the movers are computed over.
+      description: |
+        Period the movers are computed over.
+
+        | Value | Description |
+        | --- | --- |
+        | `mtd` | Month-to-date |
       schema:
         type: string
         enum:

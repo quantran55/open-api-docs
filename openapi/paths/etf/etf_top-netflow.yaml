@@ -12,7 +12,13 @@ get:
     - name: type
       in: query
       required: false
-      description: Whether to rank by inflows (`positive`) or outflows (`negative`).
+      description: |
+        Whether to rank by inflows (`positive`) or outflows (`negative`).
+
+        | Value | Description |
+        | --- | --- |
+        | `positive` | Largest inflows |
+        | `negative` | Largest outflows |
       schema:
         type: string
         enum:

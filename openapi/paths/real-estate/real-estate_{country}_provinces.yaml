@@ -19,7 +19,13 @@ get:
     - name: lang
       in: query
       required: false
-      description: Language for localized names.
+      description: |
+        Language for localized names.
+
+        | Value | Description |
+        | --- | --- |
+        | `vi` | Vietnamese |
+        | `en` | English |
       schema:
         type: string
         enum:

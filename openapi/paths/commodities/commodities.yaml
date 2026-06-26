@@ -13,7 +13,15 @@ get:
     - name: category
       in: query
       required: false
-      description: Filter by commodity category.
+      description: |
+        Filter by commodity category.
+
+        | Value | Description |
+        | --- | --- |
+        | `energy` | Energy (crude oil, natural gas, …) |
+        | `metals` | Metals (gold, silver, copper, …) |
+        | `agriculture` | Agricultural commodities (grains, softs, …) |
+        | `macro` | Macro indices (US Dollar Index, …) |
       schema:
         $ref: "../../components/schemas/common/enums/CommodityCategory.yaml"
     - name: search
@@ -26,7 +34,16 @@ get:
     - name: sort
       in: query
       required: false
-      description: Field to sort by.
+      description: |
+        Field to sort by.
+
+        | Value | Description |
+        | --- | --- |
+        | `name` | Commodity name |
+        | `price` | Latest price |
+        | `change_1d` | 1-day price change |
+        | `mtd` | Month-to-date change |
+        | `ytd` | Year-to-date change |
       schema:
         type: string
         enum:
@@ -39,7 +56,13 @@ get:
     - name: order
       in: query
       required: false
-      description: Sort direction.
+      description: |
+        Sort direction.
+
+        | Value | Description |
+        | --- | --- |
+        | `asc` | Ascending |
+        | `desc` | Descending |
       schema:
         $ref: "../../components/schemas/common/enums/SortOrder.yaml"
   responses:

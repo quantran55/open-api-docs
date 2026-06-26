@@ -12,7 +12,15 @@ get:
     - name: type
       in: query
       required: true
-      description: Indicator to return.
+      description: |
+        Macroeconomic indicator to return.
+
+        | Value | Description |
+        | --- | --- |
+        | `gdp` | Gross Domestic Product |
+        | `cpi` | Consumer Price Index |
+        | `pce` | Personal Consumption Expenditures |
+        | `import-export` | Import & export trade |
       schema:
         type: string
         enum:

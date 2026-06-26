@@ -12,7 +12,14 @@ get:
     - name: period
       in: query
       required: false
-      description: Look-back window for the performance ranking.
+      description: |
+        Look-back window for the performance ranking.
+
+        | Value | Description |
+        | --- | --- |
+        | `1M` | Last 1 month |
+        | `6M` | Last 6 months |
+        | `1Y` | Last 1 year |
       schema:
         type: string
         enum:

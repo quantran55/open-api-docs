@@ -25,10 +25,10 @@ info:
     headers. See **Rate limits** and **Plans & features**.
   contact: {}
 servers:
-  - url: https://api.hayinsights.com
-    description: Production
   - url: https://stg-api.hayinsights.com
-    description: Staging
+    description: Staging (live — use for demo / Try It)
+  - url: https://api.hayinsights.com
+    description: Production (not yet deployed)
 security:
   - HayInsightsApiKey: []
 tags:

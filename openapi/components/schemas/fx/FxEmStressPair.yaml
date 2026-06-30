@@ -47,6 +47,7 @@ properties:
       - STABLE
       - WARNING
       - PANIC
+      - UNKNOWN
     description: Stress classification for this pair.
     example: WARNING
   sampleN:

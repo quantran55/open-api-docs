@@ -1,0 +1,55 @@
+type: object
+title: MacroPceData
+description: |
+  One PCE (Personal Consumption Expenditures) observation. Returned as an item
+  of the economic-data `data` array when the `type` query parameter is `pce`.
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - country
+  - observationDate
+  - pcePoints
+  - corePcePoints
+  - pceChangeYoyPercent
+  - corePceChangeYoyPercent
+properties:
+  id:
+    type: integer
+    description: Unique identifier of the observation record.
+    example: 2048
+  createdAt:
+    type: string
+    format: date-time
+    description: When the record was created.
+    example: "2026-04-01T08:00:00.000Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the record was last updated.
+    example: "2026-04-01T08:00:00.000Z"
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: US
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2026-03-01"
+  pcePoints:
+    type: ["number", "null"]
+    description: Headline PCE index points; `null` when not published for the period.
+    example: 124.5
+  corePcePoints:
+    type: ["number", "null"]
+    description: Core PCE (excluding food & energy) index points; `null` when unavailable.
+    example: 122.1
+  pceChangeYoyPercent:
+    type: ["number", "null"]
+    description: Year-over-year change in headline PCE, in percent; `null` when unavailable.
+    example: 2.5
+  corePceChangeYoyPercent:
+    type: ["number", "null"]
+    description: Year-over-year change in core PCE, in percent; `null` when unavailable.
+    example: 2.2

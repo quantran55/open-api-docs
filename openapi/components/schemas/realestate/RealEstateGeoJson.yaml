@@ -6,6 +6,8 @@ description: |
   rings and can be large; clients typically pass it straight to a mapping library.
 required:
   - wards
+  - availableYears
+  - latestYear
 properties:
   wards:
     type: array
@@ -72,3 +74,11 @@ properties:
           type: array
           items: {}
       additionalProperties: true
+  availableYears:
+    type: array
+    description: Years for which land-price data is available.
+    items:
+      type: integer
+  latestYear:
+    type: ["integer", "null"]
+    description: Most recent year with data (null if none).

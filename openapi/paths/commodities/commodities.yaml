@@ -52,7 +52,7 @@ get:
           - change_1d
           - mtd
           - ytd
-        default: price
+        default: name
     - name: order
       in: query
       required: false

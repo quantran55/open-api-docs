@@ -25,7 +25,9 @@ properties:
   tag:
     type: string
     enum:
+      - new
+      - top-gainer
+      - top20-mover
       - gainer
-      - loser
-    description: Whether the coin is a top gainer or loser.
+    description: Trend category of the coin — newly added, top gainer, top-20 mover, or gainer.
     example: gainer

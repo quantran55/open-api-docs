@@ -1,0 +1,55 @@
+type: object
+title: MacroCpiData
+description: |
+  One CPI (Consumer Price Index) observation. Returned as an item of the
+  economic-data `data` array when the `type` query parameter is `cpi`.
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - country
+  - observationDate
+  - cpiPoints
+  - coreCpiPoints
+  - cpiChangeYoyPercent
+  - coreCpiChangeYoyPercent
+properties:
+  id:
+    type: integer
+    description: Unique identifier of the observation record.
+    example: 1024
+  createdAt:
+    type: string
+    format: date-time
+    description: When the record was created.
+    example: "2026-04-01T08:00:00.000Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the record was last updated.
+    example: "2026-04-01T08:00:00.000Z"
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: JP
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2026-03-01"
+  cpiPoints:
+    type: ["number", "null"]
+    description: Headline CPI index points; `null` when not published for the period.
+    example: 111.2
+  coreCpiPoints:
+    type: ["number", "null"]
+    description: Core CPI (excluding food & energy) index points; `null` when unavailable.
+    example: 109.8
+  cpiChangeYoyPercent:
+    type: ["number", "null"]
+    description: Year-over-year change in headline CPI, in percent; `null` when unavailable.
+    example: 2.7
+  coreCpiChangeYoyPercent:
+    type: ["number", "null"]
+    description: Year-over-year change in core CPI, in percent; `null` when unavailable.
+    example: 2.3

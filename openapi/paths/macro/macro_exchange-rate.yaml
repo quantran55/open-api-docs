@@ -31,17 +31,25 @@ get:
 
         | Value | Description |
         | --- | --- |
+        | `1M` | Last 1 month |
+        | `3M` | Last 3 months |
+        | `6M` | Last 6 months |
         | `1Y` | Last 1 year |
         | `3Y` | Last 3 years |
         | `5Y` | Last 5 years |
         | `10Y` | Last 10 years |
+        | `20Y` | Last 20 years |
       schema:
         type: string
         enum:
+          - 1M
+          - 3M
+          - 6M
           - 1Y
           - 3Y
           - 5Y
           - 10Y
+          - 20Y
         example: 1Y
     - name: before
       in: query

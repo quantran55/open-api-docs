@@ -44,11 +44,11 @@ properties:
     description: 50-period moving average.
     example: 3475.3036
   trend:
-    type: string
+    type: ["string", "null"]
     enum:
       - bullish
       - bearish
-      - neutral
+      - null
     description: Trend classification derived from the moving average.
     example: bullish
   trendline:

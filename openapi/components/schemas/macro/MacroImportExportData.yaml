@@ -1,0 +1,80 @@
+type: object
+title: MacroImportExportData
+description: |
+  One import/export observation. Returned as an item of the economic-data
+  `data` array when the `type` query parameter is `import-export`. Vietnam
+  (`VN`) markets populate turnover values and the trade balance; other markets
+  populate price-index points (PPI/IPI/EPI). Fields not relevant to a market
+  are `null`.
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - country
+  - observationDate
+  - tradeBalance
+  - importTurnover
+  - exportTurnover
+  - importTurnoverUnits
+  - exportTurnoverUnits
+  - ppiPoints
+  - ipiPoints
+  - epiPoints
+properties:
+  id:
+    type: integer
+    description: Unique identifier of the observation record.
+    example: 4096
+  createdAt:
+    type: string
+    format: date-time
+    description: When the record was created.
+    example: "2026-04-01T08:00:00.000Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the record was last updated.
+    example: "2026-04-01T08:00:00.000Z"
+  country:
+    type: string
+    description: ISO country code the observation belongs to.
+    example: VN
+  observationDate:
+    type: string
+    format: date
+    description: Date of the observation.
+    example: "2026-03-01"
+  tradeBalance:
+    type: ["number", "null"]
+    description: |
+      Exports minus imports for the period. Populated for `VN`; `null` for
+      markets that report price-index points instead.
+    example: 1200.5
+  importTurnover:
+    type: ["number", "null"]
+    description: Import turnover value; `null` for price-index markets.
+    example: 30500
+  exportTurnover:
+    type: ["number", "null"]
+    description: Export turnover value; `null` for price-index markets.
+    example: 31700.5
+  importTurnoverUnits:
+    type: ["string", "null"]
+    description: Unit the import turnover is expressed in; `null` when not applicable.
+    example: Million USD
+  exportTurnoverUnits:
+    type: ["string", "null"]
+    description: Unit the export turnover is expressed in; `null` when not applicable.
+    example: Million USD
+  ppiPoints:
+    type: ["number", "null"]
+    description: Producer Price Index points; `null` for turnover markets.
+    example: null
+  ipiPoints:
+    type: ["number", "null"]
+    description: Import Price Index points; `null` for turnover markets.
+    example: null
+  epiPoints:
+    type: ["number", "null"]
+    description: Export Price Index points; `null` for turnover markets.
+    example: null

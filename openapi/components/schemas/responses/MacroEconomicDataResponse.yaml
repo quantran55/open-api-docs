@@ -6,5 +6,17 @@ allOf:
     properties:
       data:
         type: array
+        description: |
+          Array of observations whose item shape depends on the `type` query
+          parameter:
+
+          - `gdp` → `EconomicDataPoint`
+          - `cpi` → `MacroCpiData`
+          - `pce` → `MacroPceData`
+          - `import-export` → `MacroImportExportData`
         items:
-          $ref: "../macro/EconomicDataPoint.yaml"
+          oneOf:
+            - $ref: "../macro/EconomicDataPoint.yaml"
+            - $ref: "../macro/MacroCpiData.yaml"
+            - $ref: "../macro/MacroPceData.yaml"
+            - $ref: "../macro/MacroImportExportData.yaml"

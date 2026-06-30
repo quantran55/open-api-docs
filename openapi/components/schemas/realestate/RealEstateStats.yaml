@@ -52,15 +52,15 @@ properties:
           description: Area / zone label (localized).
           example: Khu vực I
         avgPrice:
-          type: number
+          type: ["number", "null"]
           description: Average residential price within the area.
           example: 165462
         minPrice:
-          type: number
+          type: ["number", "null"]
           description: Minimum residential price within the area.
           example: 48600
         maxPrice:
-          type: number
+          type: ["number", "null"]
           description: Maximum residential price within the area.
           example: 687200
         wardCount:
@@ -83,7 +83,7 @@ properties:
         - priceResidential
       properties:
         roadName:
-          type: string
+          type: ["string", "null"]
           description: Road name.
           example: Hai Bà Trưng
         wardName:

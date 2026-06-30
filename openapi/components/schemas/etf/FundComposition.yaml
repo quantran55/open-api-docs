@@ -14,7 +14,9 @@ properties:
     description: Vietnamese fund certificate code.
     example: VESAF
   assetAllocation:
-    $ref: "./FundAssetAllocation.yaml"
+    oneOf:
+      - $ref: "./FundAssetAllocation.yaml"
+      - type: "null"
   portfolio:
     type: array
     description: Equity positions held by the fund.

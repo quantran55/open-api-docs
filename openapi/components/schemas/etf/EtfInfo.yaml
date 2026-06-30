@@ -5,8 +5,6 @@ required:
   - etfCode
   - etfName
   - managementCompany
-  - country
-  - etfType
 properties:
   id:
     type: integer

@@ -5,7 +5,7 @@ required:
   - pairs
 properties:
   asOf:
-    type: string
+    type: ["string", "null"]
     format: date
     description: Date the readings are as of.
     example: "2026-05-14"

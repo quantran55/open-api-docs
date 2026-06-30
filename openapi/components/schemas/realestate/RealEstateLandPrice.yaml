@@ -25,7 +25,7 @@ properties:
     description: Area / land-value zone label (localized).
     example: Khu vực 1
   roadName:
-    type: string
+    type: ["string", "null"]
     description: Road name.
     example: Nhà Thờ
   segmentFrom:

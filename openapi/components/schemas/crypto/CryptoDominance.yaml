@@ -26,17 +26,17 @@ properties:
       - isStale
     properties:
       globalMetrics:
-        type: string
+        type: ["string", "null"]
         format: date-time
         description: Timestamp of the global-metrics snapshot.
         example: "2026-06-19T08:45:00.000Z"
       assets:
-        type: string
+        type: ["string", "null"]
         format: date-time
         description: Timestamp of the per-asset snapshot.
         example: "2026-06-19T08:45:00.040Z"
       skewSeconds:
-        type: integer
+        type: ["integer", "null"]
         description: Skew, in seconds, between the two snapshots.
         example: 0
       isStale:

@@ -6,6 +6,9 @@ required:
   - unit
   - lastClose
   - currency
+  - change1dPct
+  - changeValue
+  - trendline
 properties:
   id:
     type: string
@@ -17,17 +20,17 @@ properties:
     type: string
     example: USD/oz
   lastClose:
-    type: number
+    type: ["number", "null"]
     example: 4189.22
   currency:
     type: string
     example: USD
   change1dPct:
-    type: number
+    type: ["number", "null"]
     description: 1-day percentage change.
     example: 0.02
   changeValue:
-    type: number
+    type: ["number", "null"]
     description: 1-day absolute price change.
     example: 0.77
   trendline:

@@ -26,11 +26,11 @@ properties:
       preserve full numeric precision.
     example: "677233.400"
   gdpUnit:
-    type: string
+    type: ["string", "null"]
     description: Unit the value is expressed in.
     example: Billion JPY
   growthRate:
-    type: number
+    type: ["number", "null"]
     description: Period-over-period nominal growth rate, in percent.
     example: 0.8
   realGdp:

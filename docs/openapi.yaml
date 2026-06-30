@@ -100,7 +100,7 @@ paths:
               - change_1d
               - mtd
               - ytd
-            default: price
+            default: name
         - name: order
           in: query
           required: false
@@ -2065,17 +2065,25 @@ paths:
 
             | Value | Description |
             | --- | --- |
+            | `1M` | Last 1 month |
+            | `3M` | Last 3 months |
+            | `6M` | Last 6 months |
             | `1Y` | Last 1 year |
             | `3Y` | Last 3 years |
             | `5Y` | Last 5 years |
             | `10Y` | Last 10 years |
+            | `20Y` | Last 20 years |
           schema:
             type: string
             enum:
+              - 1M
+              - 3M
+              - 6M
               - 1Y
               - 3Y
               - 5Y
               - 10Y
+              - 20Y
             example: 1Y
         - name: before
           in: query
@@ -2370,6 +2378,11 @@ paths:
                             - 10.7051207
                           - - 106.751422
                             - 10.7074537
+                  availableYears:
+                    - 2024
+                    - 2025
+                    - 2026
+                  latestYear: 2026
                 meta:
                   timestamp: '2026-06-19T08:54:29.621Z'
         '400':
@@ -2921,34 +2934,46 @@ components:
           type: string
           example: USD/ton
         lastClose:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Most recent closing price.
           example: 3588
         currency:
           type: string
           example: USD
         change1dPct:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 1-day percentage change.
           example: 0.53
         changeMtdPct:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Month-to-date percentage change.
           example: 0.28
         changeYtdPct:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Year-to-date percentage change.
           example: 14.63
         ma50:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 50-period moving average.
           example: 3475.3036
         trend:
-          type: string
+          type:
+            - string
+            - 'null'
           enum:
             - bullish
             - bearish
-            - neutral
+            - null
           description: Trend classification derived from the moving average.
           example: bullish
         trendline:
@@ -3024,6 +3049,9 @@ components:
         - unit
         - lastClose
         - currency
+        - change1dPct
+        - changeValue
+        - trendline
       properties:
         id:
           type: string
@@ -3035,17 +3063,23 @@ components:
           type: string
           example: USD/oz
         lastClose:
-          type: number
+          type:
+            - number
+            - 'null'
           example: 4189.22
         currency:
           type: string
           example: USD
         change1dPct:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 1-day percentage change.
           example: 0.02
         changeValue:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 1-day absolute price change.
           example: 0.77
         trendline:
@@ -3117,6 +3151,7 @@ components:
       required:
         - date
         - value
+        - pctChange
       properties:
         date:
           type: string
@@ -3217,9 +3252,11 @@ components:
         tag:
           type: string
           enum:
+            - new
+            - top-gainer
+            - top20-mover
             - gainer
-            - loser
-          description: Whether the coin is a top gainer or loser.
+          description: Trend category of the coin — newly added, top gainer, top-20 mover, or gainer.
           example: gainer
     CryptoOverview:
       type: object
@@ -3282,7 +3319,9 @@ components:
               description: Combined dominance of all other coins.
               example: 23.706
         fearGreed:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Crypto Fear & Greed index reading.
           required:
             - value
@@ -3390,7 +3429,9 @@ components:
         - nupl
       properties:
         ethGas:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Ethereum gas price tiers.
           required:
             - safe
@@ -3400,19 +3441,27 @@ components:
             - unit
           properties:
             safe:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Gas price for a low-priority (safe) transaction.
               example: 0.084424998
             standard:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Gas price for a standard-priority transaction.
               example: 0.08533128
             fast:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Gas price for a high-priority (fast) transaction.
               example: 0.093864408
             baseFee:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Current network base fee.
               example: 0.0843841
             unit:
@@ -3420,7 +3469,9 @@ components:
               description: Unit the gas prices are expressed in.
               example: gwei
         btcHashrate:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Bitcoin network hashrate.
           required:
             - value
@@ -3434,15 +3485,21 @@ components:
               description: Unit the hashrate is expressed in.
               example: EH/s
         btcActiveAddresses:
-          type: integer
+          type:
+            - integer
+            - 'null'
           description: Number of active Bitcoin addresses.
           example: 503361
         whaleTxCount:
-          type: integer
+          type:
+            - integer
+            - 'null'
           description: Number of large ("whale") transactions observed.
           example: 29766
         mvrv:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Market-Value-to-Realised-Value ratio and its valuation zone.
           required:
             - value
@@ -3453,10 +3510,17 @@ components:
               example: 1.1772253837760067
             zone:
               type: string
+              enum:
+                - undervalued
+                - fair_value
+                - overheating
+                - overvalued
               description: Valuation zone derived from the MVRV value.
               example: fair_value
         nupl:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Net Unrealised Profit / Loss and its sentiment zone.
           required:
             - value
@@ -3467,6 +3531,12 @@ components:
               example: 0.1586
             zone:
               type: string
+              enum:
+                - capitulation
+                - hope_fear
+                - optimism
+                - belief
+                - euphoria
               description: Sentiment zone derived from the NUPL value.
               example: hope_fear
     CryptoOnchainResponse:
@@ -3532,9 +3602,13 @@ components:
             - eth
           properties:
             btc:
-              $ref: '#/components/schemas/CryptoOpenInterest'
+              oneOf:
+                - $ref: '#/components/schemas/CryptoOpenInterest'
+                - type: 'null'
             eth:
-              $ref: '#/components/schemas/CryptoOpenInterest'
+              oneOf:
+                - $ref: '#/components/schemas/CryptoOpenInterest'
+                - type: 'null'
         fundingRate:
           type: object
           description: Perpetual-futures funding rate per coin.
@@ -3543,11 +3617,17 @@ components:
             - eth
           properties:
             btc:
-              $ref: '#/components/schemas/CryptoFundingRate'
+              oneOf:
+                - $ref: '#/components/schemas/CryptoFundingRate'
+                - type: 'null'
             eth:
-              $ref: '#/components/schemas/CryptoFundingRate'
+              oneOf:
+                - $ref: '#/components/schemas/CryptoFundingRate'
+                - type: 'null'
         liquidations24h:
-          type: object
+          type:
+            - object
+            - 'null'
           description: Total long and short liquidations over the last 24 hours, in USD.
           required:
             - total
@@ -3555,14 +3635,20 @@ components:
             - short
           properties:
             total:
-              type: number
+              type:
+                - number
+                - 'null'
               example: 600914130.33
             long:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Value of liquidated long positions.
               example: 515261276.52
             short:
-              type: number
+              type:
+                - number
+                - 'null'
               description: Value of liquidated short positions.
               example: 85652853.81
         putCallRatio:
@@ -3572,7 +3658,9 @@ components:
             - btc
           properties:
             btc:
-              type: object
+              type:
+                - object
+                - 'null'
               required:
                 - ratio
                 - putOi
@@ -3652,17 +3740,23 @@ components:
             - isStale
           properties:
             globalMetrics:
-              type: string
+              type:
+                - string
+                - 'null'
               format: date-time
               description: Timestamp of the global-metrics snapshot.
               example: '2026-06-19T08:45:00.000Z'
             assets:
-              type: string
+              type:
+                - string
+                - 'null'
               format: date-time
               description: Timestamp of the per-asset snapshot.
               example: '2026-06-19T08:45:00.040Z'
             skewSeconds:
-              type: integer
+              type:
+                - integer
+                - 'null'
               description: Skew, in seconds, between the two snapshots.
               example: 0
             isStale:
@@ -3689,8 +3783,6 @@ components:
         - etfCode
         - etfName
         - managementCompany
-        - country
-        - etfType
       properties:
         id:
           type: integer
@@ -3742,7 +3834,9 @@ components:
           description: Asset-class / strategy classification.
           example: Japanese Equity(Market)
         price:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Latest market price.
           example: 425.5
         aum:
@@ -4025,7 +4119,9 @@ components:
           description: Vietnamese fund certificate code.
           example: VESAF
         assetAllocation:
-          $ref: '#/components/schemas/FundAssetAllocation'
+          oneOf:
+            - $ref: '#/components/schemas/FundAssetAllocation'
+            - type: 'null'
         portfolio:
           type: array
           description: Equity positions held by the fund.
@@ -4067,6 +4163,14 @@ components:
           type: number
           description: Net asset value per share on the date.
           example: 19948.69
+        isFilledFromPreviousDate:
+          type: boolean
+          description: True when this point's value was carried forward from a previous trading day (the period boundary was not a trading day).
+          example: true
+        actualDataDate:
+          type: string
+          description: The actual trading date the carried-forward value came from (format DD-MM-YYYY).
+          example: 18-03-2026
     NavGrowthSeries:
       type: object
       description: |
@@ -4157,8 +4261,6 @@ components:
         - etfCode
         - etfName
         - managementCompany
-        - country
-        - etfType
       properties:
         id:
           type: integer
@@ -4624,7 +4726,9 @@ components:
           description: Date the value is as of.
           example: '2026-06-19'
         source:
-          type: string
+          type:
+            - string
+            - 'null'
           description: Link to the methodology / data source.
           example: https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md
     FxEmStressSummary:
@@ -4667,11 +4771,17 @@ components:
         - emStress
       properties:
         dxy:
-          $ref: '#/components/schemas/FxRate'
+          oneOf:
+            - $ref: '#/components/schemas/FxRate'
+            - type: 'null'
         usdJpy:
-          $ref: '#/components/schemas/FxRate'
+          oneOf:
+            - $ref: '#/components/schemas/FxRate'
+            - type: 'null'
         emStress:
-          $ref: '#/components/schemas/FxEmStressSummary'
+          oneOf:
+            - $ref: '#/components/schemas/FxEmStressSummary'
+            - type: 'null'
     FxSummaryResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
@@ -4689,6 +4799,9 @@ components:
         - lastPrice
         - changePct
         - asOf
+        - sparkline10d
+        - high52w
+        - low52w
       properties:
         pair:
           type: string
@@ -4708,11 +4821,15 @@ components:
           items:
             type: number
         high52w:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 52-week high.
           example: 1.2
         low52w:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 52-week low.
           example: 1.14
         asOf:
@@ -4728,7 +4845,9 @@ components:
         - rows
       properties:
         asOf:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date
           description: Date the table is as of.
           example: '2026-06-19'
@@ -4763,7 +4882,9 @@ components:
           description: Look-back window the correlations are computed over.
           example: 90d
         asOf:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date
           description: Date the matrix is as of.
           example: '2026-06-19'
@@ -4823,27 +4944,39 @@ components:
           description: Currency-pair symbol.
           example: USD/CNY
         latestPrice:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Most recent price.
           example: 6.79
         vol30d:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Annualised 30-day realised volatility (%).
           example: 1.42
         vol90dMean:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Mean of the 90-day realised-volatility distribution (%).
           example: 2.39
         vol90dSd:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Standard deviation of the 90-day realised-volatility distribution (%).
           example: 0.63
         zScore:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Z-score of current volatility versus its 90-day distribution.
           example: -1.52
         priceZScore:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Z-score of the latest price versus its 90-day distribution.
           example: -2
         level:
@@ -4852,6 +4985,7 @@ components:
             - STABLE
             - WARNING
             - PANIC
+            - UNKNOWN
           description: Stress classification for this pair.
           example: WARNING
         sampleN:
@@ -4866,7 +5000,9 @@ components:
         - pairs
       properties:
         asOf:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date
           description: Date the readings are as of.
           example: '2026-05-14'
@@ -4912,11 +5048,15 @@ components:
             preserve full numeric precision.
           example: '677233.400'
         gdpUnit:
-          type: string
+          type:
+            - string
+            - 'null'
           description: Unit the value is expressed in.
           example: Billion JPY
         growthRate:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Period-over-period nominal growth rate, in percent.
           example: 0.8
         realGdp:
@@ -5216,6 +5356,231 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/MarketRecap'
+    MacroCpiData:
+      type: object
+      title: MacroCpiData
+      description: |
+        One CPI (Consumer Price Index) observation. Returned as an item of the
+        economic-data `data` array when the `type` query parameter is `cpi`.
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - country
+        - observationDate
+        - cpiPoints
+        - coreCpiPoints
+        - cpiChangeYoyPercent
+        - coreCpiChangeYoyPercent
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the observation record.
+          example: 1024
+        createdAt:
+          type: string
+          format: date-time
+          description: When the record was created.
+          example: '2026-04-01T08:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the record was last updated.
+          example: '2026-04-01T08:00:00.000Z'
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: JP
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2026-03-01'
+        cpiPoints:
+          type:
+            - number
+            - 'null'
+          description: Headline CPI index points; `null` when not published for the period.
+          example: 111.2
+        coreCpiPoints:
+          type:
+            - number
+            - 'null'
+          description: Core CPI (excluding food & energy) index points; `null` when unavailable.
+          example: 109.8
+        cpiChangeYoyPercent:
+          type:
+            - number
+            - 'null'
+          description: Year-over-year change in headline CPI, in percent; `null` when unavailable.
+          example: 2.7
+        coreCpiChangeYoyPercent:
+          type:
+            - number
+            - 'null'
+          description: Year-over-year change in core CPI, in percent; `null` when unavailable.
+          example: 2.3
+    MacroPceData:
+      type: object
+      title: MacroPceData
+      description: |
+        One PCE (Personal Consumption Expenditures) observation. Returned as an item
+        of the economic-data `data` array when the `type` query parameter is `pce`.
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - country
+        - observationDate
+        - pcePoints
+        - corePcePoints
+        - pceChangeYoyPercent
+        - corePceChangeYoyPercent
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the observation record.
+          example: 2048
+        createdAt:
+          type: string
+          format: date-time
+          description: When the record was created.
+          example: '2026-04-01T08:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the record was last updated.
+          example: '2026-04-01T08:00:00.000Z'
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: US
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2026-03-01'
+        pcePoints:
+          type:
+            - number
+            - 'null'
+          description: Headline PCE index points; `null` when not published for the period.
+          example: 124.5
+        corePcePoints:
+          type:
+            - number
+            - 'null'
+          description: Core PCE (excluding food & energy) index points; `null` when unavailable.
+          example: 122.1
+        pceChangeYoyPercent:
+          type:
+            - number
+            - 'null'
+          description: Year-over-year change in headline PCE, in percent; `null` when unavailable.
+          example: 2.5
+        corePceChangeYoyPercent:
+          type:
+            - number
+            - 'null'
+          description: Year-over-year change in core PCE, in percent; `null` when unavailable.
+          example: 2.2
+    MacroImportExportData:
+      type: object
+      title: MacroImportExportData
+      description: |
+        One import/export observation. Returned as an item of the economic-data
+        `data` array when the `type` query parameter is `import-export`. Vietnam
+        (`VN`) markets populate turnover values and the trade balance; other markets
+        populate price-index points (PPI/IPI/EPI). Fields not relevant to a market
+        are `null`.
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - country
+        - observationDate
+        - tradeBalance
+        - importTurnover
+        - exportTurnover
+        - importTurnoverUnits
+        - exportTurnoverUnits
+        - ppiPoints
+        - ipiPoints
+        - epiPoints
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the observation record.
+          example: 4096
+        createdAt:
+          type: string
+          format: date-time
+          description: When the record was created.
+          example: '2026-04-01T08:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the record was last updated.
+          example: '2026-04-01T08:00:00.000Z'
+        country:
+          type: string
+          description: ISO country code the observation belongs to.
+          example: VN
+        observationDate:
+          type: string
+          format: date
+          description: Date of the observation.
+          example: '2026-03-01'
+        tradeBalance:
+          type:
+            - number
+            - 'null'
+          description: |
+            Exports minus imports for the period. Populated for `VN`; `null` for
+            markets that report price-index points instead.
+          example: 1200.5
+        importTurnover:
+          type:
+            - number
+            - 'null'
+          description: Import turnover value; `null` for price-index markets.
+          example: 30500
+        exportTurnover:
+          type:
+            - number
+            - 'null'
+          description: Export turnover value; `null` for price-index markets.
+          example: 31700.5
+        importTurnoverUnits:
+          type:
+            - string
+            - 'null'
+          description: Unit the import turnover is expressed in; `null` when not applicable.
+          example: Million USD
+        exportTurnoverUnits:
+          type:
+            - string
+            - 'null'
+          description: Unit the export turnover is expressed in; `null` when not applicable.
+          example: Million USD
+        ppiPoints:
+          type:
+            - number
+            - 'null'
+          description: Producer Price Index points; `null` for turnover markets.
+          example: null
+        ipiPoints:
+          type:
+            - number
+            - 'null'
+          description: Import Price Index points; `null` for turnover markets.
+          example: null
+        epiPoints:
+          type:
+            - number
+            - 'null'
+          description: Export Price Index points; `null` for turnover markets.
+          example: null
     MacroEconomicDataResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
@@ -5225,8 +5590,20 @@ components:
           properties:
             data:
               type: array
+              description: |
+                Array of observations whose item shape depends on the `type` query
+                parameter:
+
+                - `gdp` → `EconomicDataPoint`
+                - `cpi` → `MacroCpiData`
+                - `pce` → `MacroPceData`
+                - `import-export` → `MacroImportExportData`
               items:
-                $ref: '#/components/schemas/EconomicDataPoint'
+                oneOf:
+                  - $ref: '#/components/schemas/EconomicDataPoint'
+                  - $ref: '#/components/schemas/MacroCpiData'
+                  - $ref: '#/components/schemas/MacroPceData'
+                  - $ref: '#/components/schemas/MacroImportExportData'
     ExchangeRatePoint:
       type: object
       description: One closing exchange-rate observation for a currency pair.
@@ -5237,9 +5614,9 @@ components:
       properties:
         date:
           type: string
-          format: date
+          format: date-time
           description: Date of the observation.
-          example: '2024-01-15'
+          example: '2024-01-15T00:00:00.000Z'
         close:
           type: number
           description: Closing exchange rate for the pair on this date.
@@ -5278,11 +5655,15 @@ components:
           description: Date of the observation.
           example: '2026-03-01'
         population:
-          type: integer
+          type:
+            - number
+            - 'null'
           description: Total population for the period.
           example: 122850000
         unemploymentRate:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Unemployment rate, in percent.
           example: 2.7
     MacroPopulationResponse:
@@ -5355,11 +5736,15 @@ components:
           description: ISO country code the observation belongs to.
           example: JP
         tenYearsGovernmentBondYieldsPct:
-          type: number
+          type:
+            - number
+            - 'null'
           description: 10-year government bond yield, in percent.
           example: 2.35
         overnightCallRate:
-          type: number
+          type:
+            - number
+            - 'null'
           description: Overnight policy / call rate, in percent.
           example: 0.73
     MacroRatesYieldsResponse:
@@ -5382,6 +5767,8 @@ components:
         rings and can be large; clients typically pass it straight to a mapping library.
       required:
         - wards
+        - availableYears
+        - latestYear
       properties:
         wards:
           type: array
@@ -5446,7 +5833,9 @@ components:
                 description: Maximum residential price in the ward.
                 example: 83400
               roadCount:
-                type: integer
+                type:
+                  - integer
+                  - 'null'
                 description: Number of priced roads in the ward.
                 example: 38
               unit:
@@ -5460,6 +5849,16 @@ components:
                 type: array
                 items: {}
             additionalProperties: true
+        availableYears:
+          type: array
+          description: Years for which land-price data is available.
+          items:
+            type: integer
+        latestYear:
+          type:
+            - integer
+            - 'null'
+          description: Most recent year with data (null if none).
     RealEstateGeoJsonResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
@@ -5524,15 +5923,21 @@ components:
                 description: Area / zone label (localized).
                 example: Khu vực I
               avgPrice:
-                type: number
+                type:
+                  - number
+                  - 'null'
                 description: Average residential price within the area.
                 example: 165462
               minPrice:
-                type: number
+                type:
+                  - number
+                  - 'null'
                 description: Minimum residential price within the area.
                 example: 48600
               maxPrice:
-                type: number
+                type:
+                  - number
+                  - 'null'
                 description: Maximum residential price within the area.
                 example: 687200
               wardCount:
@@ -5555,7 +5960,9 @@ components:
               - priceResidential
             properties:
               roadName:
-                type: string
+                type:
+                  - string
+                  - 'null'
                 description: Road name.
                 example: Hai Bà Trưng
               wardName:
@@ -5769,7 +6176,9 @@ components:
               - priceResidentialVt1
             properties:
               roadName:
-                type: string
+                type:
+                  - string
+                  - 'null'
                 description: Road name.
                 example: NGUYỄN HUỆ
               segmentFrom:
@@ -5857,7 +6266,9 @@ components:
           description: Area / land-value zone label (localized).
           example: Khu vực 1
         roadName:
-          type: string
+          type:
+            - string
+            - 'null'
           description: Road name.
           example: Nhà Thờ
         segmentFrom:

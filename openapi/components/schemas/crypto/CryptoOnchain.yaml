@@ -11,7 +11,7 @@ required:
   - nupl
 properties:
   ethGas:
-    type: object
+    type: ["object", "null"]
     description: Ethereum gas price tiers.
     required:
       - safe
@@ -21,19 +21,19 @@ properties:
       - unit
     properties:
       safe:
-        type: number
+        type: ["number", "null"]
         description: Gas price for a low-priority (safe) transaction.
         example: 0.084424998
       standard:
-        type: number
+        type: ["number", "null"]
         description: Gas price for a standard-priority transaction.
         example: 0.08533128
       fast:
-        type: number
+        type: ["number", "null"]
         description: Gas price for a high-priority (fast) transaction.
         example: 0.093864408
       baseFee:
-        type: number
+        type: ["number", "null"]
         description: Current network base fee.
         example: 0.0843841
       unit:
@@ -41,7 +41,7 @@ properties:
         description: Unit the gas prices are expressed in.
         example: gwei
   btcHashrate:
-    type: object
+    type: ["object", "null"]
     description: Bitcoin network hashrate.
     required:
       - value
@@ -55,15 +55,15 @@ properties:
         description: Unit the hashrate is expressed in.
         example: EH/s
   btcActiveAddresses:
-    type: integer
+    type: ["integer", "null"]
     description: Number of active Bitcoin addresses.
     example: 503361
   whaleTxCount:
-    type: integer
+    type: ["integer", "null"]
     description: Number of large ("whale") transactions observed.
     example: 29766
   mvrv:
-    type: object
+    type: ["object", "null"]
     description: Market-Value-to-Realised-Value ratio and its valuation zone.
     required:
       - value
@@ -74,10 +74,15 @@ properties:
         example: 1.1772253837760067
       zone:
         type: string
+        enum:
+          - undervalued
+          - fair_value
+          - overheating
+          - overvalued
         description: Valuation zone derived from the MVRV value.
         example: fair_value
   nupl:
-    type: object
+    type: ["object", "null"]
     description: Net Unrealised Profit / Loss and its sentiment zone.
     required:
       - value
@@ -88,5 +93,11 @@ properties:
         example: 0.1586
       zone:
         type: string
+        enum:
+          - capitulation
+          - hope_fear
+          - optimism
+          - belief
+          - euphoria
         description: Sentiment zone derived from the NUPL value.
         example: hope_fear

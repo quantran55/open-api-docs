@@ -7,9 +7,9 @@ required:
 properties:
   date:
     type: string
-    format: date
+    format: date-time
     description: Date of the observation.
-    example: "2024-01-15"
+    example: "2024-01-15T00:00:00.000Z"
   close:
     type: number
     description: Closing exchange rate for the pair on this date.

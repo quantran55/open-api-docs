@@ -83,7 +83,7 @@ properties:
         - priceResidentialVt1
       properties:
         roadName:
-          type: string
+          type: ["string", "null"]
           description: Road name.
           example: NGUYỄN HUỆ
         segmentFrom:

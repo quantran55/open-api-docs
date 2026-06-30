@@ -17,3 +17,11 @@ properties:
     type: number
     description: Net asset value per share on the date.
     example: 19948.69
+  isFilledFromPreviousDate:
+    type: boolean
+    description: True when this point's value was carried forward from a previous trading day (the period boundary was not a trading day).
+    example: true
+  actualDataDate:
+    type: string
+    description: The actual trading date the carried-forward value came from (format DD-MM-YYYY).
+    example: 18-03-2026

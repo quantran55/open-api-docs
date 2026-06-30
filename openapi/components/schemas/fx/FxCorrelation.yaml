@@ -15,7 +15,7 @@ properties:
     description: Look-back window the correlations are computed over.
     example: 90d
   asOf:
-    type: string
+    type: ["string", "null"]
     format: date
     description: Date the matrix is as of.
     example: "2026-06-19"

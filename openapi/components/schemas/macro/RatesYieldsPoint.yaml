@@ -16,10 +16,10 @@ properties:
     description: ISO country code the observation belongs to.
     example: JP
   tenYearsGovernmentBondYieldsPct:
-    type: number
+    type: ["number", "null"]
     description: 10-year government bond yield, in percent.
     example: 2.35
   overnightCallRate:
-    type: number
+    type: ["number", "null"]
     description: Overnight policy / call rate, in percent.
     example: 0.73

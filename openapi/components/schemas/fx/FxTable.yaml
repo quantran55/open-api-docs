@@ -5,7 +5,7 @@ required:
   - rows
 properties:
   asOf:
-    type: string
+    type: ["string", "null"]
     format: date
     description: Date the table is as of.
     example: "2026-06-19"

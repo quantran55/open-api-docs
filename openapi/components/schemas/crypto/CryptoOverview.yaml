@@ -58,7 +58,7 @@ properties:
         description: Combined dominance of all other coins.
         example: 23.706
   fearGreed:
-    type: object
+    type: ["object", "null"]
     description: Crypto Fear & Greed index reading.
     required:
       - value

@@ -18,27 +18,27 @@ properties:
     description: Currency-pair symbol.
     example: USD/CNY
   latestPrice:
-    type: number
+    type: ["number", "null"]
     description: Most recent price.
     example: 6.79
   vol30d:
-    type: number
+    type: ["number", "null"]
     description: Annualised 30-day realised volatility (%).
     example: 1.42
   vol90dMean:
-    type: number
+    type: ["number", "null"]
     description: Mean of the 90-day realised-volatility distribution (%).
     example: 2.39
   vol90dSd:
-    type: number
+    type: ["number", "null"]
     description: Standard deviation of the 90-day realised-volatility distribution (%).
     example: 0.63
   zScore:
-    type: number
+    type: ["number", "null"]
     description: Z-score of current volatility versus its 90-day distribution.
     example: -1.52
   priceZScore:
-    type: number
+    type: ["number", "null"]
     description: Z-score of the latest price versus its 90-day distribution.
     example: -2
   level:

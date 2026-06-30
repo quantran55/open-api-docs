@@ -21,26 +21,26 @@ properties:
     type: string
     example: USD/ton
   lastClose:
-    type: number
+    type: ["number", "null"]
     description: Most recent closing price.
     example: 3588
   currency:
     type: string
     example: USD
   change1dPct:
-    type: number
+    type: ["number", "null"]
     description: 1-day percentage change.
     example: 0.53
   changeMtdPct:
-    type: number
+    type: ["number", "null"]
     description: Month-to-date percentage change.
     example: 0.28
   changeYtdPct:
-    type: number
+    type: ["number", "null"]
     description: Year-to-date percentage change.
     example: 14.63
   ma50:
-    type: number
+    type: ["number", "null"]
     description: 50-period moving average.
     example: 3475.3036
   trend:

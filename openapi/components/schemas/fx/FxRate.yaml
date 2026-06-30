@@ -20,6 +20,6 @@ properties:
     description: Date the value is as of.
     example: "2026-06-19"
   source:
-    type: string
+    type: ["string", "null"]
     description: Link to the methodology / data source.
     example: "https://github.com/finhay/hayinsights/blob/master/docs/methodologies/fx.md"

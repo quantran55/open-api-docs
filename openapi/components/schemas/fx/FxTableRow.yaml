@@ -5,6 +5,9 @@ required:
   - lastPrice
   - changePct
   - asOf
+  - sparkline10d
+  - high52w
+  - low52w
 properties:
   pair:
     type: string
@@ -24,11 +27,11 @@ properties:
     items:
       type: number
   high52w:
-    type: number
+    type: ["number", "null"]
     description: 52-week high.
     example: 1.2
   low52w:
-    type: number
+    type: ["number", "null"]
     description: 52-week low.
     example: 1.14
   asOf:

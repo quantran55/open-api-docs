@@ -60,7 +60,7 @@ properties:
           description: Maximum residential price in the ward.
           example: 83400
         roadCount:
-          type: integer
+          type: ["integer", "null"]
           description: Number of priced roads in the ward.
           example: 38
         unit:

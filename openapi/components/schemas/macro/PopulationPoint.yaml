@@ -16,10 +16,10 @@ properties:
     description: Date of the observation.
     example: "2026-03-01"
   population:
-    type: integer
+    type: ["number", "null"]
     description: Total population for the period.
     example: 122850000
   unemploymentRate:
-    type: number
+    type: ["number", "null"]
     description: Unemployment rate, in percent.
     example: 2.7

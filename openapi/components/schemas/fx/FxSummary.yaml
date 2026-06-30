@@ -8,8 +8,14 @@ required:
   - emStress
 properties:
   dxy:
-    $ref: "./FxRate.yaml"
+    oneOf:
+      - $ref: "./FxRate.yaml"
+      - type: "null"
   usdJpy:
-    $ref: "./FxRate.yaml"
+    oneOf:
+      - $ref: "./FxRate.yaml"
+      - type: "null"
   emStress:
-    $ref: "./FxEmStressSummary.yaml"
+    oneOf:
+      - $ref: "./FxEmStressSummary.yaml"
+      - type: "null"

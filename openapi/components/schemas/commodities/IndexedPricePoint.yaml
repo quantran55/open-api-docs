@@ -3,6 +3,7 @@ description: One point of a rebased price series (percentage change vs the serie
 required:
   - date
   - value
+  - pctChange
 properties:
   date:
     type: string

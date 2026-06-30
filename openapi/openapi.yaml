@@ -27,10 +27,8 @@ info:
   contact: {}
 
 servers:
-  - url: https://stg-api.hayinsights.com
-    description: Staging (live — use for demo / Try It)
   - url: https://api.hayinsights.com
-    description: Production (not yet deployed)
+    description: Production
 
 # Baseline: every request must carry X-API-Key. Single auth tier — no signing.
 security:

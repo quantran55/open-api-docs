@@ -140,7 +140,7 @@
     "primary": {
       "type": "button",
       "label": "Get API key",
-      "href": "https://app.hayinsights.com"
+      "href": "https://app.hayinsights.com/en/api-keys"
     }
   },
   "footer": {

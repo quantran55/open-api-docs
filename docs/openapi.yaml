@@ -25,7 +25,7 @@ info:
     headers. See **Rate limits** and **Plans & features**.
   contact: {}
 servers:
-  - url: https://api.hayinsights.com
+  - url: https://api-v2.hayinsights.com
     description: Production
 security:
   - HayInsightsApiKey: []

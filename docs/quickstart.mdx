@@ -24,12 +24,12 @@ signing, no token exchange.
     <CodeGroup>
     ```bash cURL
     curl -H "X-API-Key: $HAYINSIGHTS_API_KEY" \
-      "https://api.hayinsights.com/openapi/v1/crypto/dominance"
+      "https://api-v2.hayinsights.com/openapi/v1/crypto/dominance"
     ```
 
     ```typescript TypeScript
     const res = await fetch(
-      "https://api.hayinsights.com/openapi/v1/crypto/dominance",
+      "https://api-v2.hayinsights.com/openapi/v1/crypto/dominance",
       { headers: { "X-API-Key": process.env.HAYINSIGHTS_API_KEY! } }
     );
     const json = await res.json();
@@ -40,7 +40,7 @@ signing, no token exchange.
     import os, requests
 
     res = requests.get(
-        "https://api.hayinsights.com/openapi/v1/crypto/dominance",
+        "https://api-v2.hayinsights.com/openapi/v1/crypto/dominance",
         headers={"X-API-Key": os.environ["HAYINSIGHTS_API_KEY"]},
     )
     print(res.json()["data"])

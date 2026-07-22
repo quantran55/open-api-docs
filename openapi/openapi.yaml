@@ -27,7 +27,7 @@ info:
   contact: {}
 
 servers:
-  - url: https://api.hayinsights.com
+  - url: https://api-v2.hayinsights.com
     description: Production
 
 # Baseline: every request must carry X-API-Key. Single auth tier — no signing.

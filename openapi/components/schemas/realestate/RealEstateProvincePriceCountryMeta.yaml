@@ -1,0 +1,40 @@
+type: object
+description: |
+  Colour thresholds and unit for one country. These live in `meta` rather than on
+  each province because a threshold is a property of the country, not the province.
+required:
+  - unit
+  - bands
+  - bandMethod
+properties:
+  unit:
+    type: string
+    enum: [k_vnd, jpy_m2]
+    example: jpy_m2
+  bands:
+    type:
+      - array
+      - "null"
+    description: |
+      Percentile colour thresholds. `null` for Vietnam, where the client falls back
+      to its own fixed bands.
+    items:
+      type: number
+    example: [120000, 240000, 410000, 780000]
+  bandMethod:
+    type:
+      - string
+      - "null"
+    enum: [percentile, null]
+    example: percentile
+  usdRate:
+    type:
+      - number
+      - "null"
+    description: USD value of one unit of local currency at the data period; `null` when no FX is available.
+    example: 0.0000068
+  latestYear:
+    type:
+      - integer
+      - "null"
+    example: 2025

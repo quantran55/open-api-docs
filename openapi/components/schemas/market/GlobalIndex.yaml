@@ -1,0 +1,35 @@
+type: object
+description: |
+  Latest close for one global index. **`change` and `changePercent` here are
+  intraday** (close minus open of the latest bar) — for the daily close-to-close
+  move use `change1d` from `/openapi/v1/market/indices/snapshot`.
+required:
+  - symbol
+  - market
+  - close
+  - change
+  - changePercent
+properties:
+  symbol:
+    type: string
+    example: ^N225
+  market:
+    type: string
+    example: jp
+  close:
+    type: number
+    example: 42180.5
+  change:
+    type: number
+    description: Intraday change — close minus open of the latest bar.
+    example: -118.24
+  changePercent:
+    type: number
+    description: Intraday change as a percentage of the open.
+    example: -0.28
+  date:
+    type:
+      - string
+      - "null"
+    format: date
+    example: "2026-09-15"

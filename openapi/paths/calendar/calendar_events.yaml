@@ -1,0 +1,201 @@
+get:
+  operationId: calendarEvents
+  tags:
+    - Calendar
+  summary: Economic calendar events
+  description: |
+    Scheduled economic events in a date range — rate decisions, CPI and GDP releases,
+    holidays. Defaults to the next 30 days when `from` / `to` are omitted. Filter by
+    `country` (us, jp, vn, …) and `impact` (high, medium, low) to keep a daily briefing
+    to the events that move markets. Filters accept a comma-separated list. The
+    response reports `total`, so page with `offset` when there is more than one page.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: from
+      in: query
+      required: false
+      description: Start date, `YYYY-MM-DD`.
+      schema:
+        type: string
+        format: date
+        example: "2026-09-01"
+    - name: to
+      in: query
+      required: false
+      description: End date, `YYYY-MM-DD`.
+      schema:
+        type: string
+        format: date
+        example: "2026-09-30"
+    - name: country
+      in: query
+      required: false
+      description: |
+        Filter by country. Comma-separated, e.g. `us,jp,vn`. An unrecognised value
+        yields an empty list rather than every event.
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [global, us, jp, vn, eu, gb, au, ca, nz, cn, ch]
+      style: form
+      explode: false
+    - name: category
+      in: query
+      required: false
+      description: |
+        Filter by event type. Comma-separated.
+
+        | Value | Description |
+        | --- | --- |
+        | `holiday` | Market holidays |
+        | `economic` | Macroeconomic releases |
+        | `asset` | Asset-level events (dividends, rebalances) |
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [holiday, economic, asset]
+      style: form
+      explode: false
+    - name: assetClass
+      in: query
+      required: false
+      description: Filter by asset class. Comma-separated.
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [stock, etf, bond, crypto, commodity, fx]
+      style: form
+      explode: false
+    - name: impact
+      in: query
+      required: false
+      description: Filter by expected market impact. Comma-separated.
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [high, medium, low]
+      style: form
+      explode: false
+    - name: q
+      in: query
+      required: false
+      description: Search the event title, local name, or tag.
+      schema:
+        type: string
+        example: CPI
+    - name: includeGlobal
+      in: query
+      required: false
+      description: Include global events alongside the countries selected.
+      schema:
+        type: boolean
+        default: true
+    - name: tz
+      in: query
+      required: false
+      description: IANA timezone the event times are rendered in.
+      schema:
+        type: string
+        example: Asia/Tokyo
+    - name: preset
+      in: query
+      required: false
+      description: Preset filter bundle.
+      schema:
+        type: string
+        enum: [global]
+    - name: limit
+      in: query
+      required: false
+      description: Events to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    - name: offset
+      in: query
+      required: false
+      description: Events to skip, for paging.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    "200":
+      description: One page of calendar events.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/CalendarEventsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              total: 150
+              returned: 2
+              offset: 0
+              items:
+                - id: "48213"
+                  date: "2026-09-17"
+                  time: "14:30:00"
+                  timezone: America/New_York
+                  timezoneLabel: ET
+                  country: us
+                  category: economic
+                  assetClass: null
+                  title: CPI (YoY)
+                  titleLocal: null
+                  description: Consumer price index, year over year.
+                  impact: high
+                  actual: null
+                  forecast: 3.1
+                  previous: 3.2
+                  unit: percent
+                  actualText: null
+                  forecastText: 3.1%
+                  previousText: 3.2%
+                  symbols: []
+                  subgroup: null
+                  source: investing.com
+                  sourceUrl: https://www.investing.com/economic-calendar/cpi-733
+                - id: "48377"
+                  date: "2026-09-21"
+                  time: null
+                  timezone: Asia/Tokyo
+                  timezoneLabel: JST
+                  country: jp
+                  category: holiday
+                  assetClass: null
+                  title: Respect for the Aged Day
+                  titleLocal: 敬老の日
+                  description: null
+                  impact: low
+                  actual: null
+                  forecast: null
+                  previous: null
+                  unit: null
+                  actualText: null
+                  forecastText: null
+                  previousText: null
+                  symbols: []
+                  subgroup: null
+                  source: jpx
+                  sourceUrl: null
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

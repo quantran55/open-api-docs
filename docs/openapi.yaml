@@ -4,8 +4,8 @@ info:
   version: 0.1.0
   description: |
     Programmatic access to the **HayInsights** financial-data hub — commodities,
-    crypto, ETF, FX, macroeconomic and real-estate datasets, served from a single
-    API surface under `/openapi/v1/*`.
+    crypto, ETF, FX, macroeconomic, real-estate, news, economic-calendar and
+    market-index datasets, served from a single API surface under `/openapi/v1/*`.
 
     This specification is the **single source of truth** for the public API
     surface — shared by SDK codegen, the reference docs, and (later) the mock
@@ -41,7 +41,13 @@ tags:
   - name: Macro
     description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
   - name: Real Estate
-    description: Real-estate statistics, land prices, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+    description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+  - name: News
+    description: Market news headlines with per-article sentiment, plus an aggregate sentiment reading over a rolling window.
+  - name: Calendar
+    description: Economic calendar — rate decisions, CPI and GDP releases, market holidays and asset-level events.
+  - name: Market
+    description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
 paths:
   /openapi/v1/commodities:
     get:
@@ -2327,38 +2333,1222 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}/geojson:
+  /openapi/v1/macro/indicators/gdp-growth-rate:
     get:
-      operationId: realEstateGeoJson
+      operationId: macroIndicatorGdpGrowthRate
+      tags:
+        - Macro
+      summary: Indicator — GDP growth rate table (US/JP/VN)
+      description: |
+        Table of quarterly GDP growth rate (%) for all three economies. `columns` holds the N
+        most recent quarters (default 4, oldest to newest); `rows[i].values[j]` is the cell at
+        row i, column j. US uses YoY on real GDP (chained 2017 USD), matching the dedicated US
+        chart; JP uses QoQ, VN comes straight from the source.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: GDP growth rate table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/gdp-per-capita:
+    get:
+      operationId: macroIndicatorGdpPerCapita
+      tags:
+        - Macro
+      summary: Indicator — GDP per capita table (US/JP/VN)
+      description: |
+        Table of yearly GDP per capita in USD for all three economies, `columns` holding the N
+        most recent years (default 4). Currently only Japan (JP) has data; other rows return
+        available=false with all-null values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: GDP per capita table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/central-government-debt:
+    get:
+      operationId: macroIndicatorCentralGovernmentDebt
+      tags:
+        - Macro
+      summary: Indicator — Central government debt table (US/JP/VN)
+      description: |
+        Table of central government debt as % of GDP for all three economies, `columns`
+        holding the N most recent periods (default 4). Currently only JP and US have data; the
+        VN row returns available=false with all-null values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Central government debt table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/core-cpi:
+    get:
+      operationId: macroIndicatorCoreCpi
+      tags:
+        - Macro
+      summary: Indicator — Core CPI inflation table (US/JP/VN)
+      description: |
+        Table of Core CPI year-over-year inflation (%) for all three economies. `columns`
+        holds the N most recent months (default 4, oldest to newest); `rows[i].values[j]` is
+        the cell at row i, column j.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Core CPI table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/ppi:
+    get:
+      operationId: macroIndicatorPpi
+      tags:
+        - Macro
+      summary: Indicator — Producer Price Index table (US/JP/VN)
+      description: |
+        Table of Producer Price Index for all three economies, holding raw index points
+        exactly as published — no conversion. `columns` holds the N most recent months
+        (default 4). Currently only JP and US have data; the VN row returns available=false
+        with all-null values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Producer Price Index table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/core-pce:
+    get:
+      operationId: macroIndicatorCorePce
+      tags:
+        - Macro
+      summary: Indicator — PCE table (US/JP/VN)
+      description: |
+        Table of headline Personal Consumption Expenditures index points by month for all
+        three economies, `columns` holding the N most recent months (default 4). Values are
+        the raw index points as published, not converted to a percentage. The path keeps the
+        `core-pce` id so existing URLs continue to work, but the values are headline PCE.
+        Currently only the US has data; other rows return available=false with all-null
+        values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: PCE table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/epi-ipi:
+    get:
+      operationId: macroIndicatorEpiIpi
+      tags:
+        - Macro
+      summary: Indicator — Export/Import price index table (US/JP/VN)
+      description: |
+        Monthly table of export price index (EPI) and import price index (IPI), each cell
+        holding both metrics as raw index points exactly as published — no conversion.
+        `columns` holds the N most recent months (default 2, oldest to newest) and `metrics`
+        declares the fields inside each cell. Currently only JP and US have data; the VN row
+        returns available=false.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 2
+      responses:
+        '200':
+          description: Export/import price index table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorMultiTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: epi-ipi
+                  metrics:
+                    - key: epi
+                      label: Export
+                      unit: points
+                    - key: ipi
+                      label: Import
+                      unit: points
+                  columns:
+                    - period: Jun 2026
+                      date: '2026-06-30'
+                      isPartial: false
+                    - period: Jul 2026
+                      date: '2026-07-31'
+                      isPartial: false
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      unit: null
+                      values:
+                        - epi: 167.6
+                          ipi: 150.2
+                        - epi: 165.4
+                          ipi: 149.6
+                      display:
+                        - epi: '167.60'
+                          ipi: '150.20'
+                        - epi: '165.40'
+                          ipi: '149.60'
+                    - country: VN
+                      countryName: Vietnam
+                      available: false
+                      unit: null
+                      values:
+                        - null
+                        - null
+                      display:
+                        - epi: —
+                          ipi: —
+                        - epi: —
+                          ipi: —
+                meta:
+                  timestamp: '2026-09-16T07:25:17.048Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/export-import:
+    get:
+      operationId: macroIndicatorExportImport
+      tags:
+        - Macro
+      summary: Indicator — Export/Import value & balance table (US/JP/VN)
+      description: |
+        Monthly table of export value, import value and trade balance for all three economies,
+        each cell holding all three metrics. `columns` holds the N most recent months (default
+        2). Each economy reports in its own unit, so `unit` sits on the row (JP: Billion Yen,
+        US/VN: Billion USD). Columns flagged `isPartial` are incomplete periods. Same source
+        as /macro/trade/turnover.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 2
+      responses:
+        '200':
+          description: Export/import value & balance table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorMultiTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: export-import
+                  metrics:
+                    - key: exportValue
+                      label: Export
+                      unit: ''
+                    - key: importValue
+                      label: Import
+                      unit: ''
+                    - key: balance
+                      label: Trade Balance
+                      unit: ''
+                  columns:
+                    - period: Q2 2026
+                      date: '2026-06-30'
+                      isPartial: false
+                    - period: Q3 2026
+                      date: '2026-09-30'
+                      isPartial: true
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      unit: Billion USD
+                      values:
+                        - exportValue: 634.36
+                          importValue: 929.72
+                          balance: -295.36
+                        - exportValue: 197.45
+                          importValue: 332.92
+                          balance: -135.47
+                      display:
+                        - exportValue: '634.36'
+                          importValue: '929.72'
+                          balance: '-295.36'
+                        - exportValue: '197.45'
+                          importValue: '332.92'
+                          balance: '-135.47'
+                meta:
+                  timestamp: '2026-09-16T07:25:17.048Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/population:
+    get:
+      operationId: macroIndicatorPopulation
+      tags:
+        - Macro
+      summary: Indicator — Population table (US/JP/VN)
+      description: |
+        Monthly table of population for all three economies, holding raw head counts exactly
+        as published — no conversion. `columns` holds the N most recent months (default 4).
+        Currently only JP and US have data; the VN row returns available=false with all-null
+        values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Population table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/unemployment-rate:
+    get:
+      operationId: macroIndicatorUnemploymentRate
+      tags:
+        - Macro
+      summary: Indicator — Unemployment rate table (US/JP/VN)
+      description: |
+        Monthly table of the unemployment rate (%) for all three economies, `columns` holding
+        the N most recent months (default 4). Currently only JP and US have data; the VN row
+        returns available=false with all-null values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Unemployment rate table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/exchange-rates:
+    get:
+      operationId: macroIndicatorExchangeRates
+      tags:
+        - Macro
+      summary: Indicator — Exchange rates table
+      description: |
+        Daily exchange rate table for JP and VN, `columns` holding the N most recent days
+        (default 4). Each economy quotes a different pair, so the pair label (USD/JPY ·
+        USD/VND) sits on `rows[].unit` rather than on the table. USD/JPY comes from the same
+        source as /macro/exchange-rate; USD/VND is the State Bank of Vietnam selling rate
+        (`usd_nhnn_ban_ra`, the same WiFeed source as /macro/exchange-rates). The two sources
+        publish on different days, so a missing cell returns null.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Exchange rates table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/deposit-rates:
+    get:
+      operationId: macroIndicatorDepositRates
+      tags:
+        - Macro
+      summary: Indicator — Deposit rates table (US/VN)
+      description: |
+        Deposit rate table with one column per tenor (90-days / 6-months / 1-year), each
+        holding the single most recent data point. Unlike the other Indicator tables, columns
+        here are tenors rather than time periods. Only the US and Vietnam have this table. The
+        US only has the 90-days tenor (from /macro/monetary-policy/rates-yields); the other
+        two return null. Vietnam uses the state-owned bank group (SOBs) from
+        /macro/deposit-rates.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      responses:
+        '200':
+          description: Deposit rates table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorDepositRatesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: deposit-rates
+                  unit: '%'
+                  tenors:
+                    - key: 90d
+                      label: 90-days
+                    - key: 6m
+                      label: 6-months
+                    - key: 1y
+                      label: 1-year
+                  rows:
+                    - country: VN
+                      countryName: Vietnam
+                      available: true
+                      date: '2026-09-10'
+                      values:
+                        - 2.38
+                        - 3.63
+                        - 5.9
+                      display:
+                        - '2.38'
+                        - '3.63'
+                        - '5.90'
+                    - country: US
+                      countryName: United States
+                      available: true
+                      date: '2026-09-12'
+                      values:
+                        - 4.21
+                        - null
+                        - null
+                      display:
+                        - '4.21'
+                        - —
+                        - —
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/government-bond-rates:
+    get:
+      operationId: macroIndicatorGovernmentBondRates
+      tags:
+        - Macro
+      summary: Indicator — Government bond rates table (US/JP/VN)
+      description: |
+        Monthly table of the 10-year government bond yield (%) for all three economies,
+        `columns` holding the N most recent months (default 4). Same source as
+        /macro/monetary-policy/rates-yields. Currently only JP and US have data; the VN row
+        returns available=false with all-null values.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent periods (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Government bond rates table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: gdp-growth-rate
+                  unit: '%'
+                  columns:
+                    - period: Q3 2025
+                      date: '2025-09-30'
+                    - period: Q4 2025
+                      date: '2025-12-31'
+                    - period: Q1 2026
+                      date: '2026-03-31'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      values:
+                        - 2.1
+                        - 2.4
+                        - 5.4
+                      display:
+                        - '2.10'
+                        - '2.40'
+                        - '5.40'
+                      basis: YoY
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      values:
+                        - 0.3
+                        - 0.1
+                        - null
+                      display:
+                        - '0.30'
+                        - '0.10'
+                        - —
+                      basis: QoQ
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/provinces/prices:
+    get:
+      operationId: realEstateProvincePrices
       tags:
         - Real Estate
-      summary: Ward choropleth GeoJSON
+      summary: Representative land price per province
       description: |
-        Ward boundary geometry paired with average-price attributes, for rendering a
-        choropleth map. The response can be large (boundary coordinates for every ward);
-        the geometry is modelled permissively. Data is available for `vn`; `jp` is empty.
+        One row per province: dot coordinates, average / minimum / maximum price and the
+        number of wards carrying data. Intended for drawing a single dot per province at
+        low zoom, before loading ward-level GeoJSON. Pass `country=all` to get Vietnam and
+        Japan in one request. `meta.byCountry` holds the colour thresholds per country.
       x-feature-code: realestate_data
       x-api-weight: 2
       parameters:
         - name: country
           in: path
           required: true
-          description: Country code, lowercase.
+          description: |
+            Country code, or `all` to combine every country.
+
+            | Value | Description |
+            | --- | --- |
+            | `all` | Vietnam and Japan together |
+            | `vn` | Vietnam |
+            | `jp` | Japan |
           schema:
             type: string
-            example: vn
+            enum:
+              - all
+              - vn
+              - jp
+            example: all
+        - name: lang
+          in: query
+          required: false
+          description: |
+            Language for name fields.
+
+            | Value | Description |
+            | --- | --- |
+            | `vi` | Vietnamese |
+            | `en` | English |
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
       responses:
         '200':
-          description: Ward features with price attributes and boundary geometry.
+          description: Representative price per province.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateGeoJsonResponse'
+                $ref: '#/components/schemas/RealEstateProvincePricesResponse'
               example:
                 success: true
                 statusCode: 200
                 data:
-                  wards:
+                  data:
+                    - id: 5
+                      name: Cần Thơ
+                      code: CT
+                      country: vn
+                      lat: 9.79771
+                      lon: 105.740847
+                      bbox:
+                        - 105.289632
+                        - 9.297885
+                        - 106.223075
+                        - 10.291719
+                      outline: null
+                      avgPrice: 3184.52
+                      minPrice: 700
+                      maxPrice: 27000
+                      wardCount: 83
+                      unit: k_vnd
+                      latestYear: 2026
+                  meta:
+                    byCountry:
+                      vn:
+                        unit: k_vnd
+                        bands:
+                          - 2692.37
+                          - 4495.92
+                          - 7982.4
+                          - 23159.38
+                        bandMethod: percentile
+                        usdRate: 0.00003966381630640323
+                        latestYear: 2026
+                meta:
+                  timestamp: '2026-09-16T07:25:17.048Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/real-estate/{country}/provinces/{provinceId}/geojson:
+    get:
+      operationId: realEstateProvinceGeoJson
+      tags:
+        - Real Estate
+      summary: Ward choropleth GeoJSON for one province
+      description: |
+        Boundary geometry for every ward in `provinceId`, carrying residential land
+        prices. `meta.bands` holds percentile colour thresholds (non-Vietnam markets
+        only) — when absent, the client falls back to its own fixed bands. `meta.unit`
+        says how to format prices, and `meta.usdRate` is the USD value of one unit of
+        local currency.
+
+        Payloads are large — a single province can run to several megabytes. Use the
+        province-prices endpoint when a dot per province is enough.
+      x-feature-code: realestate_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: Country code.
+          schema:
+            type: string
+            enum:
+              - vn
+              - jp
+            example: vn
+        - name: provinceId
+          in: path
+          required: true
+          description: Province ID, from the provinces endpoint.
+          schema:
+            type: integer
+            example: 1
+        - name: lang
+          in: query
+          required: false
+          description: Language for name fields.
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
+      responses:
+        '200':
+          description: Ward boundaries and prices for the province.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealEstateProvinceGeoJsonResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  data:
                     - wardId: 34
                       wardName: Phú Thuận
                       areaName: Khu vực II
@@ -2369,20 +3559,21 @@ paths:
                       avgPriceResidentialVt4: null
                       minPriceResidential: 36500
                       maxPriceResidential: 83400
-                      roadCount: 38
+                      roadCount: 33
                       unit: k_vnd
                       coordinates:
                         - - - 106.751906
                             - 10.7051207
                           - - 106.751422
                             - 10.7074537
-                  availableYears:
-                    - 2024
-                    - 2025
-                    - 2026
-                  latestYear: 2026
+                  meta:
+                    availableYears:
+                      - 2025
+                    latestYear: 2025
+                    unit: k_vnd
+                    usdRate: 0.00003966381630640323
                 meta:
-                  timestamp: '2026-06-19T08:54:29.621Z'
+                  timestamp: '2026-09-16T07:25:17.448Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2395,57 +3586,66 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}/stats:
+  /openapi/v1/real-estate/{country}/provinces/{provinceId}/wards:
     get:
-      operationId: realEstateStats
+      operationId: realEstateProvinceWards
       tags:
         - Real Estate
-      summary: Country land-price statistics
+      summary: Wards of one province
       description: |
-        Aggregate land-price statistics for a country — overall ward / segment totals, the
-        observed price range, per-area breakdowns and the highest-priced roads. Data is
-        available for `vn`; `jp` is empty.
+        Lightweight `{ wardId, wardName, wardType }` list for rendering a ward picker
+        within a province. `wardType` disambiguates Japanese wards that share a name — it
+        is currently set on one unit only (利島村, the island village colliding with
+        Toshima ward) and `null` everywhere else, including all of Vietnam.
       x-feature-code: realestate_data
       x-api-weight: 2
       parameters:
         - name: country
           in: path
           required: true
-          description: Country code, lowercase.
+          description: Country code.
           schema:
             type: string
-            example: vn
+            enum:
+              - vn
+              - jp
+            example: jp
+        - name: provinceId
+          in: path
+          required: true
+          description: Province ID, from the provinces endpoint.
+          schema:
+            type: integer
+            example: 50
+        - name: lang
+          in: query
+          required: false
+          description: Language for name fields.
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
       responses:
         '200':
-          description: Aggregate land-price statistics.
+          description: Wards belonging to the province.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateStatsResponse'
+                $ref: '#/components/schemas/RealEstateProvinceWardsResponse'
               example:
                 success: true
                 statusCode: 200
                 data:
-                  totalWards: 185
-                  totalSegments: 13674
-                  priceRange:
-                    min: 0
-                    max: 702194
-                    unit: k_vnd
-                  byArea:
-                    - area: Khu vực I
-                      avgPrice: 165462
-                      minPrice: 48600
-                      maxPrice: 687200
-                      wardCount: 32
-                      segmentCount: 1026
-                  topRoads:
-                    - roadName: Hai Bà Trưng
-                      wardName: Khu vực 1
-                      area: Khu vực 1
-                      priceResidential: 702194
+                  - wardId: 3712
+                    wardName: Adachi
+                    wardType: null
+                  - wardId: 3746
+                    wardName: Toshima
+                    wardType: isLands
                 meta:
-                  timestamp: '2026-06-19T08:54:29.621Z'
+                  timestamp: '2026-09-16T08:54:29.672Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2458,25 +3658,36 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}/wards:
+  /openapi/v1/real-estate/{country}/provinces:
     get:
-      operationId: realEstateWards
+      operationId: realEstateProvinces
       tags:
         - Real Estate
-      summary: List ward land-price summaries
+      summary: List provinces
       description: |
-        Ward-level land-price summaries for a country — average residential prices across
-        value-position tiers, min/max prices and road counts. Data is available for `vn`;
-        `jp` is empty.
+        Provinces / cities available for real-estate queries: `id`, `name`, `code`,
+        `country` and `bbox` for each. Pass `country=all` to combine every country — each
+        province carries its own `country` field so the client can group them.
       x-feature-code: realestate_data
       x-api-weight: 2
       parameters:
         - name: country
           in: path
           required: true
-          description: Country code, lowercase.
+          description: |
+            Country code, or `all` to combine every country.
+
+            | Value | Description |
+            | --- | --- |
+            | `vn` | Vietnam |
+            | `jp` | Japan |
+            | `all` | Vietnam and Japan together |
           schema:
             type: string
+            enum:
+              - vn
+              - jp
+              - all
             example: vn
         - name: lang
           in: query
@@ -2496,30 +3707,35 @@ paths:
             default: vi
       responses:
         '200':
-          description: List of ward land-price summaries.
+          description: List of provinces / cities.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateWardsResponse'
+                $ref: '#/components/schemas/RealEstateProvincesResponse'
               example:
                 success: true
                 statusCode: 200
                 data:
-                  - wardId: 1
-                    wardName: Sài Gòn
-                    area: Khu vực I
-                    avgPriceResidentialVt1: 365020
-                    avgPriceResidentialVt2: null
-                    avgPriceResidentialVt3: null
-                    avgPriceResidentialVt4: null
-                    minPriceResidential: 191200
-                    maxPriceResidential: 687200
-                    roadCount: 60
-                    year: 2025
-                    month: 1
-                    unit: k_vnd
+                  - id: 2
+                    name: Hà Nội
+                    code: HN
+                    country: vn
+                    bbox:
+                      - 105.286
+                      - 20.564
+                      - 106.02
+                      - 21.385
+                  - id: 1
+                    name: Hồ Chí Minh
+                    code: HCM
+                    country: vn
+                    bbox:
+                      - 106.415837
+                      - 8.67851
+                      - 107.531438
+                      - 10.737193
                 meta:
-                  timestamp: '2026-06-19T08:54:29.621Z'
+                  timestamp: '2026-06-19T08:54:29.672Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2532,70 +3748,126 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}/wards/{wardId}:
+  /openapi/v1/real-estate/{country}/wards/{wardId}/transactions:
     get:
-      operationId: realEstateWardDetail
+      operationId: realEstateWardTransactions
       tags:
         - Real Estate
-      summary: Ward land-price detail
+      summary: Transaction-level records for one ward (Japan only)
       description: |
-        Full land-price detail for a single ward — an aggregate summary plus every priced
-        road segment with residential, commercial and production prices across value-position
-        tiers. Use the `wardId` returned by the wards list. Data is available for `vn`.
+        Each row is a single real transaction published by MLIT — distinct from the
+        land-prices endpoint, which aggregates a neighbourhood into median / p25 / p75.
+        Covers every quarter held, and drops transactions whose source records area only
+        as a bound (e.g. "2000㎡以上"). Residential land only (住宅地).
+
+        Japan only: any other `country` returns `400`.
       x-feature-code: realestate_data
       x-api-weight: 2
       parameters:
         - name: country
           in: path
           required: true
-          description: Country code, lowercase.
+          description: Country code — `jp` only; anything else returns `400`.
           schema:
             type: string
-            example: vn
+            enum:
+              - jp
+            example: jp
         - name: wardId
           in: path
           required: true
-          description: Ward identifier.
+          description: Ward ID, from the province wards endpoint.
           schema:
             type: integer
-            example: 1
+            example: 3712
+        - name: property_type
+          in: query
+          required: false
+          description: |
+            Property category.
+
+            | Value | Description |
+            | --- | --- |
+            | `land_building` | 宅地(土地と建物) — land with buildings |
+            | `land_only` | 宅地(土地) — land only |
+          schema:
+            type: string
+            enum:
+              - land_building
+              - land_only
+            default: land_building
+        - name: limit
+          in: query
+          required: false
+          description: |
+            Transactions to return. The densest ward currently holds 1,328 transactions in
+            a single tab, so the ceiling is set well above it.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2000
+            default: 200
+        - name: offset
+          in: query
+          required: false
+          description: Transactions to skip, for paging.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: sort
+          in: query
+          required: false
+          description: |
+            Sort order.
+
+            | Value | Description |
+            | --- | --- |
+            | `unit_price_desc` | Unit price, highest first |
+            | `unit_price_asc` | Unit price, lowest first |
+            | `price_desc` | Total price, highest first |
+            | `price_asc` | Total price, lowest first |
+            | `area_desc` | Area, largest first |
+            | `district_asc` | Neighbourhood name, A–Z |
+          schema:
+            type: string
+            enum:
+              - price_desc
+              - price_asc
+              - unit_price_desc
+              - unit_price_asc
+              - area_desc
+              - district_asc
+            default: unit_price_desc
       responses:
         '200':
-          description: Land-price detail for a single ward.
+          description: One page of transactions for the ward.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateWardDetailResponse'
+                $ref: '#/components/schemas/RealEstateJpTransactionsResponse'
               example:
                 success: true
                 statusCode: 200
                 data:
-                  wardId: 1
-                  wardName: Sài Gòn
-                  area: Khu vực I
-                  summary:
-                    avgPriceResidentialVt1: 365020
-                    avgPriceResidentialVt2: null
-                    avgPriceResidentialVt3: null
-                    avgPriceResidentialVt4: null
-                    minPriceResidential: 191200
-                    maxPriceResidential: 687200
-                    roadCount: '60'
-                    year: 2025
-                    month: 1
-                    unit: k_vnd
-                  roads:
-                    - roadName: NGUYỄN HUỆ
-                      segmentFrom: TRỌN ĐƯỜNG
-                      segmentTo: null
-                      priceResidentialVt1: 687200
-                      priceResidentialVt2: null
-                      priceResidentialVt3: null
-                      priceResidentialVt4: null
-                      priceCommercialVt1: 481000
-                      priceProductionVt1: 412300
+                  data:
+                    - districtName: 日ノ出町
+                      districtNameEn: Hinodecho
+                      nearestStation: 北千住
+                      nearestStationEn: Kita-senju
+                      nearestStationMin: 9
+                      tradePriceJpy: 260000000
+                      areaM2: 95
+                      areaIsLowerBound: false
+                      pricePerM2Jpy: 2736842.11
+                      priceYear: 2025
+                      priceQuarter: 3
+                  meta:
+                    total: 974
+                    propertyType: land_building
+                    unit: jpy_m2
                 meta:
-                  timestamp: '2026-06-19T08:54:29.812Z'
+                  timestamp: '2026-09-16T07:25:57.670Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2624,9 +3896,18 @@ paths:
         - name: country
           in: path
           required: true
-          description: Country code, lowercase.
+          description: |
+            Country code.
+
+            | Value | Description |
+            | --- | --- |
+            | `vn` | Vietnam |
+            | `jp` | Japan |
           schema:
             type: string
+            enum:
+              - vn
+              - jp
             example: vn
         - name: type
           in: query
@@ -2684,7 +3965,26 @@ paths:
           description: Maximum number of segments to return.
           schema:
             type: integer
+            minimum: 1
+            maximum: 1000
+            default: 200
             example: 100
+        - name: lang
+          in: query
+          required: false
+          description: |
+            Language for name fields.
+
+            | Value | Description |
+            | --- | --- |
+            | `vi` | Vietnamese |
+            | `en` | English |
+          schema:
+            type: string
+            enum:
+              - vi
+              - en
+            default: vi
       responses:
         '200':
           description: List of priced road segments.
@@ -2731,115 +4031,591 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}/provinces:
+  /openapi/v1/news/feed:
     get:
-      operationId: realEstateProvinces
+      operationId: newsFeed
       tags:
-        - Real Estate
-      summary: List provinces
+        - News
+      summary: Latest market news
       description: |
-        Provinces / cities available for real-estate queries in a country. Data is
-        available for `vn`; `jp` is empty.
-      x-feature-code: realestate_data
-      x-api-weight: 2
+        Recent news headlines with sentiment, newest first. Each item carries a short
+        summary, the publisher, and a sentiment label. Use `tab` to restrict to one
+        market (e.g. commodities), `geography` to one region, and keep `limit` small —
+        this is meant for a briefing, not an archive sweep. The response reports
+        `total`, so page with `offset` when there is more than one page.
+      x-feature-code: macro_data
+      x-api-weight: 3
       parameters:
-        - name: country
-          in: path
-          required: true
-          description: Country code, lowercase.
-          schema:
-            type: string
-            example: vn
-        - name: lang
+        - name: tab
           in: query
           required: false
           description: |
-            Language for localized names.
+            Restrict to one market. Equivalent to sending the matching `category`.
 
             | Value | Description |
             | --- | --- |
-            | `vi` | Vietnamese |
-            | `en` | English |
+            | `all` | Every market |
+            | `macroeconomic` | Macroeconomics |
+            | `bond` | Bonds |
+            | `stock` | Equities |
+            | `commodities` | Commodities |
+            | `forex` | Foreign exchange |
+            | `crypto` | Crypto |
           schema:
             type: string
             enum:
-              - vi
-              - en
-            default: vi
+              - all
+              - macroeconomic
+              - bond
+              - stock
+              - commodities
+              - forex
+              - crypto
+        - name: category
+          in: query
+          required: false
+          description: Filter by display category. Prefer `tab`.
+          schema:
+            type: string
+            enum:
+              - macroeconomic
+              - bond
+              - stock
+              - commodities
+              - forex
+              - crypto
+        - name: assetClass
+          in: query
+          required: false
+          description: Filter by asset class.
+          schema:
+            type: string
+            enum:
+              - crypto
+              - stock
+              - bond
+              - commodities
+              - forex
+        - name: macroTopic
+          in: query
+          required: false
+          description: Filter by macro topic.
+          schema:
+            type: string
+            enum:
+              - politics
+              - central_banks
+              - macroeconomics
+        - name: geography
+          in: query
+          required: false
+          description: |
+            Filter by region. `global` also covers apac and europe.
+
+            | Value | Description |
+            | --- | --- |
+            | `us` | United States |
+            | `japan` | Japan |
+            | `vietnam` | Vietnam |
+            | `global` | Global, incl. APAC and Europe |
+          schema:
+            type: string
+            enum:
+              - us
+              - japan
+              - vietnam
+              - global
+        - name: sourceCode
+          in: query
+          required: false
+          description: Filter by source.
+          schema:
+            type: string
+            example: cnbc-markets
+        - name: keyword
+          in: query
+          required: false
+          description: Only articles mentioning this keyword.
+          schema:
+            type: string
+            example: inflation
+        - name: limit
+          in: query
+          required: false
+          description: Articles to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+        - name: offset
+          in: query
+          required: false
+          description: Articles to skip, for paging.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
       responses:
         '200':
-          description: List of provinces / cities.
+          description: One page of articles, newest first.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateProvincesResponse'
+                $ref: '#/components/schemas/NewsFeedResponse'
               example:
                 success: true
                 statusCode: 200
                 data:
-                  - id: 2
-                    name: Hà Nội
-                    code: HN
-                    bbox: null
-                  - id: 1
-                    name: Hồ Chí Minh
-                    code: HCM
-                    bbox: null
+                  total: 143
+                  returned: 2
+                  offset: 0
+                  items:
+                    - title: Fed holds rates steady as inflation cools
+                      source: CNBC Markets
+                      publishedAt: '2026-09-16T04:12:00.000Z'
+                      category: macroeconomic
+                      geography: us
+                      sentiment: positive
+                      sentimentScore: 0.62
+                      summary:
+                        - The Federal Reserve left its benchmark rate unchanged at 4.25–4.50%.
+                        - Officials signalled one further cut before year-end.
+                      url: https://www.cnbc.com/2026/09/16/fed-holds-rates.html
+                    - title: Nikkei slips as yen strengthens past 145
+                      source: VnEconomy Business
+                      publishedAt: '2026-09-16T02:40:00.000Z'
+                      category: stock
+                      geography: japan
+                      sentiment: negative
+                      sentimentScore: -0.31
+                      summary: null
+                      url: https://vneconomy.vn/nikkei-slips.htm
                 meta:
-                  timestamp: '2026-06-19T08:54:29.672Z'
+                  timestamp: '2026-09-16T08:50:42.507Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/real-estate/{country}:
+  /openapi/v1/news/sentiment:
     get:
-      operationId: realEstateCountrySummary
+      operationId: newsSentiment
       tags:
-        - Real Estate
-      summary: Country real-estate summary
+        - News
+      summary: Aggregate news sentiment
       description: |
-        Top-level real-estate summary for a country. Currently returns an empty array on
-        staging — use the `stats`, `wards`, `land-prices`, `provinces` and `geojson`
-        sub-routes for detailed data. Data is available for `vn`; `jp` is empty.
-      x-feature-code: realestate_data
+        Overall news sentiment across the window: Cautious / Neutral / Favourable, plus
+        a 0–100 score and the article counts behind it. Defaults to the last 24 hours.
+        Neutral articles are excluded from the ratio, so check `decisive` before leaning
+        on the verdict.
+      x-feature-code: macro_data
       x-api-weight: 2
       parameters:
-        - name: country
-          in: path
-          required: true
-          description: Country code, lowercase.
+        - name: window
+          in: query
+          required: false
+          description: |
+            Analysis window. Defaults to the last 24 hours.
+
+            | Value | Description |
+            | --- | --- |
+            | `1d` | Last 24 hours |
+            | `7d` | Last 7 days |
+            | `30d` | Last 30 days |
           schema:
             type: string
-            example: vn
+            enum:
+              - 1d
+              - 7d
+              - 30d
+            default: 1d
       responses:
         '200':
-          description: Country summary rows (currently empty on staging).
+          description: Aggregate sentiment for the window.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RealEstateCountrySummaryResponse'
+                $ref: '#/components/schemas/NewsSentimentResponse'
               example:
                 success: true
                 statusCode: 200
-                data: []
+                data:
+                  window: 1 day
+                  total: 218
+                  classified: 201
+                  positive: 96
+                  neutral: 71
+                  negative: 34
+                  decisive: 130
+                  positiveRatio: 0.738
+                  score: 73.8
+                  overall: Favourable
                 meta:
-                  timestamp: '2026-06-19T08:54:29.621Z'
+                  timestamp: '2026-09-16T08:50:42.507Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/calendar/events:
+    get:
+      operationId: calendarEvents
+      tags:
+        - Calendar
+      summary: Economic calendar events
+      description: |
+        Scheduled economic events in a date range — rate decisions, CPI and GDP releases,
+        holidays. Defaults to the next 30 days when `from` / `to` are omitted. Filter by
+        `country` (us, jp, vn, …) and `impact` (high, medium, low) to keep a daily briefing
+        to the events that move markets. Filters accept a comma-separated list. The
+        response reports `total`, so page with `offset` when there is more than one page.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start date, `YYYY-MM-DD`.
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+        - name: to
+          in: query
+          required: false
+          description: End date, `YYYY-MM-DD`.
+          schema:
+            type: string
+            format: date
+            example: '2026-09-30'
+        - name: country
+          in: query
+          required: false
+          description: |
+            Filter by country. Comma-separated, e.g. `us,jp,vn`. An unrecognised value
+            yields an empty list rather than every event.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - global
+                - us
+                - jp
+                - vn
+                - eu
+                - gb
+                - au
+                - ca
+                - nz
+                - cn
+                - ch
+          style: form
+          explode: false
+        - name: category
+          in: query
+          required: false
+          description: |
+            Filter by event type. Comma-separated.
+
+            | Value | Description |
+            | --- | --- |
+            | `holiday` | Market holidays |
+            | `economic` | Macroeconomic releases |
+            | `asset` | Asset-level events (dividends, rebalances) |
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - holiday
+                - economic
+                - asset
+          style: form
+          explode: false
+        - name: assetClass
+          in: query
+          required: false
+          description: Filter by asset class. Comma-separated.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - stock
+                - etf
+                - bond
+                - crypto
+                - commodity
+                - fx
+          style: form
+          explode: false
+        - name: impact
+          in: query
+          required: false
+          description: Filter by expected market impact. Comma-separated.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - high
+                - medium
+                - low
+          style: form
+          explode: false
+        - name: q
+          in: query
+          required: false
+          description: Search the event title, local name, or tag.
+          schema:
+            type: string
+            example: CPI
+        - name: includeGlobal
+          in: query
+          required: false
+          description: Include global events alongside the countries selected.
+          schema:
+            type: boolean
+            default: true
+        - name: tz
+          in: query
+          required: false
+          description: IANA timezone the event times are rendered in.
+          schema:
+            type: string
+            example: Asia/Tokyo
+        - name: preset
+          in: query
+          required: false
+          description: Preset filter bundle.
+          schema:
+            type: string
+            enum:
+              - global
+        - name: limit
+          in: query
+          required: false
+          description: Events to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: Events to skip, for paging.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: One page of calendar events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  total: 150
+                  returned: 2
+                  offset: 0
+                  items:
+                    - id: '48213'
+                      date: '2026-09-17'
+                      time: '14:30:00'
+                      timezone: America/New_York
+                      timezoneLabel: ET
+                      country: us
+                      category: economic
+                      assetClass: null
+                      title: CPI (YoY)
+                      titleLocal: null
+                      description: Consumer price index, year over year.
+                      impact: high
+                      actual: null
+                      forecast: 3.1
+                      previous: 3.2
+                      unit: percent
+                      actualText: null
+                      forecastText: 3.1%
+                      previousText: 3.2%
+                      symbols: []
+                      subgroup: null
+                      source: investing.com
+                      sourceUrl: https://www.investing.com/economic-calendar/cpi-733
+                    - id: '48377'
+                      date: '2026-09-21'
+                      time: null
+                      timezone: Asia/Tokyo
+                      timezoneLabel: JST
+                      country: jp
+                      category: holiday
+                      assetClass: null
+                      title: Respect for the Aged Day
+                      titleLocal: 敬老の日
+                      description: null
+                      impact: low
+                      actual: null
+                      forecast: null
+                      previous: null
+                      unit: null
+                      actualText: null
+                      forecastText: null
+                      previousText: null
+                      symbols: []
+                      subgroup: null
+                      source: jpx
+                      sourceUrl: null
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/indices/snapshot:
+    get:
+      operationId: marketIndicesSnapshot
+      tags:
+        - Market
+      summary: Index snapshots
+      description: |
+        Latest level and 1-day change for tracked market indices — S&P 500, Nasdaq,
+        Dow Jones, Nikkei, VN-Index and others. `change1d` is close-to-close. Use
+        `market=all` to count how many indices rose or fell in a session; narrow to one
+        market when the question is regional.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: market
+          in: query
+          required: false
+          description: |
+            Restrict to one market. Case-insensitive.
+
+            | Value | Description |
+            | --- | --- |
+            | `all` | Every market |
+            | `vn` | Vietnam |
+            | `us` | United States |
+            | `jp` | Japan |
+            | `sea` | South-East Asia |
+            | `global` | Global indices |
+          schema:
+            type: string
+            enum:
+              - all
+              - vn
+              - us
+              - jp
+              - sea
+              - global
+            example: all
+      responses:
+        '200':
+          description: Index snapshots for the selected market.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketIndicesSnapshotResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  market: all
+                  updatedAt: '2026-09-16T01:05:11.882Z'
+                  indices:
+                    - symbol: VNINDEX
+                      market: vn
+                      name: VN-Index
+                      price: 1342.18
+                      change1d: 0.86
+                      asOfDate: '2026-09-15'
+                      source: wifeed
+                    - symbol: ^GSPC
+                      market: us
+                      name: S&P 500
+                      price: 6412.33
+                      change1d: 0.42
+                      asOfDate: '2026-09-15'
+                      source: yahoo-finance
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/global-indices:
+    get:
+      operationId: marketGlobalIndices
+      tags:
+        - Market
+      summary: Global indices
+      description: |
+        Latest close for all tracked global indices, including South-East Asia. Broader
+        coverage than the snapshot route.
+
+        **Note:** `change` / `changePercent` here are **intraday** (close minus open of
+        the latest bar), not the close-to-close daily move — use `change1d` from
+        `/openapi/v1/market/indices/snapshot` for the daily change.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      responses:
+        '200':
+          description: Latest close for every tracked global index.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketGlobalIndicesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - symbol: ^N225
+                    market: jp
+                    close: 42180.5
+                    change: -118.24
+                    changePercent: -0.28
+                    date: '2026-09-15'
+                  - symbol: ^STI
+                    market: sea
+                    close: 3641.92
+                    change: 12.07
+                    changePercent: 0.33
+                    date: '2026-09-15'
+                meta:
+                  timestamp: '2026-09-16T08:50:42.507Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -4410,21 +6186,21 @@ components:
           description: Exchange ticker for the ETF.
           example: '1306'
         open:
-          type: number
-          description: Opening price.
-          example: 2065
+          type: string
+          description: Opening price. Returned as a decimal **string**, not a number.
+          example: '2054.0000'
         high:
-          type: number
-          description: Session high.
-          example: 2068
+          type: string
+          description: Session high. Returned as a decimal **string**, not a number.
+          example: '2061.0000'
         low:
-          type: number
-          description: Session low.
-          example: 2051
+          type: string
+          description: Session low. Returned as a decimal **string**, not a number.
+          example: '2046.0000'
         close:
-          type: number
-          description: Closing price.
-          example: 2056
+          type: string
+          description: Closing price. Returned as a decimal **string**, not a number.
+          example: '2048.0000'
         volume:
           type: string
           description: Traded volume for the session.
@@ -5103,9 +6879,10 @@ components:
           example: Nikkei 225
         value:
           type:
-            - number
+            - string
             - 'null'
-          example: 38500.5
+          description: Index level. Returned as a decimal **string**, not a number.
+          example: '4062.2700'
         changeValue:
           type:
             - number
@@ -5137,8 +6914,9 @@ components:
           type: string
           example: TIBOR 3M
         value:
-          type: number
-          example: 0.08
+          type: string
+          description: Rate. Returned as a decimal **string**, not a number.
+          example: '1.62845'
         changeValue:
           type:
             - number
@@ -5170,9 +6948,10 @@ components:
           example: USD/JPY
         value:
           type:
-            - number
+            - string
             - 'null'
-          example: 148.5
+          description: Exchange rate. Returned as a decimal **string**, not a number.
+          example: '155.2960'
         changeValue:
           type:
             - number
@@ -5257,9 +7036,10 @@ components:
               example: Nikkei 225
             value:
               type:
-                - number
+                - string
                 - 'null'
-              example: 38500.5
+              description: Index level. Returned as a decimal **string**, not a number.
+              example: '4062.2700'
             changeValue:
               type:
                 - number
@@ -5291,8 +7071,9 @@ components:
               type: string
               example: TIBOR 3M
             value:
-              type: number
-              example: 0.08
+              type: string
+              description: Rate. Returned as a decimal **string**, not a number.
+              example: '1.62845'
             changeValue:
               type:
                 - number
@@ -5324,9 +7105,10 @@ components:
               example: USD/JPY
             value:
               type:
-                - number
+                - string
                 - 'null'
-              example: 148.5
+              description: Exchange rate. Returned as a decimal **string**, not a number.
+              example: '155.2960'
             changeValue:
               type:
                 - number
@@ -5756,316 +7538,670 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RatesYieldsPoint'
-    RealEstateGeoJson:
+    IndicatorColumn:
+      type: object
+      description: One period (column) of an indicator table.
+      required:
+        - period
+        - date
+      properties:
+        period:
+          type: string
+          description: Human-readable period label.
+          example: Q1 2026
+        date:
+          type: string
+          format: date
+          description: Last calendar day of the period.
+          example: '2026-03-31'
+    IndicatorRow:
       type: object
       description: |
-        Choropleth payload: a collection of ward features carrying both their average-price
-        attributes and their boundary geometry. The geometry (`coordinates`) is intentionally
-        modelled permissively — it is a nested array of `[longitude, latitude]` coordinate
-        rings and can be large; clients typically pass it straight to a mapping library.
+        One country (row) of an indicator table. `values` and `display` are positional —
+        index `n` corresponds to `columns[n]`.
       required:
-        - wards
-        - availableYears
-        - latestYear
+        - country
+        - countryName
+        - available
+        - values
+        - display
       properties:
-        wards:
+        country:
+          type: string
+          description: ISO country code.
+          example: US
+        countryName:
+          type: string
+          example: United States
+        available:
+          type: boolean
+          description: '`false` when no series exists for this country — `values` is then all `null`.'
+          example: true
+        values:
           type: array
-          description: Ward features with price attributes and boundary geometry.
+          description: Raw numeric value per column; `null` where the period has no observation.
+          items:
+            type:
+              - number
+              - 'null'
+          example:
+            - 5.4
+            - 5.4
+            - 6.1
+            - null
+        display:
+          type: array
+          description: Pre-formatted string per column; an em dash marks a missing value.
+          items:
+            type: string
+          example:
+            - '5.40'
+            - '5.40'
+            - '6.10'
+            - —
+        basis:
+          type:
+            - string
+            - 'null'
+          description: Comparison basis of the figures, when the indicator has one.
+          example: YoY
+        unit:
+          type:
+            - string
+            - 'null'
+          description: Unit override for this row, when it differs from the table unit.
+          example: USD/JPY
+    MacroIndicatorTableResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                A country × period table. `rows[].values` is positionally aligned with
+                `columns`, so `rows[0].values[2]` is the value for `columns[2]`.
+              required:
+                - indicator
+                - columns
+                - rows
+              properties:
+                indicator:
+                  type: string
+                  description: Indicator slug, matching the endpoint path.
+                  example: gdp-growth-rate
+                unit:
+                  type:
+                    - string
+                    - 'null'
+                  description: Unit shared by every row unless a row overrides it.
+                  example: '%'
+                columns:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorColumn'
+                rows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorRow'
+    IndicatorMetric:
+      type: object
+      description: One metric tracked by a multi-metric indicator table.
+      required:
+        - key
+        - label
+      properties:
+        key:
+          type: string
+          description: Key used inside each row's `values` / `display` objects.
+          example: exportValue
+        label:
+          type: string
+          example: Export
+        unit:
+          type:
+            - string
+            - 'null'
+          example: Billion USD
+    IndicatorMultiColumn:
+      type: object
+      description: One period (column) of a multi-metric indicator table.
+      required:
+        - period
+        - date
+      properties:
+        period:
+          type: string
+          example: Q2 2026
+        date:
+          type: string
+          format: date
+          example: '2026-06-30'
+        isPartial:
+          type: boolean
+          description: '`true` when the period is still in progress and figures may be revised.'
+          example: false
+    IndicatorMultiRow:
+      type: object
+      description: |
+        One country (row) of a multi-metric indicator table. Each entry of `values` is an
+        object keyed by `metrics[].key`, positionally aligned with `columns`.
+      required:
+        - country
+        - countryName
+        - available
+        - values
+        - display
+      properties:
+        country:
+          type: string
+          example: US
+        countryName:
+          type: string
+          example: United States
+        available:
+          type: boolean
+          example: true
+        unit:
+          type:
+            - string
+            - 'null'
+          example: Billion USD
+        values:
+          type: array
+          description: |
+            Per-period object of raw metric values, keyed by `metrics[].key`. The whole entry
+            is `null` for a period with no data — which is every period when `available` is
+            `false`. Within an entry, an individual metric may also be `null`.
+          items:
+            type:
+              - object
+              - 'null'
+            additionalProperties:
+              type:
+                - number
+                - 'null'
+          example:
+            - epi: 167.6
+              ipi: 150.2
+            - null
+        display:
+          type: array
+          description: |
+            Per-period object of pre-formatted metric strings. Unlike `values`, an entry is
+            always present — an em dash marks a missing figure.
           items:
             type: object
-            required:
-              - wardId
-              - wardName
-              - area
-            properties:
-              wardId:
-                type: integer
-                description: Ward identifier.
-                example: 34
-              wardName:
-                type: string
-                description: Ward name.
-                example: Phú Thuận
-              areaName:
-                type: string
-                description: Area / zone display name (localized).
-                example: Khu vực II
-              area:
-                type: string
-                description: Area / land-value zone label (localized).
-                example: Khu vực II
-              avgPriceResidentialVt1:
-                type:
-                  - number
-                  - 'null'
-                description: Average residential price, value-position tier 1.
-                example: 52639.39
-              avgPriceResidentialVt2:
-                type:
-                  - number
-                  - 'null'
-                description: Average residential price, value-position tier 2.
-                example: null
-              avgPriceResidentialVt3:
-                type:
-                  - number
-                  - 'null'
-                description: Average residential price, value-position tier 3.
-                example: null
-              avgPriceResidentialVt4:
-                type:
-                  - number
-                  - 'null'
-                description: Average residential price, value-position tier 4.
-                example: null
-              minPriceResidential:
-                type:
-                  - number
-                  - 'null'
-                description: Minimum residential price in the ward.
-                example: 36500
-              maxPriceResidential:
-                type:
-                  - number
-                  - 'null'
-                description: Maximum residential price in the ward.
-                example: 83400
-              roadCount:
-                type:
-                  - integer
-                  - 'null'
-                description: Number of priced roads in the ward.
-                example: 38
-              unit:
-                type: string
-                description: Price unit. `k_vnd` means thousands of VND per square metre.
-                example: k_vnd
-              coordinates:
-                description: |
-                  Boundary geometry as nested coordinate arrays (polygon / multipolygon rings of
-                  `[longitude, latitude]` points). Permissive by design — pass through to a map.
-                type: array
-                items: {}
-            additionalProperties: true
-        availableYears:
+            additionalProperties:
+              type: string
+          example:
+            - epi: '167.60'
+              ipi: '150.20'
+            - epi: —
+              ipi: —
+    MacroIndicatorMultiTableResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                A country × period table where each cell holds several metrics. Cell
+                objects are keyed by `metrics[].key`.
+              required:
+                - indicator
+                - metrics
+                - columns
+                - rows
+              properties:
+                indicator:
+                  type: string
+                  example: export-import
+                metrics:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorMetric'
+                columns:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorMultiColumn'
+                rows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorMultiRow'
+    IndicatorDepositTenor:
+      type: object
+      description: One deposit tenor (column) of the deposit-rates table.
+      required:
+        - key
+        - label
+      properties:
+        key:
+          type: string
+          example: 90d
+        label:
+          type: string
+          example: 90-days
+    IndicatorDepositRateRow:
+      type: object
+      description: One country (row) of the deposit-rates table, positional against `tenors`.
+      required:
+        - country
+        - countryName
+        - available
+        - values
+        - display
+      properties:
+        country:
+          type: string
+          example: VN
+        countryName:
+          type: string
+          example: Vietnam
+        available:
+          type: boolean
+          example: true
+        date:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Observation date of the rates in this row.
+          example: '2026-09-10'
+        values:
           type: array
-          description: Years for which land-price data is available.
           items:
-            type: integer
+            type:
+              - number
+              - 'null'
+          example:
+            - 2.38
+            - 3.63
+            - 5.9
+        display:
+          type: array
+          items:
+            type: string
+          example:
+            - '2.38'
+            - '3.63'
+            - '5.90'
+    MacroIndicatorDepositRatesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: Deposit rates by tenor; `rows[].values` is aligned with `tenors`.
+              required:
+                - indicator
+                - tenors
+                - rows
+              properties:
+                indicator:
+                  type: string
+                  example: deposit-rates
+                unit:
+                  type:
+                    - string
+                    - 'null'
+                  example: '%'
+                tenors:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorDepositTenor'
+                rows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorDepositRateRow'
+    RealEstateProvincePrice:
+      type: object
+      description: |
+        One province-level dot for a low-zoom map: coordinates plus a representative
+        price. Deliberately carries no ward geometry — a single province's GeoJSON runs
+        to several megabytes, which is a lot to download just to draw one dot.
+      required:
+        - id
+        - name
+        - code
+        - country
+        - wardCount
+        - unit
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Hồ Chí Minh
+        code:
+          type: string
+          example: HCM
+        country:
+          type: string
+          description: Lowercase country code — picks the colour scale and price format.
+          example: vn
+        lat:
+          type:
+            - number
+            - 'null'
+          description: |
+            Representative dot — the mean ward lat/lon, falling back to the centre of the
+            boundary bbox. `null` when the province has neither.
+          example: 10.7412
+        lon:
+          type:
+            - number
+            - 'null'
+          example: 106.7215
+        bbox:
+          type:
+            - array
+            - 'null'
+          description: Bounding box `[minLon, minLat, maxLon, maxLat]`.
+          items:
+            type: number
+          minItems: 4
+          maxItems: 4
+          example:
+            - 106.415837
+            - 8.67851
+            - 107.531438
+            - 10.737193
+        outline:
+          type:
+            - array
+            - 'null'
+          description: |
+            Province boundary as MultiPolygon coordinates (`[lon, lat]`), **heavily
+            simplified** for low-zoom drawing. Not for spatial computation — use the
+            per-province GeoJSON endpoint when exact geometry matters.
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+        avgPrice:
+          type:
+            - number
+            - 'null'
+          description: Representative average price, in `unit`. `null` when no price data exists.
+          example: 53811.68
+        minPrice:
+          type:
+            - number
+            - 'null'
+          example: 1300
+        maxPrice:
+          type:
+            - number
+            - 'null'
+          example: 687200
+        wardCount:
+          type: integer
+          description: Wards carrying price data — the denominator behind `avgPrice`.
+          example: 168
+        unit:
+          type: string
+          enum:
+            - k_vnd
+            - jpy_m2
+          description: '`k_vnd` for Vietnam, `jpy_m2` for Japan.'
+          example: k_vnd
         latestYear:
           type:
             - integer
             - 'null'
-          description: Most recent year with data (null if none).
-    RealEstateGeoJsonResponse:
-      allOf:
-        - $ref: '#/components/schemas/EnvelopeBase'
-        - type: object
-          required:
-            - data
-          properties:
-            data:
-              $ref: '#/components/schemas/RealEstateGeoJson'
-    RealEstateStats:
-      type: object
-      description: Aggregate land-price statistics for a country, including overall totals, the observed price range and per-area breakdowns.
-      required:
-        - totalWards
-        - totalSegments
-        - priceRange
-        - byArea
-      properties:
-        totalWards:
-          type: integer
-          description: Number of wards covered by the dataset.
-          example: 185
-        totalSegments:
-          type: integer
-          description: Number of priced road segments across all wards.
-          example: 13674
-        priceRange:
-          type: object
-          description: Overall residential price range across every segment.
-          required:
-            - min
-            - max
-            - unit
-          properties:
-            min:
-              type: number
-              description: Lowest observed price.
-              example: 0
-            max:
-              type: number
-              description: Highest observed price.
-              example: 702194
-            unit:
-              type: string
-              description: Price unit. `k_vnd` means thousands of VND per square metre.
-              example: k_vnd
-        byArea:
-          type: array
-          description: Price statistics grouped by administrative area / land-value zone.
-          items:
-            type: object
-            required:
-              - area
-              - avgPrice
-              - minPrice
-              - maxPrice
-              - wardCount
-              - segmentCount
-            properties:
-              area:
-                type: string
-                description: Area / zone label (localized).
-                example: Khu vực I
-              avgPrice:
-                type:
-                  - number
-                  - 'null'
-                description: Average residential price within the area.
-                example: 165462
-              minPrice:
-                type:
-                  - number
-                  - 'null'
-                description: Minimum residential price within the area.
-                example: 48600
-              maxPrice:
-                type:
-                  - number
-                  - 'null'
-                description: Maximum residential price within the area.
-                example: 687200
-              wardCount:
-                type: integer
-                description: Number of wards in the area.
-                example: 32
-              segmentCount:
-                type: integer
-                description: Number of priced road segments in the area.
-                example: 1026
-        topRoads:
-          type: array
-          description: Highest-priced roads across the country.
-          items:
-            type: object
-            required:
-              - roadName
-              - wardName
-              - area
-              - priceResidential
-            properties:
-              roadName:
-                type:
-                  - string
-                  - 'null'
-                description: Road name.
-                example: Hai Bà Trưng
-              wardName:
-                type: string
-                description: Ward the road belongs to.
-                example: Khu vực 1
-              area:
-                type: string
-                description: Area / zone label (localized).
-                example: Khu vực 1
-              priceResidential:
-                type: number
-                description: Residential land price for the road.
-                example: 702194
-    RealEstateStatsResponse:
-      allOf:
-        - $ref: '#/components/schemas/EnvelopeBase'
-        - type: object
-          required:
-            - data
-          properties:
-            data:
-              $ref: '#/components/schemas/RealEstateStats'
-    RealEstateWard:
+          example: 2025
+    RealEstateProvincePriceCountryMeta:
       type: object
       description: |
-        Ward-level land-price summary. The four `avgPriceResidentialVt1..4` fields are the
-        average residential price for value-position tiers 1–4 (frontage → rear). Tiers
-        that do not apply to a ward are `null`.
+        Colour thresholds and unit for one country. These live in `meta` rather than on
+        each province because a threshold is a property of the country, not the province.
+      required:
+        - unit
+        - bands
+        - bandMethod
+      properties:
+        unit:
+          type: string
+          enum:
+            - k_vnd
+            - jpy_m2
+          example: jpy_m2
+        bands:
+          type:
+            - array
+            - 'null'
+          description: |
+            Percentile colour thresholds. `null` for Vietnam, where the client falls back
+            to its own fixed bands.
+          items:
+            type: number
+          example:
+            - 120000
+            - 240000
+            - 410000
+            - 780000
+        bandMethod:
+          type:
+            - string
+            - 'null'
+          enum:
+            - percentile
+            - null
+          example: percentile
+        usdRate:
+          type:
+            - number
+            - 'null'
+          description: USD value of one unit of local currency at the data period; `null` when no FX is available.
+          example: 0.0000068
+        latestYear:
+          type:
+            - integer
+            - 'null'
+          example: 2025
+    RealEstateProvincePricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                Province rows plus the per-country colour thresholds. Note the nesting: the
+                rows are at `data.data`, and `data.meta` is the route's own metadata,
+                distinct from the envelope's `meta`.
+              required:
+                - data
+                - meta
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RealEstateProvincePrice'
+                meta:
+                  type: object
+                  required:
+                    - byCountry
+                  properties:
+                    byCountry:
+                      type: object
+                      description: Keyed by lowercase country code.
+                      additionalProperties:
+                        $ref: '#/components/schemas/RealEstateProvincePriceCountryMeta'
+    RealEstateWardFeature:
+      type: object
+      description: |
+        One ward feature: price attributes plus boundary geometry. `coordinates` is modelled
+        permissively — it is a nested array of `[longitude, latitude]` rings, can be large,
+        and is normally passed straight to a mapping library.
       required:
         - wardId
         - wardName
-        - area
-        - minPriceResidential
-        - maxPriceResidential
-        - roadCount
-        - year
-        - month
-        - unit
       properties:
         wardId:
           type: integer
-          description: Ward identifier — use as the `{wardId}` path param for ward detail.
-          example: 1
+          example: 34
         wardName:
           type: string
-          description: Ward name.
-          example: Sài Gòn
+          example: Phú Thuận
+        areaName:
+          type: string
+          description: Area / zone display name (localized).
+          example: Khu vực II
         area:
           type: string
           description: Area / land-value zone label (localized).
-          example: Khu vực I
+          example: Khu vực II
         avgPriceResidentialVt1:
           type:
             - number
             - 'null'
           description: Average residential price, value-position tier 1.
-          example: 365020
+          example: 52639.39
         avgPriceResidentialVt2:
           type:
             - number
             - 'null'
-          description: Average residential price, value-position tier 2.
           example: null
         avgPriceResidentialVt3:
           type:
             - number
             - 'null'
-          description: Average residential price, value-position tier 3.
           example: null
         avgPriceResidentialVt4:
           type:
             - number
             - 'null'
-          description: Average residential price, value-position tier 4.
           example: null
         minPriceResidential:
           type:
             - number
             - 'null'
-          description: Minimum residential price observed in the ward.
-          example: 191200
+          example: 36500
         maxPriceResidential:
           type:
             - number
             - 'null'
-          description: Maximum residential price observed in the ward.
-          example: 687200
+          example: 83400
         roadCount:
-          type: integer
-          description: Number of priced roads in the ward.
-          example: 60
-        year:
-          type: integer
-          description: Year the price schedule applies to.
-          example: 2025
-        month:
-          type: integer
-          description: Month the price schedule applies to.
-          example: 1
+          type:
+            - integer
+            - 'null'
+          example: 38
         unit:
           type: string
-          description: Price unit. `k_vnd` means thousands of VND per square metre.
+          enum:
+            - k_vnd
+            - jpy_m2
           example: k_vnd
-    RealEstateWardsResponse:
+        coordinates:
+          type: array
+          description: Boundary geometry as nested coordinate rings. Pass through to a map.
+          items: {}
+      additionalProperties: true
+    RealEstateProvinceGeoJsonResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                Ward features plus the colour thresholds for this province. Note the
+                nesting: the features are at `data.data`, and `data.meta` is the route's own
+                metadata, distinct from the envelope's `meta`.
+              required:
+                - data
+                - meta
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RealEstateWardFeature'
+                meta:
+                  type: object
+                  required:
+                    - unit
+                  properties:
+                    availableYears:
+                      type: array
+                      description: Years for which land-price data exists.
+                      items:
+                        type: integer
+                      example:
+                        - 2025
+                    latestYear:
+                      type:
+                        - integer
+                        - 'null'
+                      example: 2025
+                    unit:
+                      type: string
+                      enum:
+                        - k_vnd
+                        - jpy_m2
+                      description: How to format prices.
+                      example: k_vnd
+                    bands:
+                      type: array
+                      description: |
+                        Percentile colour thresholds. Absent when the market has no banding,
+                        in which case the client falls back to its own fixed bands.
+                      items:
+                        type: number
+                    bandMethod:
+                      type: string
+                      enum:
+                        - percentile
+                      description: Present only alongside `bands`.
+                    usdRate:
+                      type: number
+                      description: USD value of one unit of local currency. Absent when no FX is available.
+                      example: 0.00003966381630640323
+    RealEstateWardSummary:
+      type: object
+      description: Lightweight ward entry for populating a province's ward picker.
+      required:
+        - wardId
+        - wardName
+      properties:
+        wardId:
+          type: integer
+          example: 3712
+        wardName:
+          type: string
+          example: Adachi
+        wardType:
+          type:
+            - string
+            - 'null'
+          enum:
+            - isLands
+            - null
+          description: |
+            Disambiguates Japanese wards that share a name. Currently set on one unit only —
+            利島村, the island village whose name collides with Toshima ward — and `null`
+            everywhere else, including all of Vietnam.
+          example: null
+    RealEstateProvinceWardsResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
         - type: object
@@ -6075,159 +8211,51 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/RealEstateWard'
-    RealEstateWardDetail:
+                $ref: '#/components/schemas/RealEstateWardSummary'
+    RealEstateProvince:
       type: object
-      description: |
-        Full land-price detail for a single ward — an aggregate `summary` plus the list of
-        priced `roads`. The `Vt1..4` suffixes denote value-position tiers (frontage → rear);
-        tiers that do not apply are `null`.
+      description: A province / city administrative unit available for real-estate queries.
       required:
-        - wardId
-        - wardName
-        - area
-        - summary
-        - roads
+        - id
+        - name
+        - code
+        - country
       properties:
-        wardId:
+        id:
           type: integer
-          description: Ward identifier.
-          example: 1
-        wardName:
+          description: Province identifier.
+          example: 2
+        name:
           type: string
-          description: Ward name.
-          example: Sài Gòn
-        area:
+          description: Province / city name (localized by the `lang` query parameter).
+          example: Hà Nội
+        code:
           type: string
-          description: Area / land-value zone label (localized).
-          example: Khu vực I
-        summary:
-          type: object
-          description: Aggregate price summary for the ward.
-          required:
-            - minPriceResidential
-            - maxPriceResidential
-            - roadCount
-            - year
-            - month
-            - unit
-          properties:
-            avgPriceResidentialVt1:
-              type:
-                - number
-                - 'null'
-              description: Average residential price, value-position tier 1.
-              example: 365020
-            avgPriceResidentialVt2:
-              type:
-                - number
-                - 'null'
-              description: Average residential price, value-position tier 2.
-              example: null
-            avgPriceResidentialVt3:
-              type:
-                - number
-                - 'null'
-              description: Average residential price, value-position tier 3.
-              example: null
-            avgPriceResidentialVt4:
-              type:
-                - number
-                - 'null'
-              description: Average residential price, value-position tier 4.
-              example: null
-            minPriceResidential:
-              type:
-                - number
-                - 'null'
-              description: Minimum residential price in the ward.
-              example: 191200
-            maxPriceResidential:
-              type:
-                - number
-                - 'null'
-              description: Maximum residential price in the ward.
-              example: 687200
-            roadCount:
-              type: string
-              description: Number of priced roads in the ward (returned as a string).
-              example: '60'
-            year:
-              type: integer
-              description: Year the price schedule applies to.
-              example: 2025
-            month:
-              type: integer
-              description: Month the price schedule applies to.
-              example: 1
-            unit:
-              type: string
-              description: Price unit. `k_vnd` means thousands of VND per square metre.
-              example: k_vnd
-        roads:
-          type: array
-          description: Priced road segments within the ward.
+          description: Short province code.
+          example: HN
+        country:
+          type: string
+          description: |
+            Lowercase country code. Always present, so a `country=all` response can be
+            grouped client-side.
+          example: vn
+        bbox:
+          type:
+            - array
+            - 'null'
+          description: |
+            Geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Offshore units are
+            excluded — Tokyo's Ogasawara and Izu islands sit roughly 1,000 km from the
+            mainland and would otherwise stretch the box past usefulness. `null` when the
+            province has no boundary geometry.
           items:
-            type: object
-            required:
-              - roadName
-              - priceResidentialVt1
-            properties:
-              roadName:
-                type:
-                  - string
-                  - 'null'
-                description: Road name.
-                example: NGUYỄN HUỆ
-              segmentFrom:
-                type:
-                  - string
-                  - 'null'
-                description: Start of the priced segment (or `TRỌN ĐƯỜNG` for the whole road).
-                example: TRỌN ĐƯỜNG
-              segmentTo:
-                type:
-                  - string
-                  - 'null'
-                description: End of the priced segment.
-                example: null
-              priceResidentialVt1:
-                type:
-                  - number
-                  - 'null'
-                description: Residential price, value-position tier 1.
-                example: 687200
-              priceResidentialVt2:
-                type:
-                  - number
-                  - 'null'
-                description: Residential price, value-position tier 2.
-                example: null
-              priceResidentialVt3:
-                type:
-                  - number
-                  - 'null'
-                description: Residential price, value-position tier 3.
-                example: null
-              priceResidentialVt4:
-                type:
-                  - number
-                  - 'null'
-                description: Residential price, value-position tier 4.
-                example: null
-              priceCommercialVt1:
-                type:
-                  - number
-                  - 'null'
-                description: Commercial price, value-position tier 1.
-                example: 481000
-              priceProductionVt1:
-                type:
-                  - number
-                  - 'null'
-                description: Production / manufacturing price, value-position tier 1.
-                example: 412300
-    RealEstateWardDetailResponse:
+            type: number
+          example:
+            - 105.286
+            - 20.564
+            - 106.02
+            - 21.385
+    RealEstateProvincesResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
         - type: object
@@ -6235,7 +8263,121 @@ components:
             - data
           properties:
             data:
-              $ref: '#/components/schemas/RealEstateWardDetail'
+              type: array
+              items:
+                $ref: '#/components/schemas/RealEstateProvince'
+    RealEstateJpTransaction:
+      type: object
+      description: |
+        One real transaction as published by MLIT. Unlike the land-price endpoint —
+        which aggregates a neighbourhood into median / p25 / p75 — each row here is a
+        single sale. Residential land only (住宅地).
+      required:
+        - tradePriceJpy
+        - areaM2
+        - areaIsLowerBound
+        - pricePerM2Jpy
+        - priceYear
+        - priceQuarter
+      properties:
+        districtName:
+          type:
+            - string
+            - 'null'
+          description: 地区名 — neighbourhood name, as published.
+          example: 日ノ出町
+        districtNameEn:
+          type:
+            - string
+            - 'null'
+          description: Romaji transcription of `districtName`.
+          example: Hinodecho
+        nearestStation:
+          type:
+            - string
+            - 'null'
+          description: 最寄駅 — nearest station, as published.
+          example: 北千住
+        nearestStationEn:
+          type:
+            - string
+            - 'null'
+          example: Kita-senju
+        nearestStationMin:
+          type:
+            - integer
+            - 'null'
+          description: Walking minutes to the nearest station.
+          example: 9
+        tradePriceJpy:
+          type: number
+          description: 取引価格（総額） — total transaction price, JPY.
+          example: 260000000
+        areaM2:
+          type: number
+          description: 面積（㎡） — area in m².
+          example: 95
+        areaIsLowerBound:
+          type: boolean
+          description: |
+            `true` when the source recorded the area as a bound such as "2000㎡以上", making
+            `areaM2` a lower bound rather than an exact figure.
+          example: false
+        pricePerM2Jpy:
+          type: number
+          description: Unit price, derived as `tradePriceJpy / areaM2`.
+          example: 2736842.11
+        priceYear:
+          type: integer
+          example: 2025
+        priceQuarter:
+          type: integer
+          minimum: 1
+          maximum: 4
+          example: 3
+    RealEstateJpTransactionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                Transaction rows plus paging metadata. Note the nesting: the rows are at
+                `data.data`, and `data.meta` is the route's own metadata, distinct from the
+                envelope's `meta`.
+              required:
+                - data
+                - meta
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RealEstateJpTransaction'
+                meta:
+                  type: object
+                  required:
+                    - total
+                    - propertyType
+                    - unit
+                  properties:
+                    total:
+                      type: integer
+                      description: Transactions matching the ward and property type, across all pages.
+                      example: 1328
+                    propertyType:
+                      type: string
+                      enum:
+                        - land_building
+                        - land_only
+                      example: land_building
+                    unit:
+                      type: string
+                      enum:
+                        - jpy_m2
+                      example: jpy_m2
     RealEstateLandPrice:
       type: object
       description: |
@@ -6376,35 +8518,475 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RealEstateLandPrice'
-    RealEstateProvince:
+    NewsArticle:
       type: object
-      description: A province / city administrative unit available for real-estate queries.
+      description: |
+        One article, projected for briefing use — the dashboard's thumbnail, language,
+        ticker and enrichment fields are deliberately omitted.
       required:
-        - id
-        - name
-        - code
+        - title
+        - source
+        - publishedAt
+        - category
+        - url
       properties:
-        id:
-          type: integer
-          description: Province identifier.
-          example: 2
-        name:
+        title:
           type: string
-          description: Province / city name (localized by the `lang` query parameter).
-          example: Hà Nội
-        code:
+          example: Fed holds rates steady as inflation cools
+        source:
           type: string
-          description: Short province code.
-          example: HN
-        bbox:
+          description: Publisher name.
+          example: CNBC Markets
+        publishedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          example: '2026-09-16T04:12:00.000Z'
+        category:
+          type: string
+          description: Display category; empty string when the pipeline assigned none.
+          example: macroeconomic
+        geography:
+          type:
+            - string
+            - 'null'
+          example: us
+        sentiment:
+          type:
+            - string
+            - 'null'
+          enum:
+            - positive
+            - neutral
+            - negative
+            - null
+          example: positive
+        sentimentScore:
+          type:
+            - number
+            - 'null'
+          description: Signed sentiment strength; `null` when the article was not classified.
+          example: 0.62
+        summary:
           type:
             - array
             - 'null'
-          description: Optional geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Currently `null` on staging.
+          description: |
+            Short bullet summary. Roughly a fifth of articles have no generated summary —
+            those fall back to a single bullet holding the publisher's opening line,
+            truncated to 280 characters. Always an array or `null`, never a bare string.
           items:
-            type: number
-          example: null
-    RealEstateProvincesResponse:
+            type: string
+          example:
+            - The Federal Reserve left its benchmark rate unchanged at 4.25–4.50%.
+        url:
+          type: string
+          format: uri
+          example: https://www.cnbc.com/2026/09/16/fed-holds-rates.html
+    NewsFeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                One page of articles. `total` counts every article matching the filters,
+                not just this page — page through the remainder with `offset`.
+              required:
+                - total
+                - returned
+                - offset
+                - items
+              properties:
+                total:
+                  type: integer
+                  description: Articles matching the filters across all pages.
+                  example: 143
+                returned:
+                  type: integer
+                  description: Articles in this page.
+                  example: 5
+                offset:
+                  type: integer
+                  description: Articles skipped before this page.
+                  example: 0
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NewsArticle'
+    NewsSentimentResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                Aggregate sentiment over the window. Neutral articles are excluded from
+                `positiveRatio` and `score`, so check `decisive` before leaning on the
+                verdict — a favourable reading off three decisive articles is noise.
+              required:
+                - window
+                - total
+                - classified
+                - positive
+                - neutral
+                - negative
+                - decisive
+                - overall
+              properties:
+                window:
+                  type: string
+                  description: Window actually applied, as a Postgres interval.
+                  example: 1 day
+                total:
+                  type: integer
+                  description: Articles published in the window.
+                  example: 218
+                classified:
+                  type: integer
+                  description: Articles the pipeline assigned a sentiment to.
+                  example: 201
+                positive:
+                  type: integer
+                  example: 96
+                neutral:
+                  type: integer
+                  example: 71
+                negative:
+                  type: integer
+                  example: 34
+                decisive:
+                  type: integer
+                  description: '`positive` + `negative` — the base `positiveRatio` is computed from.'
+                  example: 130
+                positiveRatio:
+                  type:
+                    - number
+                    - 'null'
+                  description: Positive share of decisive articles, 0–1. `null` when nothing was decisive.
+                  example: 0.738
+                score:
+                  type:
+                    - number
+                    - 'null'
+                  description: Sentiment score, 0–100. `null` when nothing was decisive.
+                  example: 73.8
+                overall:
+                  type: string
+                  description: Verdict derived from `score`.
+                  enum:
+                    - Cautious
+                    - Neutral
+                    - Favourable
+                  example: Favourable
+    CalendarEvent:
+      type: object
+      description: |
+        One scheduled event. `date` and `time` are the local date–time at the publishing
+        market, **not** converted to the caller's timezone — `timezoneLabel` says which
+        market that is.
+      required:
+        - id
+        - date
+        - country
+        - category
+        - title
+        - symbols
+        - source
+      properties:
+        id:
+          type: string
+          example: '48213'
+        date:
+          type: string
+          format: date
+          example: '2026-09-17'
+        time:
+          type:
+            - string
+            - 'null'
+          description: '`null` for an all-day event.'
+          example: '14:30:00'
+        timezone:
+          type:
+            - string
+            - 'null'
+          description: IANA timezone of the publishing market.
+          example: America/New_York
+        timezoneLabel:
+          type:
+            - string
+            - 'null'
+          description: Short label for the timezone `date` / `time` are expressed in.
+          example: ET
+        country:
+          type: string
+          enum:
+            - global
+            - us
+            - jp
+            - vn
+            - eu
+            - gb
+            - au
+            - ca
+            - nz
+            - cn
+            - ch
+          example: us
+        category:
+          type: string
+          enum:
+            - holiday
+            - economic
+            - asset
+          example: economic
+        assetClass:
+          type:
+            - string
+            - 'null'
+          enum:
+            - stock
+            - etf
+            - bond
+            - crypto
+            - commodity
+            - fx
+            - null
+          description: '`null` for holidays and pure macro releases.'
+          example: etf
+        title:
+          type: string
+          example: CPI (YoY)
+        titleLocal:
+          type:
+            - string
+            - 'null'
+          description: Native-language name, where the source publishes one.
+          example: 消費者物価指数
+        description:
+          type:
+            - string
+            - 'null'
+        impact:
+          type:
+            - string
+            - 'null'
+          enum:
+            - high
+            - medium
+            - low
+            - null
+          example: high
+        actual:
+          type:
+            - number
+            - 'null'
+          description: Published figure; `null` until release time.
+          example: 2.9
+        forecast:
+          type:
+            - number
+            - 'null'
+          example: 3.1
+        previous:
+          type:
+            - number
+            - 'null'
+          example: 3.2
+        unit:
+          type:
+            - string
+            - 'null'
+          description: Unit of `actual` / `forecast` / `previous`.
+          example: percent
+        actualText:
+          type:
+            - string
+            - 'null'
+          description: Source's own string for the figure — render verbatim when present.
+          example: 2.9%
+        forecastText:
+          type:
+            - string
+            - 'null'
+          example: 3.1%
+        previousText:
+          type:
+            - string
+            - 'null'
+          example: 3.2%
+        symbols:
+          type: array
+          description: Ticker tags attached to the event.
+          items:
+            type: string
+          example:
+            - '1302'
+            - '1305'
+        subgroup:
+          type:
+            - string
+            - 'null'
+          example: No Creation only
+        source:
+          type: string
+          description: Data source — every response names where the figures came from.
+          example: investing.com
+        sourceUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+    CalendarEventsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: |
+                One page of events. `total` counts every event matching the filters, so a
+                caller told "150 events, 20 returned" can reach the rest with `offset`.
+              required:
+                - total
+                - returned
+                - offset
+                - items
+              properties:
+                total:
+                  type: integer
+                  example: 150
+                returned:
+                  type: integer
+                  example: 20
+                offset:
+                  type: integer
+                  example: 0
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CalendarEvent'
+    IndexSnapshot:
+      type: object
+      description: Latest level and daily move for one index.
+      required:
+        - symbol
+        - market
+        - name
+      properties:
+        symbol:
+          type: string
+          example: ^GSPC
+        market:
+          type: string
+          enum:
+            - vn
+            - us
+            - jp
+            - sea
+            - global
+          example: us
+        name:
+          type: string
+          example: S&P 500
+        price:
+          type:
+            - number
+            - 'null'
+          description: Latest level.
+          example: 6412.33
+        change1d:
+          type:
+            - number
+            - 'null'
+          description: |
+            Close-to-close change from the previous session. `null` when the previous
+            close is unavailable.
+          example: 0.42
+        asOfDate:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '2026-09-15'
+        source:
+          type:
+            - string
+            - 'null'
+          example: yahoo-finance
+    MarketIndicesSnapshotResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - market
+                - indices
+              properties:
+                market:
+                  type: string
+                  description: Market filter that was applied.
+                  example: all
+                updatedAt:
+                  type: string
+                  format: date-time
+                  description: When the snapshot was last refreshed. Absent when `indices` is empty.
+                  example: '2026-09-16T01:05:11.882Z'
+                indices:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndexSnapshot'
+    GlobalIndex:
+      type: object
+      description: |
+        Latest close for one global index. **`change` and `changePercent` here are
+        intraday** (close minus open of the latest bar) — for the daily close-to-close
+        move use `change1d` from `/openapi/v1/market/indices/snapshot`.
+      required:
+        - symbol
+        - market
+        - close
+        - change
+        - changePercent
+      properties:
+        symbol:
+          type: string
+          example: ^N225
+        market:
+          type: string
+          example: jp
+        close:
+          type: number
+          example: 42180.5
+        change:
+          type: number
+          description: Intraday change — close minus open of the latest bar.
+          example: -118.24
+        changePercent:
+          type: number
+          description: Intraday change as a percentage of the open.
+          example: -0.28
+        date:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '2026-09-15'
+    MarketGlobalIndicesResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
         - type: object
@@ -6414,20 +8996,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/RealEstateProvince'
-    RealEstateCountrySummaryResponse:
-      allOf:
-        - $ref: '#/components/schemas/EnvelopeBase'
-        - type: object
-          required:
-            - data
-          properties:
-            data:
-              type: array
-              description: Country-level summary rows (currently empty on staging).
-              items:
-                type: object
-                additionalProperties: true
+                $ref: '#/components/schemas/GlobalIndex'
   responses:
     BadRequest:
       description: Invalid or missing parameter — bad enum, range, format, or a missing required query parameter.
@@ -6578,6 +9147,9 @@ x-hayinsights-quota:
   weightsByTag:
     Macro: 2
     Real Estate: 2
+    Calendar: 2
+    Market: 2
+    News: 2-3
     Commodities: 3
     Crypto: 3
     FX: 3-6
@@ -6591,3 +9163,6 @@ x-tagGroups:
       - FX
       - Macro
       - Real Estate
+      - News
+      - Calendar
+      - Market

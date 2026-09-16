@@ -1,0 +1,146 @@
+get:
+  operationId: newsFeed
+  tags:
+    - News
+  summary: Latest market news
+  description: |
+    Recent news headlines with sentiment, newest first. Each item carries a short
+    summary, the publisher, and a sentiment label. Use `tab` to restrict to one
+    market (e.g. commodities), `geography` to one region, and keep `limit` small —
+    this is meant for a briefing, not an archive sweep. The response reports
+    `total`, so page with `offset` when there is more than one page.
+  x-feature-code: macro_data
+  x-api-weight: 3
+  parameters:
+    - name: tab
+      in: query
+      required: false
+      description: |
+        Restrict to one market. Equivalent to sending the matching `category`.
+
+        | Value | Description |
+        | --- | --- |
+        | `all` | Every market |
+        | `macroeconomic` | Macroeconomics |
+        | `bond` | Bonds |
+        | `stock` | Equities |
+        | `commodities` | Commodities |
+        | `forex` | Foreign exchange |
+        | `crypto` | Crypto |
+      schema:
+        type: string
+        enum: [all, macroeconomic, bond, stock, commodities, forex, crypto]
+    - name: category
+      in: query
+      required: false
+      description: Filter by display category. Prefer `tab`.
+      schema:
+        type: string
+        enum: [macroeconomic, bond, stock, commodities, forex, crypto]
+    - name: assetClass
+      in: query
+      required: false
+      description: Filter by asset class.
+      schema:
+        type: string
+        enum: [crypto, stock, bond, commodities, forex]
+    - name: macroTopic
+      in: query
+      required: false
+      description: Filter by macro topic.
+      schema:
+        type: string
+        enum: [politics, central_banks, macroeconomics]
+    - name: geography
+      in: query
+      required: false
+      description: |
+        Filter by region. `global` also covers apac and europe.
+
+        | Value | Description |
+        | --- | --- |
+        | `us` | United States |
+        | `japan` | Japan |
+        | `vietnam` | Vietnam |
+        | `global` | Global, incl. APAC and Europe |
+      schema:
+        type: string
+        enum: [us, japan, vietnam, global]
+    - name: sourceCode
+      in: query
+      required: false
+      description: Filter by source.
+      schema:
+        type: string
+        example: cnbc-markets
+    - name: keyword
+      in: query
+      required: false
+      description: Only articles mentioning this keyword.
+      schema:
+        type: string
+        example: inflation
+    - name: limit
+      in: query
+      required: false
+      description: Articles to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 5
+    - name: offset
+      in: query
+      required: false
+      description: Articles to skip, for paging.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    "200":
+      description: One page of articles, newest first.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/NewsFeedResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              total: 143
+              returned: 2
+              offset: 0
+              items:
+                - title: Fed holds rates steady as inflation cools
+                  source: CNBC Markets
+                  publishedAt: "2026-09-16T04:12:00.000Z"
+                  category: macroeconomic
+                  geography: us
+                  sentiment: positive
+                  sentimentScore: 0.62
+                  summary:
+                    - The Federal Reserve left its benchmark rate unchanged at 4.25–4.50%.
+                    - Officials signalled one further cut before year-end.
+                  url: https://www.cnbc.com/2026/09/16/fed-holds-rates.html
+                - title: Nikkei slips as yen strengthens past 145
+                  source: VnEconomy Business
+                  publishedAt: "2026-09-16T02:40:00.000Z"
+                  category: stock
+                  geography: japan
+                  sentiment: negative
+                  sentimentScore: -0.31
+                  summary: null
+                  url: https://vneconomy.vn/nikkei-slips.htm
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

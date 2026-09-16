@@ -1,0 +1,30 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          One page of events. `total` counts every event matching the filters, so a
+          caller told "150 events, 20 returned" can reach the rest with `offset`.
+        required:
+          - total
+          - returned
+          - offset
+          - items
+        properties:
+          total:
+            type: integer
+            example: 150
+          returned:
+            type: integer
+            example: 20
+          offset:
+            type: integer
+            example: 0
+          items:
+            type: array
+            items:
+              $ref: "../calendar/CalendarEvent.yaml"

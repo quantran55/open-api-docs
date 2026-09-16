@@ -3,6 +3,53 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.2.0" description="2026-09-16">
+  **News, Calendar and Market domains; Real Estate restructured.**
+
+  Brings the specification in line with the deployed API — 57 endpoints across nine
+  domains.
+
+  **Added**
+
+  - **News** — `GET /news/feed` (headlines with per-article sentiment) and
+    `GET /news/sentiment` (aggregate reading over a rolling window).
+  - **Calendar** — `GET /calendar/events`: rate decisions, CPI and GDP releases,
+    market holidays and asset-level events.
+  - **Market** — `GET /market/indices/snapshot` and `GET /market/global-indices`.
+  - **Macro** — 13 `GET /macro/indicators/*` tables covering GDP, CPI, PPI, PCE,
+    trade, population, unemployment, exchange rates, deposit rates and bond yields.
+  - **Real Estate** — ward-level `GET /real-estate/{country}/provinces/{provinceId}/wards`
+    and `/geojson`, province-level `GET /real-estate/{country}/provinces/prices`, and
+    transaction-level `GET /real-estate/{country}/wards/{wardId}/transactions`
+    (Japan only).
+
+  News, Calendar and Market are gated by the existing `macro_data` feature code, so
+  any plan that already includes Macro reaches them without a change of subscription.
+
+  **Removed — breaking**
+
+  Five Real Estate endpoints have been withdrawn. They were never exercised by a
+  first-party client, and so carried no coverage guarantee:
+
+  | Withdrawn | Replacement |
+  | --- | --- |
+  | `GET /real-estate/{country}` | — |
+  | `GET /real-estate/{country}/stats` | — |
+  | `GET /real-estate/{country}/geojson` | `GET /real-estate/{country}/provinces/{provinceId}/geojson` |
+  | `GET /real-estate/{country}/wards` | `GET /real-estate/{country}/provinces/{provinceId}/wards` |
+  | `GET /real-estate/{country}/wards/{wardId}` | `GET /real-estate/{country}/wards/{wardId}/transactions` |
+
+  Ward access is now scoped to a province rather than a whole country. If you call
+  any of the withdrawn routes, fetch the province list first and iterate.
+
+  **Changed**
+
+  - `GET /real-estate/{country}/provinces` accepts `country=all`, and every province
+    now carries a `country` field so a combined response can be grouped client-side.
+  - Province `bbox` is populated (it previously documented `null`), with offshore
+    units excluded.
+</Update>
+
 <Update label="0.1.0" description="2026-06-19">
   **Initial preview release.**
 

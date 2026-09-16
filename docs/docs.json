@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "HayInsights Open API",
-  "description": "The official API for the HayInsights financial-data hub — commodities, crypto, ETF, FX, macro and real-estate datasets.",
+  "description": "The official API for the HayInsights financial-data hub — commodities, crypto, ETF, FX, macro, real-estate, news, calendar and market-index datasets.",
   "logo": {
     "light": "/logo.svg",
     "dark": "/logo-dark.svg"
@@ -74,19 +74,51 @@
               "GET /openapi/v1/macro/exchange-rate",
               "GET /openapi/v1/macro/population",
               "GET /openapi/v1/macro/monetary-policy/central-government-debt",
-              "GET /openapi/v1/macro/monetary-policy/rates-yields"
+              "GET /openapi/v1/macro/monetary-policy/rates-yields",
+              "GET /openapi/v1/macro/indicators/gdp-growth-rate",
+              "GET /openapi/v1/macro/indicators/gdp-per-capita",
+              "GET /openapi/v1/macro/indicators/central-government-debt",
+              "GET /openapi/v1/macro/indicators/core-cpi",
+              "GET /openapi/v1/macro/indicators/ppi",
+              "GET /openapi/v1/macro/indicators/core-pce",
+              "GET /openapi/v1/macro/indicators/epi-ipi",
+              "GET /openapi/v1/macro/indicators/export-import",
+              "GET /openapi/v1/macro/indicators/population",
+              "GET /openapi/v1/macro/indicators/unemployment-rate",
+              "GET /openapi/v1/macro/indicators/exchange-rates",
+              "GET /openapi/v1/macro/indicators/deposit-rates",
+              "GET /openapi/v1/macro/indicators/government-bond-rates"
             ]
           },
           {
             "group": "Real Estate",
             "pages": [
-              "GET /openapi/v1/real-estate/{country}/geojson",
-              "GET /openapi/v1/real-estate/{country}/stats",
-              "GET /openapi/v1/real-estate/{country}/wards",
-              "GET /openapi/v1/real-estate/{country}/wards/{wardId}",
-              "GET /openapi/v1/real-estate/{country}/land-prices",
               "GET /openapi/v1/real-estate/{country}/provinces",
-              "GET /openapi/v1/real-estate/{country}"
+              "GET /openapi/v1/real-estate/{country}/provinces/prices",
+              "GET /openapi/v1/real-estate/{country}/provinces/{provinceId}/wards",
+              "GET /openapi/v1/real-estate/{country}/provinces/{provinceId}/geojson",
+              "GET /openapi/v1/real-estate/{country}/wards/{wardId}/transactions",
+              "GET /openapi/v1/real-estate/{country}/land-prices"
+            ]
+          },
+          {
+            "group": "News",
+            "pages": [
+              "GET /openapi/v1/news/feed",
+              "GET /openapi/v1/news/sentiment"
+            ]
+          },
+          {
+            "group": "Calendar",
+            "pages": [
+              "GET /openapi/v1/calendar/events"
+            ]
+          },
+          {
+            "group": "Market",
+            "pages": [
+              "GET /openapi/v1/market/indices/snapshot",
+              "GET /openapi/v1/market/global-indices"
             ]
           }
         ]

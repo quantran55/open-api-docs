@@ -1,0 +1,71 @@
+get:
+  operationId: marketIndicesSnapshot
+  tags:
+    - Market
+  summary: Index snapshots
+  description: |
+    Latest level and 1-day change for tracked market indices — S&P 500, Nasdaq,
+    Dow Jones, Nikkei, VN-Index and others. `change1d` is close-to-close. Use
+    `market=all` to count how many indices rose or fell in a session; narrow to one
+    market when the question is regional.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: market
+      in: query
+      required: false
+      description: |
+        Restrict to one market. Case-insensitive.
+
+        | Value | Description |
+        | --- | --- |
+        | `all` | Every market |
+        | `vn` | Vietnam |
+        | `us` | United States |
+        | `jp` | Japan |
+        | `sea` | South-East Asia |
+        | `global` | Global indices |
+      schema:
+        type: string
+        enum: [all, vn, us, jp, sea, global]
+        example: all
+  responses:
+    "200":
+      description: Index snapshots for the selected market.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MarketIndicesSnapshotResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              market: all
+              updatedAt: "2026-09-16T01:05:11.882Z"
+              indices:
+                - symbol: VNINDEX
+                  market: vn
+                  name: VN-Index
+                  price: 1342.18
+                  change1d: 0.86
+                  asOfDate: "2026-09-15"
+                  source: wifeed
+                - symbol: ^GSPC
+                  market: us
+                  name: S&P 500
+                  price: 6412.33
+                  change1d: 0.42
+                  asOfDate: "2026-09-15"
+                  source: yahoo-finance
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

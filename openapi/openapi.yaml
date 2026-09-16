@@ -5,8 +5,8 @@ info:
   version: 0.1.0
   description: |
     Programmatic access to the **HayInsights** financial-data hub — commodities,
-    crypto, ETF, FX, macroeconomic and real-estate datasets, served from a single
-    API surface under `/openapi/v1/*`.
+    crypto, ETF, FX, macroeconomic, real-estate, news, economic-calendar and
+    market-index datasets, served from a single API surface under `/openapi/v1/*`.
 
     This specification is the **single source of truth** for the public API
     surface — shared by SDK codegen, the reference docs, and (later) the mock
@@ -55,6 +55,9 @@ x-hayinsights-quota:
   weightsByTag:
     Macro: 2
     Real Estate: 2
+    Calendar: 2
+    Market: 2
+    News: "2-3"
     Commodities: 3
     Crypto: 3
     FX: "3-6"
@@ -72,7 +75,13 @@ tags:
   - name: Macro
     description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
   - name: Real Estate
-    description: Real-estate statistics, land prices, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+    description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
+  - name: News
+    description: Market news headlines with per-article sentiment, plus an aggregate sentiment reading over a rolling window.
+  - name: Calendar
+    description: Economic calendar — rate decisions, CPI and GDP releases, market holidays and asset-level events.
+  - name: Market
+    description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
 
 x-tagGroups:
   - name: Market Data
@@ -83,6 +92,9 @@ x-tagGroups:
       - FX
       - Macro
       - Real Estate
+      - News
+      - Calendar
+      - Market
 
 # Populated per-domain during Phase 2/3. Keep static/specific routes BEFORE
 # `{param}` catch-alls to avoid no-ambiguous-paths violations.
@@ -163,22 +175,64 @@ paths:
   /openapi/v1/macro/monetary-policy/rates-yields:
     $ref: "./paths/macro/macro_monetary-policy_rates-yields.yaml"
 
+  /openapi/v1/macro/indicators/gdp-growth-rate:
+    $ref: "./paths/macro/macro_indicators_gdp-growth-rate.yaml"
+  /openapi/v1/macro/indicators/gdp-per-capita:
+    $ref: "./paths/macro/macro_indicators_gdp-per-capita.yaml"
+  /openapi/v1/macro/indicators/central-government-debt:
+    $ref: "./paths/macro/macro_indicators_central-government-debt.yaml"
+  /openapi/v1/macro/indicators/core-cpi:
+    $ref: "./paths/macro/macro_indicators_core-cpi.yaml"
+  /openapi/v1/macro/indicators/ppi:
+    $ref: "./paths/macro/macro_indicators_ppi.yaml"
+  /openapi/v1/macro/indicators/core-pce:
+    $ref: "./paths/macro/macro_indicators_core-pce.yaml"
+  /openapi/v1/macro/indicators/epi-ipi:
+    $ref: "./paths/macro/macro_indicators_epi-ipi.yaml"
+  /openapi/v1/macro/indicators/export-import:
+    $ref: "./paths/macro/macro_indicators_export-import.yaml"
+  /openapi/v1/macro/indicators/population:
+    $ref: "./paths/macro/macro_indicators_population.yaml"
+  /openapi/v1/macro/indicators/unemployment-rate:
+    $ref: "./paths/macro/macro_indicators_unemployment-rate.yaml"
+  /openapi/v1/macro/indicators/exchange-rates:
+    $ref: "./paths/macro/macro_indicators_exchange-rates.yaml"
+  /openapi/v1/macro/indicators/deposit-rates:
+    $ref: "./paths/macro/macro_indicators_deposit-rates.yaml"
+  /openapi/v1/macro/indicators/government-bond-rates:
+    $ref: "./paths/macro/macro_indicators_government-bond-rates.yaml"
+
   # ── Real Estate ────────────────────────────────────────────────────────
-  # Static / deeper routes BEFORE the single-segment `{country}` catch-all.
-  /openapi/v1/real-estate/{country}/geojson:
-    $ref: "./paths/real-estate/real-estate_{country}_geojson.yaml"
-  /openapi/v1/real-estate/{country}/stats:
-    $ref: "./paths/real-estate/real-estate_{country}_stats.yaml"
-  /openapi/v1/real-estate/{country}/wards:
-    $ref: "./paths/real-estate/real-estate_{country}_wards.yaml"
-  /openapi/v1/real-estate/{country}/wards/{wardId}:
-    $ref: "./paths/real-estate/real-estate_{country}_wards_{wardId}.yaml"
-  /openapi/v1/real-estate/{country}/land-prices:
-    $ref: "./paths/real-estate/real-estate_{country}_land-prices.yaml"
+  # Static / deeper routes BEFORE shorter `{param}` routes, mirroring the
+  # declaration order the API itself relies on.
+  /openapi/v1/real-estate/{country}/provinces/prices:
+    $ref: "./paths/real-estate/real-estate_{country}_provinces_prices.yaml"
+  /openapi/v1/real-estate/{country}/provinces/{provinceId}/geojson:
+    $ref: "./paths/real-estate/real-estate_{country}_provinces_{provinceId}_geojson.yaml"
+  /openapi/v1/real-estate/{country}/provinces/{provinceId}/wards:
+    $ref: "./paths/real-estate/real-estate_{country}_provinces_{provinceId}_wards.yaml"
   /openapi/v1/real-estate/{country}/provinces:
     $ref: "./paths/real-estate/real-estate_{country}_provinces.yaml"
-  /openapi/v1/real-estate/{country}:
-    $ref: "./paths/real-estate/real-estate_{country}.yaml"
+  /openapi/v1/real-estate/{country}/wards/{wardId}/transactions:
+    $ref: "./paths/real-estate/real-estate_{country}_wards_{wardId}_transactions.yaml"
+  /openapi/v1/real-estate/{country}/land-prices:
+    $ref: "./paths/real-estate/real-estate_{country}_land-prices.yaml"
+
+  # ── News ───────────────────────────────────────────────────────────────
+  /openapi/v1/news/feed:
+    $ref: "./paths/news/news_feed.yaml"
+  /openapi/v1/news/sentiment:
+    $ref: "./paths/news/news_sentiment.yaml"
+
+  # ── Calendar ───────────────────────────────────────────────────────────
+  /openapi/v1/calendar/events:
+    $ref: "./paths/calendar/calendar_events.yaml"
+
+  # ── Market ─────────────────────────────────────────────────────────────
+  /openapi/v1/market/indices/snapshot:
+    $ref: "./paths/market/market_indices_snapshot.yaml"
+  /openapi/v1/market/global-indices:
+    $ref: "./paths/market/market_global-indices.yaml"
 
 components:
   securitySchemes:

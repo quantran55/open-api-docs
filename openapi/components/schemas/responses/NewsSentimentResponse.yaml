@@ -1,0 +1,67 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          Aggregate sentiment over the window. Neutral articles are excluded from
+          `positiveRatio` and `score`, so check `decisive` before leaning on the
+          verdict — a favourable reading off three decisive articles is noise.
+        required:
+          - window
+          - total
+          - classified
+          - positive
+          - neutral
+          - negative
+          - decisive
+          - overall
+        properties:
+          window:
+            type: string
+            description: Window actually applied, as a Postgres interval.
+            example: 1 day
+          total:
+            type: integer
+            description: Articles published in the window.
+            example: 218
+          classified:
+            type: integer
+            description: Articles the pipeline assigned a sentiment to.
+            example: 201
+          positive:
+            type: integer
+            example: 96
+          neutral:
+            type: integer
+            example: 71
+          negative:
+            type: integer
+            example: 34
+          decisive:
+            type: integer
+            description: "`positive` + `negative` — the base `positiveRatio` is computed from."
+            example: 130
+          positiveRatio:
+            type:
+              - number
+              - "null"
+            description: Positive share of decisive articles, 0–1. `null` when nothing was decisive.
+            example: 0.738
+          score:
+            type:
+              - number
+              - "null"
+            description: Sentiment score, 0–100. `null` when nothing was decisive.
+            example: 73.8
+          overall:
+            type: string
+            description: Verdict derived from `score`.
+            enum:
+              - Cautious
+              - Neutral
+              - Favourable
+            example: Favourable

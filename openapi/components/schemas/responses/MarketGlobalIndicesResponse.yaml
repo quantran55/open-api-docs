@@ -6,7 +6,5 @@ allOf:
     properties:
       data:
         type: array
-        description: Country-level summary rows (currently empty on staging).
         items:
-          type: object
-          additionalProperties: true
+          $ref: "../market/GlobalIndex.yaml"

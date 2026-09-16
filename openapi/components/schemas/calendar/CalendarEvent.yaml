@@ -1,0 +1,131 @@
+type: object
+description: |
+  One scheduled event. `date` and `time` are the local date–time at the publishing
+  market, **not** converted to the caller's timezone — `timezoneLabel` says which
+  market that is.
+required:
+  - id
+  - date
+  - country
+  - category
+  - title
+  - symbols
+  - source
+properties:
+  id:
+    type: string
+    example: "48213"
+  date:
+    type: string
+    format: date
+    example: "2026-09-17"
+  time:
+    type:
+      - string
+      - "null"
+    description: "`null` for an all-day event."
+    example: "14:30:00"
+  timezone:
+    type:
+      - string
+      - "null"
+    description: IANA timezone of the publishing market.
+    example: America/New_York
+  timezoneLabel:
+    type:
+      - string
+      - "null"
+    description: Short label for the timezone `date` / `time` are expressed in.
+    example: ET
+  country:
+    type: string
+    enum: [global, us, jp, vn, eu, gb, au, ca, nz, cn, ch]
+    example: us
+  category:
+    type: string
+    enum: [holiday, economic, asset]
+    example: economic
+  assetClass:
+    type:
+      - string
+      - "null"
+    enum: [stock, etf, bond, crypto, commodity, fx, null]
+    description: "`null` for holidays and pure macro releases."
+    example: etf
+  title:
+    type: string
+    example: CPI (YoY)
+  titleLocal:
+    type:
+      - string
+      - "null"
+    description: Native-language name, where the source publishes one.
+    example: 消費者物価指数
+  description:
+    type:
+      - string
+      - "null"
+  impact:
+    type:
+      - string
+      - "null"
+    enum: [high, medium, low, null]
+    example: high
+  actual:
+    type:
+      - number
+      - "null"
+    description: Published figure; `null` until release time.
+    example: 2.9
+  forecast:
+    type:
+      - number
+      - "null"
+    example: 3.1
+  previous:
+    type:
+      - number
+      - "null"
+    example: 3.2
+  unit:
+    type:
+      - string
+      - "null"
+    description: Unit of `actual` / `forecast` / `previous`.
+    example: percent
+  actualText:
+    type:
+      - string
+      - "null"
+    description: Source's own string for the figure — render verbatim when present.
+    example: 2.9%
+  forecastText:
+    type:
+      - string
+      - "null"
+    example: 3.1%
+  previousText:
+    type:
+      - string
+      - "null"
+    example: 3.2%
+  symbols:
+    type: array
+    description: Ticker tags attached to the event.
+    items:
+      type: string
+    example: ["1302", "1305"]
+  subgroup:
+    type:
+      - string
+      - "null"
+    example: No Creation only
+  source:
+    type: string
+    description: Data source — every response names where the figures came from.
+    example: investing.com
+  sourceUrl:
+    type:
+      - string
+      - "null"
+    format: uri

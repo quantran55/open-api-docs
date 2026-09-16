@@ -1,0 +1,87 @@
+get:
+  operationId: macroIndicatorEpiIpi
+  tags:
+    - Macro
+  summary: "Indicator — Export/Import price index table (US/JP/VN)"
+  description: |
+    Monthly table of export price index (EPI) and import price index (IPI), each cell
+    holding both metrics as raw index points exactly as published — no conversion.
+    `columns` holds the N most recent months (default 2, oldest to newest) and `metrics`
+    declares the fields inside each cell. Currently only JP and US have data; the VN row
+    returns available=false.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      description: Number of most recent periods (columns) to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 4
+        example: 2
+  responses:
+    "200":
+      description: Export/import price index table.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroIndicatorMultiTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              indicator: epi-ipi
+              metrics:
+                - key: epi
+                  label: Export
+                  unit: points
+                - key: ipi
+                  label: Import
+                  unit: points
+              columns:
+                - period: Jun 2026
+                  date: "2026-06-30"
+                  isPartial: false
+                - period: Jul 2026
+                  date: "2026-07-31"
+                  isPartial: false
+              rows:
+                - country: US
+                  countryName: United States
+                  available: true
+                  unit: null
+                  values:
+                    - epi: 167.6
+                      ipi: 150.2
+                    - epi: 165.4
+                      ipi: 149.6
+                  display:
+                    - epi: "167.60"
+                      ipi: "150.20"
+                    - epi: "165.40"
+                      ipi: "149.60"
+                - country: VN
+                  countryName: Vietnam
+                  available: false
+                  unit: null
+                  values: [null, null]
+                  display:
+                    - epi: "—"
+                      ipi: "—"
+                    - epi: "—"
+                      ipi: "—"
+            meta:
+              timestamp: "2026-09-16T07:25:17.048Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

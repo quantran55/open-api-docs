@@ -1,0 +1,42 @@
+type: object
+description: Latest level and daily move for one index.
+required:
+  - symbol
+  - market
+  - name
+properties:
+  symbol:
+    type: string
+    example: ^GSPC
+  market:
+    type: string
+    enum: [vn, us, jp, sea, global]
+    example: us
+  name:
+    type: string
+    example: S&P 500
+  price:
+    type:
+      - number
+      - "null"
+    description: Latest level.
+    example: 6412.33
+  change1d:
+    type:
+      - number
+      - "null"
+    description: |
+      Close-to-close change from the previous session. `null` when the previous
+      close is unavailable.
+    example: 0.42
+  asOfDate:
+    type:
+      - string
+      - "null"
+    format: date
+    example: "2026-09-15"
+  source:
+    type:
+      - string
+      - "null"
+    example: yahoo-finance

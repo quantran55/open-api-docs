@@ -1,0 +1,37 @@
+type: object
+description: One country (row) of the deposit-rates table, positional against `tenors`.
+required:
+  - country
+  - countryName
+  - available
+  - values
+  - display
+properties:
+  country:
+    type: string
+    example: VN
+  countryName:
+    type: string
+    example: Vietnam
+  available:
+    type: boolean
+    example: true
+  date:
+    type:
+      - string
+      - "null"
+    format: date
+    description: Observation date of the rates in this row.
+    example: "2026-09-10"
+  values:
+    type: array
+    items:
+      type:
+        - number
+        - "null"
+    example: [2.38, 3.63, 5.9]
+  display:
+    type: array
+    items:
+      type: string
+    example: ["2.38", "3.63", "5.90"]

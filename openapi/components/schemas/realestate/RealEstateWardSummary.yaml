@@ -1,0 +1,24 @@
+type: object
+description: Lightweight ward entry for populating a province's ward picker.
+required:
+  - wardId
+  - wardName
+properties:
+  wardId:
+    type: integer
+    example: 3712
+  wardName:
+    type: string
+    example: Adachi
+  wardType:
+    type:
+      - string
+      - "null"
+    enum:
+      - isLands
+      - null
+    description: |
+      Disambiguates Japanese wards that share a name. Currently set on one unit only —
+      利島村, the island village whose name collides with Toshima ward — and `null`
+      everywhere else, including all of Vietnam.
+    example: null

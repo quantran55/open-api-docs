@@ -62,8 +62,9 @@ $defs:
         type: string
         example: Nikkei 225
       value:
-        type: ["number", "null"]
-        example: 38500.5
+        type: ["string", "null"]
+        description: Index level. Returned as a decimal **string**, not a number.
+        example: "4062.2700"
       changeValue:
         type: ["number", "null"]
         description: Absolute change versus the previous close.
@@ -91,8 +92,9 @@ $defs:
         type: string
         example: TIBOR 3M
       value:
-        type: number
-        example: 0.08
+        type: string
+        description: Rate. Returned as a decimal **string**, not a number.
+        example: "1.62845"
       changeValue:
         type: ["number", "null"]
         description: Absolute change versus the previous close.
@@ -119,8 +121,9 @@ $defs:
         type: string
         example: USD/JPY
       value:
-        type: ["number", "null"]
-        example: 148.5
+        type: ["string", "null"]
+        description: Exchange rate. Returned as a decimal **string**, not a number.
+        example: "155.2960"
       changeValue:
         type: ["number", "null"]
         description: Absolute change versus the previous close.

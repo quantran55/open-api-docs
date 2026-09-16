@@ -1,0 +1,68 @@
+get:
+  operationId: macroIndicatorGovernmentBondRates
+  tags:
+    - Macro
+  summary: "Indicator — Government bond rates table (US/JP/VN)"
+  description: |
+    Monthly table of the 10-year government bond yield (%) for all three economies,
+    `columns` holding the N most recent months (default 4). Same source as
+    /macro/monetary-policy/rates-yields. Currently only JP and US have data; the VN row
+    returns available=false with all-null values.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      description: Number of most recent periods (columns) to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 4
+        example: 4
+  responses:
+    "200":
+      description: Government bond rates table.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroIndicatorTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              indicator: gdp-growth-rate
+              unit: "%"
+              columns:
+                - period: Q3 2025
+                  date: "2025-09-30"
+                - period: Q4 2025
+                  date: "2025-12-31"
+                - period: Q1 2026
+                  date: "2026-03-31"
+              rows:
+                - country: US
+                  countryName: United States
+                  available: true
+                  values: [2.1, 2.4, 5.4]
+                  display: ["2.10", "2.40", "5.40"]
+                  basis: YoY
+                - country: JP
+                  countryName: Japan
+                  available: true
+                  values: [0.3, 0.1, null]
+                  display: ["0.30", "0.10", "—"]
+                  basis: QoQ
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,30 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          Province rows plus the per-country colour thresholds. Note the nesting: the
+          rows are at `data.data`, and `data.meta` is the route's own metadata,
+          distinct from the envelope's `meta`.
+        required:
+          - data
+          - meta
+        properties:
+          data:
+            type: array
+            items:
+              $ref: "../realestate/RealEstateProvincePrice.yaml"
+          meta:
+            type: object
+            required:
+              - byCountry
+            properties:
+              byCountry:
+                type: object
+                description: Keyed by lowercase country code.
+                additionalProperties:
+                  $ref: "../realestate/RealEstateProvincePriceCountryMeta.yaml"

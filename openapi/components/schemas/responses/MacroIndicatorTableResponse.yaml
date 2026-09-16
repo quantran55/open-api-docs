@@ -1,0 +1,34 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          A country × period table. `rows[].values` is positionally aligned with
+          `columns`, so `rows[0].values[2]` is the value for `columns[2]`.
+        required:
+          - indicator
+          - columns
+          - rows
+        properties:
+          indicator:
+            type: string
+            description: Indicator slug, matching the endpoint path.
+            example: gdp-growth-rate
+          unit:
+            type:
+              - string
+              - "null"
+            description: Unit shared by every row unless a row overrides it.
+            example: "%"
+          columns:
+            type: array
+            items:
+              $ref: "../macro/IndicatorColumn.yaml"
+          rows:
+            type: array
+            items:
+              $ref: "../macro/IndicatorRow.yaml"

@@ -1,0 +1,122 @@
+get:
+  operationId: realEstateWardTransactions
+  tags:
+    - Real Estate
+  summary: Transaction-level records for one ward (Japan only)
+  description: |
+    Each row is a single real transaction published by MLIT — distinct from the
+    land-prices endpoint, which aggregates a neighbourhood into median / p25 / p75.
+    Covers every quarter held, and drops transactions whose source records area only
+    as a bound (e.g. "2000㎡以上"). Residential land only (住宅地).
+
+    Japan only: any other `country` returns `400`.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code — `jp` only; anything else returns `400`.
+      schema:
+        type: string
+        enum: [jp]
+        example: jp
+    - name: wardId
+      in: path
+      required: true
+      description: Ward ID, from the province wards endpoint.
+      schema:
+        type: integer
+        example: 3712
+    - name: property_type
+      in: query
+      required: false
+      description: |
+        Property category.
+
+        | Value | Description |
+        | --- | --- |
+        | `land_building` | 宅地(土地と建物) — land with buildings |
+        | `land_only` | 宅地(土地) — land only |
+      schema:
+        type: string
+        enum: [land_building, land_only]
+        default: land_building
+    - name: limit
+      in: query
+      required: false
+      description: |
+        Transactions to return. The densest ward currently holds 1,328 transactions in
+        a single tab, so the ceiling is set well above it.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2000
+        default: 200
+    - name: offset
+      in: query
+      required: false
+      description: Transactions to skip, for paging.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    - name: sort
+      in: query
+      required: false
+      description: |
+        Sort order.
+
+        | Value | Description |
+        | --- | --- |
+        | `unit_price_desc` | Unit price, highest first |
+        | `unit_price_asc` | Unit price, lowest first |
+        | `price_desc` | Total price, highest first |
+        | `price_asc` | Total price, lowest first |
+        | `area_desc` | Area, largest first |
+        | `district_asc` | Neighbourhood name, A–Z |
+      schema:
+        type: string
+        enum: [price_desc, price_asc, unit_price_desc, unit_price_asc, area_desc, district_asc]
+        default: unit_price_desc
+  responses:
+    "200":
+      description: One page of transactions for the ward.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateJpTransactionsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              data:
+                - districtName: 日ノ出町
+                  districtNameEn: Hinodecho
+                  nearestStation: 北千住
+                  nearestStationEn: Kita-senju
+                  nearestStationMin: 9
+                  tradePriceJpy: 260000000
+                  areaM2: 95
+                  areaIsLowerBound: false
+                  pricePerM2Jpy: 2736842.11
+                  priceYear: 2025
+                  priceQuarter: 3
+              meta:
+                total: 974
+                propertyType: land_building
+                unit: jpy_m2
+            meta:
+              timestamp: "2026-09-16T07:25:57.670Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

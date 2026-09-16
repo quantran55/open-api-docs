@@ -1,0 +1,32 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          A country × period table where each cell holds several metrics. Cell
+          objects are keyed by `metrics[].key`.
+        required:
+          - indicator
+          - metrics
+          - columns
+          - rows
+        properties:
+          indicator:
+            type: string
+            example: export-import
+          metrics:
+            type: array
+            items:
+              $ref: "../macro/IndicatorMetric.yaml"
+          columns:
+            type: array
+            items:
+              $ref: "../macro/IndicatorMultiColumn.yaml"
+          rows:
+            type: array
+            items:
+              $ref: "../macro/IndicatorMultiRow.yaml"

@@ -1,0 +1,65 @@
+type: object
+description: |
+  One article, projected for briefing use — the dashboard's thumbnail, language,
+  ticker and enrichment fields are deliberately omitted.
+required:
+  - title
+  - source
+  - publishedAt
+  - category
+  - url
+properties:
+  title:
+    type: string
+    example: Fed holds rates steady as inflation cools
+  source:
+    type: string
+    description: Publisher name.
+    example: CNBC Markets
+  publishedAt:
+    type:
+      - string
+      - "null"
+    format: date-time
+    example: "2026-09-16T04:12:00.000Z"
+  category:
+    type: string
+    description: Display category; empty string when the pipeline assigned none.
+    example: macroeconomic
+  geography:
+    type:
+      - string
+      - "null"
+    example: us
+  sentiment:
+    type:
+      - string
+      - "null"
+    enum:
+      - positive
+      - neutral
+      - negative
+      - null
+    example: positive
+  sentimentScore:
+    type:
+      - number
+      - "null"
+    description: Signed sentiment strength; `null` when the article was not classified.
+    example: 0.62
+  summary:
+    type:
+      - array
+      - "null"
+    description: |
+      Short bullet summary. Roughly a fifth of articles have no generated summary —
+      those fall back to a single bullet holding the publisher's opening line,
+      truncated to 280 characters. Always an array or `null`, never a bare string.
+    items:
+      type: string
+    example:
+      - The Federal Reserve left its benchmark rate unchanged at 4.25–4.50%.
+  url:
+    type: string
+    format: uri
+    example: https://www.cnbc.com/2026/09/16/fed-holds-rates.html

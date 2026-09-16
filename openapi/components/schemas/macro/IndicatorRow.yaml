@@ -1,0 +1,48 @@
+type: object
+description: |
+  One country (row) of an indicator table. `values` and `display` are positional —
+  index `n` corresponds to `columns[n]`.
+required:
+  - country
+  - countryName
+  - available
+  - values
+  - display
+properties:
+  country:
+    type: string
+    description: ISO country code.
+    example: US
+  countryName:
+    type: string
+    example: United States
+  available:
+    type: boolean
+    description: "`false` when no series exists for this country — `values` is then all `null`."
+    example: true
+  values:
+    type: array
+    description: Raw numeric value per column; `null` where the period has no observation.
+    items:
+      type:
+        - number
+        - "null"
+    example: [5.4, 5.4, 6.1, null]
+  display:
+    type: array
+    description: Pre-formatted string per column; an em dash marks a missing value.
+    items:
+      type: string
+    example: ["5.40", "5.40", "6.10", "—"]
+  basis:
+    type:
+      - string
+      - "null"
+    description: Comparison basis of the figures, when the indicator has one.
+    example: YoY
+  unit:
+    type:
+      - string
+      - "null"
+    description: Unit override for this row, when it differs from the table unit.
+    example: USD/JPY

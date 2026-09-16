@@ -1,0 +1,95 @@
+type: object
+description: |
+  One province-level dot for a low-zoom map: coordinates plus a representative
+  price. Deliberately carries no ward geometry — a single province's GeoJSON runs
+  to several megabytes, which is a lot to download just to draw one dot.
+required:
+  - id
+  - name
+  - code
+  - country
+  - wardCount
+  - unit
+properties:
+  id:
+    type: integer
+    example: 1
+  name:
+    type: string
+    example: Hồ Chí Minh
+  code:
+    type: string
+    example: HCM
+  country:
+    type: string
+    description: Lowercase country code — picks the colour scale and price format.
+    example: vn
+  lat:
+    type:
+      - number
+      - "null"
+    description: |
+      Representative dot — the mean ward lat/lon, falling back to the centre of the
+      boundary bbox. `null` when the province has neither.
+    example: 10.7412
+  lon:
+    type:
+      - number
+      - "null"
+    example: 106.7215
+  bbox:
+    type:
+      - array
+      - "null"
+    description: Bounding box `[minLon, minLat, maxLon, maxLat]`.
+    items:
+      type: number
+    minItems: 4
+    maxItems: 4
+    example: [106.415837, 8.67851, 107.531438, 10.737193]
+  outline:
+    type:
+      - array
+      - "null"
+    description: |
+      Province boundary as MultiPolygon coordinates (`[lon, lat]`), **heavily
+      simplified** for low-zoom drawing. Not for spatial computation — use the
+      per-province GeoJSON endpoint when exact geometry matters.
+    items:
+      type: array
+      items:
+        type: array
+        items:
+          type: array
+          items:
+            type: number
+  avgPrice:
+    type:
+      - number
+      - "null"
+    description: Representative average price, in `unit`. `null` when no price data exists.
+    example: 53811.68
+  minPrice:
+    type:
+      - number
+      - "null"
+    example: 1300
+  maxPrice:
+    type:
+      - number
+      - "null"
+    example: 687200
+  wardCount:
+    type: integer
+    description: Wards carrying price data — the denominator behind `avgPrice`.
+    example: 168
+  unit:
+    type: string
+    enum: [k_vnd, jpy_m2]
+    description: "`k_vnd` for Vietnam, `jpy_m2` for Japan."
+    example: k_vnd
+  latestYear:
+    type:
+      - integer
+      - "null"
+    example: 2025

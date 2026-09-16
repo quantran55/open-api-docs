@@ -13,9 +13,16 @@ get:
     - name: country
       in: path
       required: true
-      description: Country code, lowercase.
+      description: |
+        Country code.
+
+        | Value | Description |
+        | --- | --- |
+        | `vn` | Vietnam |
+        | `jp` | Japan |
       schema:
         type: string
+        enum: [vn, jp]
         example: vn
     - name: type
       in: query
@@ -73,7 +80,24 @@ get:
       description: Maximum number of segments to return.
       schema:
         type: integer
+        minimum: 1
+        maximum: 1000
+        default: 200
         example: 100
+    - name: lang
+      in: query
+      required: false
+      description: |
+        Language for name fields.
+
+        | Value | Description |
+        | --- | --- |
+        | `vi` | Vietnamese |
+        | `en` | English |
+      schema:
+        type: string
+        enum: [vi, en]
+        default: vi
   responses:
     "200":
       description: List of priced road segments.

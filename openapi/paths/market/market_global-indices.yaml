@@ -1,0 +1,47 @@
+get:
+  operationId: marketGlobalIndices
+  tags:
+    - Market
+  summary: Global indices
+  description: |
+    Latest close for all tracked global indices, including South-East Asia. Broader
+    coverage than the snapshot route.
+
+    **Note:** `change` / `changePercent` here are **intraday** (close minus open of
+    the latest bar), not the close-to-close daily move — use `change1d` from
+    `/openapi/v1/market/indices/snapshot` for the daily change.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  responses:
+    "200":
+      description: Latest close for every tracked global index.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MarketGlobalIndicesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - symbol: ^N225
+                market: jp
+                close: 42180.5
+                change: -118.24
+                changePercent: -0.28
+                date: "2026-09-15"
+              - symbol: ^STI
+                market: sea
+                close: 3641.92
+                change: 12.07
+                changePercent: 0.33
+                date: "2026-09-15"
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

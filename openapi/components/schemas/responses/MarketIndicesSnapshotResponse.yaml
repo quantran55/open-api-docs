@@ -1,0 +1,25 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - market
+          - indices
+        properties:
+          market:
+            type: string
+            description: Market filter that was applied.
+            example: all
+          updatedAt:
+            type: string
+            format: date-time
+            description: When the snapshot was last refreshed. Absent when `indices` is empty.
+            example: "2026-09-16T01:05:11.882Z"
+          indices:
+            type: array
+            items:
+              $ref: "../market/IndexSnapshot.yaml"

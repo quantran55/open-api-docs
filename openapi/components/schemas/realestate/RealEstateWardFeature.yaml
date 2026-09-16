@@ -1,0 +1,54 @@
+type: object
+description: |
+  One ward feature: price attributes plus boundary geometry. `coordinates` is modelled
+  permissively — it is a nested array of `[longitude, latitude]` rings, can be large,
+  and is normally passed straight to a mapping library.
+required:
+  - wardId
+  - wardName
+properties:
+  wardId:
+    type: integer
+    example: 34
+  wardName:
+    type: string
+    example: Phú Thuận
+  areaName:
+    type: string
+    description: Area / zone display name (localized).
+    example: Khu vực II
+  area:
+    type: string
+    description: Area / land-value zone label (localized).
+    example: Khu vực II
+  avgPriceResidentialVt1:
+    type: ["number", "null"]
+    description: Average residential price, value-position tier 1.
+    example: 52639.39
+  avgPriceResidentialVt2:
+    type: ["number", "null"]
+    example: null
+  avgPriceResidentialVt3:
+    type: ["number", "null"]
+    example: null
+  avgPriceResidentialVt4:
+    type: ["number", "null"]
+    example: null
+  minPriceResidential:
+    type: ["number", "null"]
+    example: 36500
+  maxPriceResidential:
+    type: ["number", "null"]
+    example: 83400
+  roadCount:
+    type: ["integer", "null"]
+    example: 38
+  unit:
+    type: string
+    enum: [k_vnd, jpy_m2]
+    example: k_vnd
+  coordinates:
+    type: array
+    description: Boundary geometry as nested coordinate rings. Pass through to a map.
+    items: {}
+additionalProperties: true

@@ -1,0 +1,39 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          Transaction rows plus paging metadata. Note the nesting: the rows are at
+          `data.data`, and `data.meta` is the route's own metadata, distinct from the
+          envelope's `meta`.
+        required:
+          - data
+          - meta
+        properties:
+          data:
+            type: array
+            items:
+              $ref: "../realestate/RealEstateJpTransaction.yaml"
+          meta:
+            type: object
+            required:
+              - total
+              - propertyType
+              - unit
+            properties:
+              total:
+                type: integer
+                description: Transactions matching the ward and property type, across all pages.
+                example: 1328
+              propertyType:
+                type: string
+                enum: [land_building, land_only]
+                example: land_building
+              unit:
+                type: string
+                enum: [jpy_m2]
+                example: jpy_m2

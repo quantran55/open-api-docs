@@ -1,0 +1,33 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          One page of articles. `total` counts every article matching the filters,
+          not just this page — page through the remainder with `offset`.
+        required:
+          - total
+          - returned
+          - offset
+          - items
+        properties:
+          total:
+            type: integer
+            description: Articles matching the filters across all pages.
+            example: 143
+          returned:
+            type: integer
+            description: Articles in this page.
+            example: 5
+          offset:
+            type: integer
+            description: Articles skipped before this page.
+            example: 0
+          items:
+            type: array
+            items:
+              $ref: "../news/NewsArticle.yaml"

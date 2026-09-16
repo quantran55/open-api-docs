@@ -1,0 +1,68 @@
+get:
+  operationId: macroIndicatorGdpGrowthRate
+  tags:
+    - Macro
+  summary: "Indicator — GDP growth rate table (US/JP/VN)"
+  description: |
+    Table of quarterly GDP growth rate (%) for all three economies. `columns` holds the N
+    most recent quarters (default 4, oldest to newest); `rows[i].values[j]` is the cell at
+    row i, column j. US uses YoY on real GDP (chained 2017 USD), matching the dedicated US
+    chart; JP uses QoQ, VN comes straight from the source.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      description: Number of most recent periods (columns) to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 4
+        example: 4
+  responses:
+    "200":
+      description: GDP growth rate table.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroIndicatorTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              indicator: gdp-growth-rate
+              unit: "%"
+              columns:
+                - period: Q3 2025
+                  date: "2025-09-30"
+                - period: Q4 2025
+                  date: "2025-12-31"
+                - period: Q1 2026
+                  date: "2026-03-31"
+              rows:
+                - country: US
+                  countryName: United States
+                  available: true
+                  values: [2.1, 2.4, 5.4]
+                  display: ["2.10", "2.40", "5.40"]
+                  basis: YoY
+                - country: JP
+                  countryName: Japan
+                  available: true
+                  values: [0.3, 0.1, null]
+                  display: ["0.30", "0.10", "—"]
+                  basis: QoQ
+            meta:
+              timestamp: "2026-09-16T08:50:42.507Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

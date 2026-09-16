@@ -1,0 +1,84 @@
+get:
+  operationId: realEstateProvinceGeoJson
+  tags:
+    - Real Estate
+  summary: Ward choropleth GeoJSON for one province
+  description: |
+    Boundary geometry for every ward in `provinceId`, carrying residential land
+    prices. `meta.bands` holds percentile colour thresholds (non-Vietnam markets
+    only) — when absent, the client falls back to its own fixed bands. `meta.unit`
+    says how to format prices, and `meta.usdRate` is the USD value of one unit of
+    local currency.
+
+    Payloads are large — a single province can run to several megabytes. Use the
+    province-prices endpoint when a dot per province is enough.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code.
+      schema:
+        type: string
+        enum: [vn, jp]
+        example: vn
+    - name: provinceId
+      in: path
+      required: true
+      description: Province ID, from the provinces endpoint.
+      schema:
+        type: integer
+        example: 1
+    - name: lang
+      in: query
+      required: false
+      description: Language for name fields.
+      schema:
+        type: string
+        enum: [vi, en]
+        default: vi
+  responses:
+    "200":
+      description: Ward boundaries and prices for the province.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateProvinceGeoJsonResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              data:
+                - wardId: 34
+                  wardName: Phú Thuận
+                  areaName: Khu vực II
+                  area: Khu vực II
+                  avgPriceResidentialVt1: 52639.39
+                  avgPriceResidentialVt2: null
+                  avgPriceResidentialVt3: null
+                  avgPriceResidentialVt4: null
+                  minPriceResidential: 36500
+                  maxPriceResidential: 83400
+                  roadCount: 33
+                  unit: k_vnd
+                  coordinates: [[[106.751906, 10.7051207], [106.751422, 10.7074537]]]
+              meta:
+                availableYears: [2025]
+                latestYear: 2025
+                unit: k_vnd
+                usdRate: 0.00003966381630640323
+            meta:
+              timestamp: "2026-09-16T07:25:17.448Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

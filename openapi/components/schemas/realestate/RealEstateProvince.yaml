@@ -4,6 +4,7 @@ required:
   - id
   - name
   - code
+  - country
 properties:
   id:
     type: integer
@@ -17,9 +18,19 @@ properties:
     type: string
     description: Short province code.
     example: HN
+  country:
+    type: string
+    description: |
+      Lowercase country code. Always present, so a `country=all` response can be
+      grouped client-side.
+    example: vn
   bbox:
     type: ["array", "null"]
-    description: Optional geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Currently `null` on staging.
+    description: |
+      Geographic bounding box `[minLon, minLat, maxLon, maxLat]`. Offshore units are
+      excluded — Tokyo's Ogasawara and Izu islands sit roughly 1,000 km from the
+      mainland and would otherwise stretch the box past usefulness. `null` when the
+      province has no boundary geometry.
     items:
       type: number
-    example: null
+    example: [105.286, 20.564, 106.02, 21.385]

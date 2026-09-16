@@ -1,0 +1,17 @@
+type: object
+description: One period (column) of a multi-metric indicator table.
+required:
+  - period
+  - date
+properties:
+  period:
+    type: string
+    example: Q2 2026
+  date:
+    type: string
+    format: date
+    example: "2026-06-30"
+  isPartial:
+    type: boolean
+    description: "`true` when the period is still in progress and figures may be revised."
+    example: false

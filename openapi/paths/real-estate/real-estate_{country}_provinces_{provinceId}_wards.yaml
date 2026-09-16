@@ -1,0 +1,67 @@
+get:
+  operationId: realEstateProvinceWards
+  tags:
+    - Real Estate
+  summary: Wards of one province
+  description: |
+    Lightweight `{ wardId, wardName, wardType }` list for rendering a ward picker
+    within a province. `wardType` disambiguates Japanese wards that share a name — it
+    is currently set on one unit only (利島村, the island village colliding with
+    Toshima ward) and `null` everywhere else, including all of Vietnam.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: Country code.
+      schema:
+        type: string
+        enum: [vn, jp]
+        example: jp
+    - name: provinceId
+      in: path
+      required: true
+      description: Province ID, from the provinces endpoint.
+      schema:
+        type: integer
+        example: 50
+    - name: lang
+      in: query
+      required: false
+      description: Language for name fields.
+      schema:
+        type: string
+        enum: [vi, en]
+        default: vi
+  responses:
+    "200":
+      description: Wards belonging to the province.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateProvinceWardsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - wardId: 3712
+                wardName: Adachi
+                wardType: null
+              - wardId: 3746
+                wardName: Toshima
+                wardType: isLands
+            meta:
+              timestamp: "2026-09-16T08:54:29.672Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      $ref: "../../components/responses/NotFound.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

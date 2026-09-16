@@ -1,0 +1,12 @@
+type: object
+description: One deposit tenor (column) of the deposit-rates table.
+required:
+  - key
+  - label
+properties:
+  key:
+    type: string
+    example: 90d
+  label:
+    type: string
+    example: 90-days

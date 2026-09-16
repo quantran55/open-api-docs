@@ -1,0 +1,54 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: |
+          Ward features plus the colour thresholds for this province. Note the
+          nesting: the features are at `data.data`, and `data.meta` is the route's own
+          metadata, distinct from the envelope's `meta`.
+        required:
+          - data
+          - meta
+        properties:
+          data:
+            type: array
+            items:
+              $ref: "../realestate/RealEstateWardFeature.yaml"
+          meta:
+            type: object
+            required:
+              - unit
+            properties:
+              availableYears:
+                type: array
+                description: Years for which land-price data exists.
+                items:
+                  type: integer
+                example: [2025]
+              latestYear:
+                type: ["integer", "null"]
+                example: 2025
+              unit:
+                type: string
+                enum: [k_vnd, jpy_m2]
+                description: How to format prices.
+                example: k_vnd
+              bands:
+                type: array
+                description: |
+                  Percentile colour thresholds. Absent when the market has no banding,
+                  in which case the client falls back to its own fixed bands.
+                items:
+                  type: number
+              bandMethod:
+                type: string
+                enum: [percentile]
+                description: Present only alongside `bands`.
+              usdRate:
+                type: number
+                description: USD value of one unit of local currency. Absent when no FX is available.
+                example: 0.00003966381630640323

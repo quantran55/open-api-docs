@@ -4,17 +4,26 @@ get:
     - Real Estate
   summary: List provinces
   description: |
-    Provinces / cities available for real-estate queries in a country. Data is
-    available for `vn`; `jp` is empty.
+    Provinces / cities available for real-estate queries: `id`, `name`, `code`,
+    `country` and `bbox` for each. Pass `country=all` to combine every country — each
+    province carries its own `country` field so the client can group them.
   x-feature-code: realestate_data
   x-api-weight: 2
   parameters:
     - name: country
       in: path
       required: true
-      description: Country code, lowercase.
+      description: |
+        Country code, or `all` to combine every country.
+
+        | Value | Description |
+        | --- | --- |
+        | `vn` | Vietnam |
+        | `jp` | Japan |
+        | `all` | Vietnam and Japan together |
       schema:
         type: string
+        enum: [vn, jp, all]
         example: vn
     - name: lang
       in: query
@@ -46,11 +55,13 @@ get:
               - id: 2
                 name: Hà Nội
                 code: HN
-                bbox: null
+                country: vn
+                bbox: [105.286, 20.564, 106.02, 21.385]
               - id: 1
                 name: Hồ Chí Minh
                 code: HCM
-                bbox: null
+                country: vn
+                bbox: [106.415837, 8.67851, 107.531438, 10.737193]
             meta:
               timestamp: "2026-06-19T08:54:29.672Z"
     "400":

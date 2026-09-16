@@ -20,21 +20,21 @@ properties:
     description: Exchange ticker for the ETF.
     example: "1306"
   open:
-    type: number
-    description: Opening price.
-    example: 2065
+    type: string
+    description: Opening price. Returned as a decimal **string**, not a number.
+    example: "2054.0000"
   high:
-    type: number
-    description: Session high.
-    example: 2068
+    type: string
+    description: Session high. Returned as a decimal **string**, not a number.
+    example: "2061.0000"
   low:
-    type: number
-    description: Session low.
-    example: 2051
+    type: string
+    description: Session low. Returned as a decimal **string**, not a number.
+    example: "2046.0000"
   close:
-    type: number
-    description: Closing price.
-    example: 2056
+    type: string
+    description: Closing price. Returned as a decimal **string**, not a number.
+    example: "2048.0000"
   volume:
     type: string
     description: Traded volume for the session.

@@ -1,0 +1,88 @@
+get:
+  operationId: realEstateProvincePrices
+  tags:
+    - Real Estate
+  summary: Representative land price per province
+  description: |
+    One row per province: dot coordinates, average / minimum / maximum price and the
+    number of wards carrying data. Intended for drawing a single dot per province at
+    low zoom, before loading ward-level GeoJSON. Pass `country=all` to get Vietnam and
+    Japan in one request. `meta.byCountry` holds the colour thresholds per country.
+  x-feature-code: realestate_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: path
+      required: true
+      description: |
+        Country code, or `all` to combine every country.
+
+        | Value | Description |
+        | --- | --- |
+        | `all` | Vietnam and Japan together |
+        | `vn` | Vietnam |
+        | `jp` | Japan |
+      schema:
+        type: string
+        enum: [all, vn, jp]
+        example: all
+    - name: lang
+      in: query
+      required: false
+      description: |
+        Language for name fields.
+
+        | Value | Description |
+        | --- | --- |
+        | `vi` | Vietnamese |
+        | `en` | English |
+      schema:
+        type: string
+        enum: [vi, en]
+        default: vi
+  responses:
+    "200":
+      description: Representative price per province.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/RealEstateProvincePricesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              data:
+                - id: 5
+                  name: Cần Thơ
+                  code: CT
+                  country: vn
+                  lat: 9.79771
+                  lon: 105.740847
+                  bbox: [105.289632, 9.297885, 106.223075, 10.291719]
+                  outline: null
+                  avgPrice: 3184.52
+                  minPrice: 700
+                  maxPrice: 27000
+                  wardCount: 83
+                  unit: k_vnd
+                  latestYear: 2026
+              meta:
+                byCountry:
+                  vn:
+                    unit: k_vnd
+                    bands: [2692.37, 4495.92, 7982.4, 23159.38]
+                    bandMethod: percentile
+                    usdRate: 0.00003966381630640323
+                    latestYear: 2026
+            meta:
+              timestamp: "2026-09-16T07:25:17.048Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,30 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: Deposit rates by tenor; `rows[].values` is aligned with `tenors`.
+        required:
+          - indicator
+          - tenors
+          - rows
+        properties:
+          indicator:
+            type: string
+            example: deposit-rates
+          unit:
+            type:
+              - string
+              - "null"
+            example: "%"
+          tenors:
+            type: array
+            items:
+              $ref: "../macro/IndicatorDepositTenor.yaml"
+          rows:
+            type: array
+            items:
+              $ref: "../macro/IndicatorDepositRateRow.yaml"

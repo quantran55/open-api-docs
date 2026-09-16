@@ -1,0 +1,68 @@
+type: object
+description: |
+  One real transaction as published by MLIT. Unlike the land-price endpoint —
+  which aggregates a neighbourhood into median / p25 / p75 — each row here is a
+  single sale. Residential land only (住宅地).
+required:
+  - tradePriceJpy
+  - areaM2
+  - areaIsLowerBound
+  - pricePerM2Jpy
+  - priceYear
+  - priceQuarter
+properties:
+  districtName:
+    type:
+      - string
+      - "null"
+    description: 地区名 — neighbourhood name, as published.
+    example: 日ノ出町
+  districtNameEn:
+    type:
+      - string
+      - "null"
+    description: Romaji transcription of `districtName`.
+    example: Hinodecho
+  nearestStation:
+    type:
+      - string
+      - "null"
+    description: 最寄駅 — nearest station, as published.
+    example: 北千住
+  nearestStationEn:
+    type:
+      - string
+      - "null"
+    example: Kita-senju
+  nearestStationMin:
+    type:
+      - integer
+      - "null"
+    description: Walking minutes to the nearest station.
+    example: 9
+  tradePriceJpy:
+    type: number
+    description: 取引価格（総額） — total transaction price, JPY.
+    example: 260000000
+  areaM2:
+    type: number
+    description: 面積（㎡） — area in m².
+    example: 95
+  areaIsLowerBound:
+    type: boolean
+    description: |
+      `true` when the source recorded the area as a bound such as "2000㎡以上", making
+      `areaM2` a lower bound rather than an exact figure.
+    example: false
+  pricePerM2Jpy:
+    type: number
+    description: Unit price, derived as `tradePriceJpy / areaM2`.
+    example: 2736842.11
+  priceYear:
+    type: integer
+    example: 2025
+  priceQuarter:
+    type: integer
+    minimum: 1
+    maximum: 4
+    example: 3

@@ -1,0 +1,18 @@
+type: object
+description: One metric tracked by a multi-metric indicator table.
+required:
+  - key
+  - label
+properties:
+  key:
+    type: string
+    description: Key used inside each row's `values` / `display` objects.
+    example: exportValue
+  label:
+    type: string
+    example: Export
+  unit:
+    type:
+      - string
+      - "null"
+    example: Billion USD

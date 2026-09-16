@@ -1,0 +1,57 @@
+type: object
+description: |
+  One country (row) of a multi-metric indicator table. Each entry of `values` is an
+  object keyed by `metrics[].key`, positionally aligned with `columns`.
+required:
+  - country
+  - countryName
+  - available
+  - values
+  - display
+properties:
+  country:
+    type: string
+    example: US
+  countryName:
+    type: string
+    example: United States
+  available:
+    type: boolean
+    example: true
+  unit:
+    type:
+      - string
+      - "null"
+    example: Billion USD
+  values:
+    type: array
+    description: |
+      Per-period object of raw metric values, keyed by `metrics[].key`. The whole entry
+      is `null` for a period with no data — which is every period when `available` is
+      `false`. Within an entry, an individual metric may also be `null`.
+    items:
+      type:
+        - object
+        - "null"
+      additionalProperties:
+        type:
+          - number
+          - "null"
+    example:
+      - epi: 167.6
+        ipi: 150.2
+      - null
+  display:
+    type: array
+    description: |
+      Per-period object of pre-formatted metric strings. Unlike `values`, an entry is
+      always present — an em dash marks a missing figure.
+    items:
+      type: object
+      additionalProperties:
+        type: string
+    example:
+      - epi: "167.60"
+        ipi: "150.20"
+      - epi: "—"
+        ipi: "—"

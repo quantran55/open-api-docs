@@ -1,0 +1,15 @@
+type: object
+description: One period (column) of an indicator table.
+required:
+  - period
+  - date
+properties:
+  period:
+    type: string
+    description: Human-readable period label.
+    example: Q1 2026
+  date:
+    type: string
+    format: date
+    description: Last calendar day of the period.
+    example: "2026-03-31"

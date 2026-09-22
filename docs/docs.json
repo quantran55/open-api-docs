@@ -179,5 +179,11 @@
     "socials": {
       "website": "https://hayinsights.com"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/introduction"
+    }
+  ]
 }

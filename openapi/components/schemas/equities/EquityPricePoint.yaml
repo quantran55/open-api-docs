@@ -1,0 +1,37 @@
+type: object
+description: One trading day.
+required:
+  - date
+  - close
+  - adjustedClose
+properties:
+  date:
+    type: string
+    format: date
+    example: "2026-09-30"
+  close:
+    type: number
+    description: Raw close — the price actually traded that day.
+    example: 2920
+  adjustedClose:
+    type: number
+    description: Close adjusted for splits to the share base of the latest session. Use it for charts so the line does not jump at splits.
+    example: 2920
+  volume:
+    type:
+      - number
+      - "null"
+    description: Raw volume — shares actually traded that day.
+    example: 29166700
+  adjustedVolume:
+    type:
+      - number
+      - "null"
+    description: Volume on the same share base as `adjustedClose` (a 1:4 split multiplies earlier volume by 4).
+    example: 29166700
+  tradingValue:
+    type:
+      - number
+      - "null"
+    description: Trading value in JPY (unaffected by splits).
+    example: 84918791500

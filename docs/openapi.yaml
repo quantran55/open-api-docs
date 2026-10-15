@@ -48,6 +48,8 @@ tags:
     description: Economic calendar — rate decisions, CPI and GDP releases, market holidays and asset-level events.
   - name: Market
     description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
+  - name: Equities
+    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers.
 paths:
   /openapi/v1/commodities:
     get:
@@ -4620,6 +4622,646 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/{market}/equities/{code}:
+    get:
+      operationId: equitySummary
+      tags:
+        - Equities
+      summary: Japan equity snapshot
+      description: |
+        End-of-day snapshot of one Tokyo Stock Exchange stock: closing quote, company
+        overview (segment, TSE 33-sector, shares, market cap), trading volume and value,
+        price change over 1D / 3M / 6M / YTD / 12M / 3Y (split-adjusted; YTD from the
+        last close of the previous year) and TTM ratios (P/E, P/B, ROE, EPS).
+
+        Prices are **closing** prices of the latest session, not intraday quotes. All
+        numbers are raw, in JPY / shares / %.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: market
+          in: path
+          required: true
+          description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            example: jp
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+          schema:
+            type: string
+            example: '7203'
+      responses:
+        '200':
+          description: Snapshot of the requested stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquitySummaryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  symbol: '72030'
+                  code: '7203'
+                  market: jp
+                  name: TOYOTA MOTOR CORPORATION
+                  nameLocal: トヨタ自動車
+                  exchange: Tokyo Stock Exchange
+                  marketSegment: Prime
+                  sector:
+                    code: '3700'
+                    name: Transportation Equipment
+                    classification: TSE33
+                  currency: JPY
+                  quote:
+                    price: 2920
+                    previousClose: 2881.5
+                    change: 38.5
+                    changePercent: 1.3361
+                    priceType: close
+                    tradingDate: '2026-09-30'
+                    closeTime: '15:30'
+                    timezone: Asia/Tokyo
+                  overview:
+                    tradingUnit: 100
+                    sharesOutstanding: 14594987460
+                    treasuryShares: 2753153800
+                    sharesAsOf: '2026-06-30'
+                    marketCap: 42617363383200
+                    marketCapAsOf: '2026-09-30'
+                  tradingActivity:
+                    tradingDate: '2026-09-30'
+                    volume: 29166700
+                    volumeChangePercent: -14.51
+                    tradingValue: 84918791500
+                    tradingValueChangePercent: -13.97
+                  periodChanges:
+                    asOf: '2026-09-30'
+                    change1d: 1.3361
+                    change3m: 4.12
+                    change6m: -2.35
+                    ytdChange: 6.8
+                    change12m: 10.05
+                    change3y: 21.4
+                  ratios:
+                    peRatio: 8.3101
+                    pbRatio: 0.9268
+                    roe: 12.2259
+                    eps: 351.38
+                    basis:
+                      type: TTM
+                      fiscalPeriod: 1Q
+                      periodEnd: '2026-06-30'
+                      disclosedAt: '2026-08-04T05:00:00Z'
+                    notes: []
+                meta:
+                  source:
+                    - jquants:/v2/equities/bars/daily
+                    - jquants:/v2/fins/summary
+                    - jquants:/v2/equities/master
+                  as_of: '2026-09-30'
+                  unit: JPY
+                  classification: RAW+COMPUTED
+                  formula_version: price-change-v2, jp-fins-ttm-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T14:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: Unsupported market, or an invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 400
+                error:
+                  code: MARKET_NOT_SUPPORTED
+                  message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+                meta:
+                  error: Bad Request
+                  statusCode: 400
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is not in the J-Quants listing or is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu 99999
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/{market}/equities/{code}/events:
+    get:
+      operationId: equityEvents
+      tags:
+        - Equities
+      summary: Japan equity events
+      description: |
+        Dividends and scheduled earnings releases within ±30 days of today (Tokyo
+        time), nearest first.
+
+        A dividend is dated by its **ex-dividend date**. `status: expected` is
+        estimated from the company's own forecast (J-Quants); `status: confirmed` means
+        the actual payout is published (Yahoo Finance). `items` is empty when no event
+        falls in the window.
+      x-feature-code: macro_data
+      x-api-weight: 1
+      parameters:
+        - name: market
+          in: path
+          required: true
+          description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            example: jp
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+          schema:
+            type: string
+            example: '7203'
+      responses:
+        '200':
+          description: Events around today for the requested stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityEventsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  asOf: '2026-10-01'
+                  window:
+                    from: '2026-09-01'
+                    to: '2026-10-31'
+                  items:
+                    - type: dividend
+                      date: '2026-09-29'
+                      exDate: '2026-09-29'
+                      recordDate: '2026-09-30'
+                      dividendPeriod: 2Q
+                      amountPerShare: 50
+                      currency: JPY
+                      status: confirmed
+                    - type: earnings_release
+                      date: '2026-11-05'
+                      fiscalPeriod: 2Q
+                      status: scheduled
+                meta:
+                  source:
+                    - jquants:/v2/fins/summary
+                    - yahoo:v8/finance/chart
+                    - jquants:/v2/fins/earnings-date
+                  as_of: '2026-10-01'
+                  unit: JPY/share
+                  classification: RAW+COMPUTED
+                  formula_version: jp-dividend-exdate-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T14:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: Unsupported market, or an invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 400
+                error:
+                  code: MARKET_NOT_SUPPORTED
+                  message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+                meta:
+                  error: Bad Request
+                  statusCode: 400
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is not in the J-Quants listing or is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu 99999
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/{market}/equities/{code}/prices:
+    get:
+      operationId: equityPrices
+      tags:
+        - Equities
+      summary: Japan equity daily prices
+      description: |
+        Daily closing prices, oldest to newest. Each point carries both the raw `close`
+        / `volume` (what actually traded that day) and the split-adjusted
+        `adjustedClose` / `adjustedVolume` on the share base of the latest session — use
+        the adjusted fields for charts so the series does not jump at splits.
+
+        History starts in October 2021; a window longer than that returns
+        `isPartial: true`.
+      x-feature-code: macro_data
+      x-api-weight: 3
+      parameters:
+        - name: market
+          in: path
+          required: true
+          description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            example: jp
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+          schema:
+            type: string
+            example: '7203'
+        - name: range
+          in: query
+          required: false
+          description: |
+            Window to return. `5d` is the last 5 sessions; `max` is the full history.
+          schema:
+            type: string
+            enum:
+              - 5d
+              - 1m
+              - 3m
+              - 6m
+              - 1y
+              - 3y
+              - 5y
+              - max
+            default: 1y
+      responses:
+        '200':
+          description: Daily price series for the requested window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityPricesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  range: 1y
+                  from: '2025-10-01'
+                  to: '2026-09-30'
+                  isPartial: false
+                  points:
+                    - date: '2025-10-01'
+                      close: 2850
+                      adjustedClose: 2850
+                      volume: 31200400
+                      adjustedVolume: 31200400
+                      tradingValue: 88917000000
+                    - date: '2026-09-30'
+                      close: 2920
+                      adjustedClose: 2920
+                      volume: 29166700
+                      adjustedVolume: 29166700
+                      tradingValue: 84918791500
+                meta:
+                  source:
+                    - jquants:/v2/equities/bars/daily
+                  as_of: '2026-09-30'
+                  unit: JPY
+                  classification: RAW+COMPUTED
+                  formula_version: jp-split-adjust-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T14:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: Unsupported market, or an invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 400
+                error:
+                  code: MARKET_NOT_SUPPORTED
+                  message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+                meta:
+                  error: Bad Request
+                  statusCode: 400
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is not in the J-Quants listing or is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu 99999
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/{market}/equities/{code}/financial-statements:
+    get:
+      operationId: equityFinancialStatements
+      tags:
+        - Equities
+      summary: Japan equity financial statements
+      description: |
+        Income statement (TTM + 3 fiscal years) or balance sheet (4 fiscal years, no
+        TTM), as Yahoo Finance line items arranged in a tree.
+
+        All rows share `columns`; read a figure with `row.values[column.key]`. Column
+        labels use each company's actual fiscal year end (e.g. `Mar 31, 2026`).
+        `columns` and `rows` are empty while the statement has not been collected yet.
+      x-feature-code: macro_data
+      x-api-weight: 3
+      parameters:
+        - name: market
+          in: path
+          required: true
+          description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            example: jp
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+          schema:
+            type: string
+            example: '7203'
+        - name: statement
+          in: query
+          required: false
+          description: Which statement to return.
+          schema:
+            type: string
+            enum:
+              - income-statement
+              - balance-sheet
+            default: income-statement
+      responses:
+        '200':
+          description: The requested financial statement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityFinancialStatementsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  statement: income-statement
+                  currency: JPY
+                  columns:
+                    - key: ttm
+                      label: TTM
+                      periodType: ttm
+                      periodEnd: '2026-06-30'
+                    - key: '2026-03-31'
+                      label: Mar 31, 2026
+                      periodType: annual
+                      periodEnd: '2026-03-31'
+                  rows:
+                    - key: TotalRevenue
+                      label: Total Revenue
+                      unit: JPY
+                      values:
+                        ttm: 51957026000000
+                        '2026-03-31': 50684952000000
+                      children:
+                        - key: OperatingRevenue
+                          label: Operating Revenue
+                          unit: JPY
+                          values:
+                            ttm: 51957026000000
+                            '2026-03-31': 50684952000000
+                          children: []
+                  dataAsOf: '2026-06-30'
+                  lastUpdatedAt: '2026-10-01T14:00:12.000Z'
+                meta:
+                  source:
+                    - yahoo:ws/fundamentals-timeseries
+                  as_of: '2026-06-30'
+                  unit: JPY
+                  classification: RAW
+                  formula_version: yahoo-statement-catalog-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-02T08:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: Unsupported market, or an invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 400
+                error:
+                  code: MARKET_NOT_SUPPORTED
+                  message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+                meta:
+                  error: Bad Request
+                  statusCode: 400
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is not in the J-Quants listing or is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu 99999
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/{market}/equities/{code}/related-stocks:
+    get:
+      operationId: equityRelatedStocks
+      tags:
+        - Equities
+      summary: Japan related equities
+      description: |
+        Peers of the stock in the same TSE 33-sector — common shares on Prime, Standard
+        or Growth — ordered by market cap, largest first. When the sector has fewer
+        stocks than `limit`, peers from the same market segment fill the list and
+        `basis` becomes `sector33_segment`.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: market
+          in: path
+          required: true
+          description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            example: jp
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+          schema:
+            type: string
+            example: '7203'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of peers to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            default: 6
+      responses:
+        '200':
+          description: Peers of the requested stock.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityRelatedStocksResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  basis: sector33
+                  sector:
+                    code: '3700'
+                    name: Transportation Equipment
+                  items:
+                    - symbol: '72670'
+                      code: '7267'
+                      name: HONDA MOTOR CO.,LTD.
+                      price: 1520.5
+                      change: 12
+                      changePercent: 0.7955
+                      tradingDate: '2026-09-30'
+                      marketCap: 8235000000000
+                meta:
+                  source:
+                    - jquants:/v2/equities/bars/daily
+                    - jquants:/v2/equities/master
+                  as_of: '2026-09-30'
+                  unit: JPY
+                  classification: RAW+COMPUTED
+                  formula_version: price-change-v2
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T14:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: Unsupported market, or an invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 400
+                error:
+                  code: MARKET_NOT_SUPPORTED
+                  message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+                meta:
+                  error: Bad Request
+                  statusCode: 400
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is not in the J-Quants listing or is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu 99999
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 components:
   securitySchemes:
     HayInsightsApiKey:
@@ -8997,6 +9639,787 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/GlobalIndex'
+    EquitySummary:
+      type: object
+      description: |
+        End-of-day snapshot of one Japanese equity. All numbers are raw, in their native
+        unit (JPY, shares, %). A block with no data is `null` (or an empty array), never
+        an error.
+      required:
+        - symbol
+        - code
+        - market
+        - exchange
+        - currency
+        - quote
+        - overview
+        - tradingActivity
+        - periodChanges
+        - ratios
+      properties:
+        symbol:
+          type: string
+          description: 5-character J-Quants code.
+          example: '72030'
+        code:
+          type: string
+          description: Exchange ticker. Preferred shares whose last character is not `0` keep all 5 characters (e.g. `25935`).
+          example: '7203'
+        market:
+          type: string
+          enum:
+            - jp
+          example: jp
+        name:
+          type:
+            - string
+            - 'null'
+          example: TOYOTA MOTOR CORPORATION
+        nameLocal:
+          type:
+            - string
+            - 'null'
+          description: Company name in Japanese.
+          example: トヨタ自動車
+        exchange:
+          type: string
+          example: Tokyo Stock Exchange
+        marketSegment:
+          type:
+            - string
+            - 'null'
+          description: TSE market segment (Prime, Standard, Growth).
+          example: Prime
+        sector:
+          type:
+            - object
+            - 'null'
+          description: TSE 33-sector classification.
+          properties:
+            code:
+              type: string
+              example: '3700'
+            name:
+              type:
+                - string
+                - 'null'
+              example: Transportation Equipment
+            classification:
+              type: string
+              enum:
+                - TSE33
+              example: TSE33
+        currency:
+          type: string
+          enum:
+            - JPY
+          example: JPY
+        quote:
+          type: object
+          description: |
+            Closing price of the latest session (`priceType` is always `close` — not a
+            delayed intraday quote). `change` / `changePercent` are the same numbers as
+            `periodChanges.change1d`.
+          properties:
+            price:
+              type:
+                - number
+                - 'null'
+              example: 2920
+            previousClose:
+              type:
+                - number
+                - 'null'
+              example: 2881.5
+            change:
+              type:
+                - number
+                - 'null'
+              example: 38.5
+            changePercent:
+              type:
+                - number
+                - 'null'
+              example: 1.3361
+            priceType:
+              type: string
+              enum:
+                - close
+              example: close
+            tradingDate:
+              type:
+                - string
+                - 'null'
+              format: date
+              example: '2026-09-30'
+            closeTime:
+              type: string
+              description: Session close time in `timezone` (TSE closes at 15:30 JST).
+              example: '15:30'
+            timezone:
+              type: string
+              example: Asia/Tokyo
+        overview:
+          type: object
+          properties:
+            tradingUnit:
+              type: integer
+              description: Board lot — 100 shares on every TSE stock.
+              example: 100
+            sharesOutstanding:
+              type:
+                - number
+                - 'null'
+              description: |
+                Shares issued **including treasury shares** (the base J-Quants uses for
+                `marketCap`). Shares in circulation = `sharesOutstanding − treasuryShares`.
+              example: 14594987460
+            treasuryShares:
+              type:
+                - number
+                - 'null'
+              example: 2753153800
+            sharesAsOf:
+              type:
+                - string
+                - 'null'
+              format: date
+              example: '2026-06-30'
+            marketCap:
+              type:
+                - number
+                - 'null'
+              description: Market capitalisation in JPY, as published by J-Quants.
+              example: 42617363383200
+            marketCapAsOf:
+              type:
+                - string
+                - 'null'
+              format: date
+              example: '2026-09-30'
+        tradingActivity:
+          type: object
+          description: Volume and trading value of the latest session, with % change versus the previous session.
+          properties:
+            tradingDate:
+              type:
+                - string
+                - 'null'
+              format: date
+              example: '2026-09-30'
+            volume:
+              type:
+                - number
+                - 'null'
+              example: 29166700
+            volumeChangePercent:
+              type:
+                - number
+                - 'null'
+              example: -14.51
+            tradingValue:
+              type:
+                - number
+                - 'null'
+              description: Trading value in JPY.
+              example: 84918791500
+            tradingValueChangePercent:
+              type:
+                - number
+                - 'null'
+              example: -13.97
+        periodChanges:
+          type: object
+          description: |
+            Split-adjusted price change in % over each window. `ytdChange` is measured from
+            the last close of the previous year. A window longer than the listing history
+            is `null`.
+          properties:
+            asOf:
+              type:
+                - string
+                - 'null'
+              format: date
+              example: '2026-09-30'
+            change1d:
+              type:
+                - number
+                - 'null'
+              example: 1.3361
+            change3m:
+              type:
+                - number
+                - 'null'
+              example: 4.12
+            change6m:
+              type:
+                - number
+                - 'null'
+              example: -2.35
+            ytdChange:
+              type:
+                - number
+                - 'null'
+              example: 6.8
+            change12m:
+              type:
+                - number
+                - 'null'
+              example: 10.05
+            change3y:
+              type:
+                - number
+                - 'null'
+              example: 21.4
+        ratios:
+          type: object
+          description: |
+            Trailing-twelve-month ratios. `basis` names the reporting period used; `notes`
+            explains any `null` ratio: `negative_earnings`, `insufficient_history`,
+            `no_price`, `no_book_value`.
+          properties:
+            peRatio:
+              type:
+                - number
+                - 'null'
+              example: 8.3101
+            pbRatio:
+              type:
+                - number
+                - 'null'
+              example: 0.9268
+            roe:
+              type:
+                - number
+                - 'null'
+              description: Return on equity, in %.
+              example: 12.2259
+            eps:
+              type:
+                - number
+                - 'null'
+              description: Earnings per share in JPY — sum of the last four periods' EPS.
+              example: 351.38
+            basis:
+              type:
+                - object
+                - 'null'
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - TTM
+                  example: TTM
+                fiscalPeriod:
+                  type: string
+                  example: 1Q
+                periodEnd:
+                  type: string
+                  format: date
+                  example: '2026-06-30'
+                disclosedAt:
+                  type: string
+                  format: date-time
+                  example: '2026-08-04T05:00:00Z'
+            notes:
+              type: array
+              items:
+                type: string
+                enum:
+                  - negative_earnings
+                  - insufficient_history
+                  - no_price
+                  - no_book_value
+              example: []
+    EquityMeta:
+      description: |
+        Response metadata for the Equities domain. On top of `timestamp`, every equities
+        response says where the numbers came from and how fresh they are.
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+        - type: object
+          properties:
+            source:
+              type: array
+              items:
+                type: string
+              description: Upstream datasets behind the payload (J-Quants, Yahoo Finance).
+              example:
+                - jquants:/v2/equities/bars/daily
+            as_of:
+              type:
+                - string
+                - 'null'
+              description: Date the data refers to (latest trading date, latest fiscal period, …).
+              example: '2026-09-30'
+            unit:
+              type: string
+              description: Currency or unit of the numeric fields (`JPY`, `JPY/share`).
+              example: JPY
+            classification:
+              type: string
+              enum:
+                - RAW
+                - COMPUTED
+                - RAW+COMPUTED
+              description: Whether values are passed through as published, computed by HayInsights, or both.
+              example: RAW+COMPUTED
+            formula_version:
+              type:
+                - string
+                - 'null'
+              description: Version tag of the formulas used for computed fields.
+              example: jp-split-adjust-v1
+            was_restated:
+              type: boolean
+              description: Whether any value was restated after first publication.
+              example: false
+            served_from_cache:
+              type: boolean
+              description: Whether the response was served from cache.
+              example: true
+            cache_expires_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: When the cached copy expires (6 h; 24 h for financial statements).
+              example: '2026-10-01T14:00:00.000Z'
+    EquitySummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquitySummary'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityEvent:
+      description: |
+        One corporate event. `type` tells the two shapes apart: a **dividend** (dated by
+        its ex-dividend date) or an **earnings release**.
+      oneOf:
+        - title: Dividend
+          type: object
+          required:
+            - type
+            - date
+            - exDate
+            - amountPerShare
+            - currency
+            - status
+          properties:
+            type:
+              type: string
+              const: dividend
+            date:
+              type: string
+              format: date
+              description: Ex-dividend date (same as `exDate`).
+              example: '2026-09-29'
+            exDate:
+              type: string
+              format: date
+              example: '2026-09-29'
+            recordDate:
+              type:
+                - string
+                - 'null'
+              format: date
+              description: Record date. `null` for events known only from Yahoo Finance.
+              example: '2026-09-30'
+            dividendPeriod:
+              type:
+                - string
+                - 'null'
+              enum:
+                - 1Q
+                - 2Q
+                - 3Q
+                - FY
+                - null
+              example: 2Q
+            amountPerShare:
+              type: number
+              example: 50
+            currency:
+              type: string
+              example: JPY
+            status:
+              type: string
+              enum:
+                - expected
+                - confirmed
+              description: |
+                `expected` — estimated from the company's own forecast; `confirmed` — the
+                actual payout is published.
+              example: confirmed
+        - title: Earnings release
+          type: object
+          required:
+            - type
+            - date
+            - status
+          properties:
+            type:
+              type: string
+              const: earnings_release
+            date:
+              type: string
+              format: date
+              description: Scheduled announcement date.
+              example: '2026-11-05'
+            fiscalPeriod:
+              type:
+                - string
+                - 'null'
+              enum:
+                - 1Q
+                - 2Q
+                - 3Q
+                - FY
+                - null
+              example: 2Q
+            status:
+              type: string
+              const: scheduled
+    EquityEvents:
+      type: object
+      description: |
+        Dividends and earnings releases within ±30 days of today (Tokyo time), nearest
+        first. `items` is empty when nothing falls in the window.
+      required:
+        - asOf
+        - window
+        - items
+      properties:
+        asOf:
+          type: string
+          format: date
+          description: Today in Tokyo time — the centre of the window.
+          example: '2026-10-01'
+        window:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date
+              example: '2026-09-01'
+            to:
+              type: string
+              format: date
+              example: '2026-10-31'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityEvent'
+    EquityEventsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityEvents'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityPricePoint:
+      type: object
+      description: One trading day.
+      required:
+        - date
+        - close
+        - adjustedClose
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-30'
+        close:
+          type: number
+          description: Raw close — the price actually traded that day.
+          example: 2920
+        adjustedClose:
+          type: number
+          description: Close adjusted for splits to the share base of the latest session. Use it for charts so the line does not jump at splits.
+          example: 2920
+        volume:
+          type:
+            - number
+            - 'null'
+          description: Raw volume — shares actually traded that day.
+          example: 29166700
+        adjustedVolume:
+          type:
+            - number
+            - 'null'
+          description: Volume on the same share base as `adjustedClose` (a 1:4 split multiplies earlier volume by 4).
+          example: 29166700
+        tradingValue:
+          type:
+            - number
+            - 'null'
+          description: Trading value in JPY (unaffected by splits).
+          example: 84918791500
+    EquityPrices:
+      type: object
+      description: Daily price series, oldest to newest.
+      required:
+        - range
+        - isPartial
+        - points
+      properties:
+        range:
+          type: string
+          enum:
+            - 5d
+            - 1m
+            - 3m
+            - 6m
+            - 1y
+            - 3y
+            - 5y
+            - max
+          example: 1y
+        from:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: First date of the window (`null` for `5d` and `max`).
+          example: '2025-10-01'
+        to:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Latest trading date in the series.
+          example: '2026-09-30'
+        isPartial:
+          type: boolean
+          description: '`true` when the requested window is longer than the available history (data starts October 2021).'
+          example: false
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityPricePoint'
+    EquityPricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityPrices'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityStatementRow:
+      type: object
+      description: One line item. Rows form a tree — `children` are sub-items of this line.
+      required:
+        - key
+        - label
+        - unit
+        - values
+        - children
+      properties:
+        key:
+          type: string
+          example: TotalRevenue
+        label:
+          type: string
+          example: Total Revenue
+        unit:
+          type: string
+          enum:
+            - JPY
+            - JPY/share
+            - shares
+            - ratio
+          example: JPY
+        values:
+          type: object
+          description: Value per column, keyed by `columns[].key`. A period with no figure is `null`.
+          additionalProperties:
+            type:
+              - number
+              - 'null'
+          example:
+            ttm: 51957026000000
+            '2026-03-31': 50684952000000
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityStatementRow'
+    EquityStatementTable:
+      type: object
+      description: |
+        Financial statement as a table: columns are periods, rows are a tree of line
+        items. The income statement has TTM + 3 fiscal years; the balance sheet has 4
+        fiscal years (no TTM). `columns` and `rows` are empty while the statement has not
+        been collected yet.
+      required:
+        - statement
+        - currency
+        - columns
+        - rows
+      properties:
+        statement:
+          type: string
+          enum:
+            - income-statement
+            - balance-sheet
+          example: income-statement
+        currency:
+          type: string
+          example: JPY
+        columns:
+          type: array
+          items:
+            type: object
+            required:
+              - key
+              - label
+              - periodType
+              - periodEnd
+            properties:
+              key:
+                type: string
+                description: Key into each row's `values`.
+                example: ttm
+              label:
+                type: string
+                description: Display label — the company's actual fiscal year end, e.g. `Mar 31, 2026`.
+                example: TTM
+              periodType:
+                type: string
+                enum:
+                  - ttm
+                  - annual
+                example: ttm
+              periodEnd:
+                type: string
+                format: date
+                example: '2026-06-30'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityStatementRow'
+        dataAsOf:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: End of the latest period in the table.
+          example: '2026-06-30'
+        lastUpdatedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: Last time HayInsights updated the figures.
+          example: '2026-10-01T14:00:12.000Z'
+    EquityFinancialStatementsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityStatementTable'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityRelatedStocks:
+      type: object
+      description: |
+        Peers in the same TSE 33-sector (common shares on Prime / Standard / Growth),
+        largest market cap first. When the sector has fewer stocks than `limit`, peers
+        from the same market segment fill the list and `basis` becomes `sector33_segment`.
+      required:
+        - basis
+        - items
+      properties:
+        basis:
+          type: string
+          enum:
+            - sector33
+            - sector33_segment
+          example: sector33
+        sector:
+          type:
+            - object
+            - 'null'
+          properties:
+            code:
+              type: string
+              example: '3700'
+            name:
+              type:
+                - string
+                - 'null'
+              example: Transportation Equipment
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - symbol
+              - code
+            properties:
+              symbol:
+                type: string
+                example: '72670'
+              code:
+                type: string
+                example: '7267'
+              name:
+                type:
+                  - string
+                  - 'null'
+                example: HONDA MOTOR CO.,LTD.
+              price:
+                type:
+                  - number
+                  - 'null'
+                example: 1520.5
+              change:
+                type:
+                  - number
+                  - 'null'
+                description: 1-day change, same formula as the snapshot endpoint.
+                example: 12
+              changePercent:
+                type:
+                  - number
+                  - 'null'
+                example: 0.7955
+              tradingDate:
+                type:
+                  - string
+                  - 'null'
+                format: date
+                example: '2026-09-30'
+              marketCap:
+                type:
+                  - number
+                  - 'null'
+                example: 8235000000000
+    EquityRelatedStocksResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityRelatedStocks'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
   responses:
     BadRequest:
       description: Invalid or missing parameter — bad enum, range, format, or a missing required query parameter.
@@ -9149,6 +10572,7 @@ x-hayinsights-quota:
     Real Estate: 2
     Calendar: 2
     Market: 2
+    Equities: 1-3
     News: 2-3
     Commodities: 3
     Crypto: 3
@@ -9166,3 +10590,4 @@ x-tagGroups:
       - News
       - Calendar
       - Market
+      - Equities

@@ -67,6 +67,12 @@ const ENDPOINTS = [
   ['realEstateWardDetail', '/openapi/v1/real-estate/vn/wards/1'],
   ['realEstateLandPrices', '/openapi/v1/real-estate/vn/land-prices'],
   ['realEstateProvinces', '/openapi/v1/real-estate/vn/provinces'],
+  // Equities
+  ['equitySummary', '/openapi/v1/market/jp/equities/7203'],
+  ['equityEvents', '/openapi/v1/market/jp/equities/7203/events'],
+  ['equityPrices', '/openapi/v1/market/jp/equities/7203/prices?range=5d'],
+  ['equityFinancialStatements', '/openapi/v1/market/jp/equities/7203/financial-statements'],
+  ['equityRelatedStocks', '/openapi/v1/market/jp/equities/7203/related-stocks'],
 ];
 
 const OUT = 'examples';

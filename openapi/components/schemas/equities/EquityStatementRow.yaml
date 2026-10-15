@@ -1,0 +1,33 @@
+type: object
+description: One line item. Rows form a tree — `children` are sub-items of this line.
+required:
+  - key
+  - label
+  - unit
+  - values
+  - children
+properties:
+  key:
+    type: string
+    example: TotalRevenue
+  label:
+    type: string
+    example: Total Revenue
+  unit:
+    type: string
+    enum: [JPY, JPY/share, shares, ratio]
+    example: JPY
+  values:
+    type: object
+    description: Value per column, keyed by `columns[].key`. A period with no figure is `null`.
+    additionalProperties:
+      type:
+        - number
+        - "null"
+    example:
+      ttm: 51957026000000
+      "2026-03-31": 50684952000000
+  children:
+    type: array
+    items:
+      $ref: "./EquityStatementRow.yaml"

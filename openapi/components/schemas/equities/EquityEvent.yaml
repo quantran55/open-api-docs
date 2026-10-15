@@ -1,0 +1,76 @@
+description: |
+  One corporate event. `type` tells the two shapes apart: a **dividend** (dated by
+  its ex-dividend date) or an **earnings release**.
+oneOf:
+  - title: Dividend
+    type: object
+    required:
+      - type
+      - date
+      - exDate
+      - amountPerShare
+      - currency
+      - status
+    properties:
+      type:
+        type: string
+        const: dividend
+      date:
+        type: string
+        format: date
+        description: Ex-dividend date (same as `exDate`).
+        example: "2026-09-29"
+      exDate:
+        type: string
+        format: date
+        example: "2026-09-29"
+      recordDate:
+        type:
+          - string
+          - "null"
+        format: date
+        description: Record date. `null` for events known only from Yahoo Finance.
+        example: "2026-09-30"
+      dividendPeriod:
+        type:
+          - string
+          - "null"
+        enum: [1Q, 2Q, 3Q, FY, null]
+        example: 2Q
+      amountPerShare:
+        type: number
+        example: 50
+      currency:
+        type: string
+        example: JPY
+      status:
+        type: string
+        enum: [expected, confirmed]
+        description: |
+          `expected` — estimated from the company's own forecast; `confirmed` — the
+          actual payout is published.
+        example: confirmed
+  - title: Earnings release
+    type: object
+    required:
+      - type
+      - date
+      - status
+    properties:
+      type:
+        type: string
+        const: earnings_release
+      date:
+        type: string
+        format: date
+        description: Scheduled announcement date.
+        example: "2026-11-05"
+      fiscalPeriod:
+        type:
+          - string
+          - "null"
+        enum: [1Q, 2Q, 3Q, FY, null]
+        example: 2Q
+      status:
+        type: string
+        const: scheduled

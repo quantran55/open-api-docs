@@ -1,0 +1,148 @@
+get:
+  operationId: equitySummary
+  tags:
+    - Equities
+  summary: Japan equity snapshot
+  description: |
+    End-of-day snapshot of one Tokyo Stock Exchange stock: closing quote, company
+    overview (segment, TSE 33-sector, shares, market cap), trading volume and value,
+    price change over 1D / 3M / 6M / YTD / 12M / 3Y (split-adjusted; YTD from the
+    last close of the previous year) and TTM ratios (P/E, P/B, ROE, EPS).
+
+    Prices are **closing** prices of the latest session, not intraday quotes. All
+    numbers are raw, in JPY / shares / %.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: market
+      in: path
+      required: true
+      description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+      schema:
+        type: string
+        enum: [jp]
+        example: jp
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+      schema:
+        type: string
+        example: "7203"
+  responses:
+    "200":
+      description: Snapshot of the requested stock.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquitySummaryResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              symbol: "72030"
+              code: "7203"
+              market: jp
+              name: TOYOTA MOTOR CORPORATION
+              nameLocal: トヨタ自動車
+              exchange: Tokyo Stock Exchange
+              marketSegment: Prime
+              sector:
+                code: "3700"
+                name: Transportation Equipment
+                classification: TSE33
+              currency: JPY
+              quote:
+                price: 2920
+                previousClose: 2881.5
+                change: 38.5
+                changePercent: 1.3361
+                priceType: close
+                tradingDate: "2026-09-30"
+                closeTime: "15:30"
+                timezone: Asia/Tokyo
+              overview:
+                tradingUnit: 100
+                sharesOutstanding: 14594987460
+                treasuryShares: 2753153800
+                sharesAsOf: "2026-06-30"
+                marketCap: 42617363383200
+                marketCapAsOf: "2026-09-30"
+              tradingActivity:
+                tradingDate: "2026-09-30"
+                volume: 29166700
+                volumeChangePercent: -14.51
+                tradingValue: 84918791500
+                tradingValueChangePercent: -13.97
+              periodChanges:
+                asOf: "2026-09-30"
+                change1d: 1.3361
+                change3m: 4.12
+                change6m: -2.35
+                ytdChange: 6.8
+                change12m: 10.05
+                change3y: 21.4
+              ratios:
+                peRatio: 8.3101
+                pbRatio: 0.9268
+                roe: 12.2259
+                eps: 351.38
+                basis:
+                  type: TTM
+                  fiscalPeriod: 1Q
+                  periodEnd: "2026-06-30"
+                  disclosedAt: "2026-08-04T05:00:00Z"
+                notes: []
+            meta:
+              source:
+                - jquants:/v2/equities/bars/daily
+                - jquants:/v2/fins/summary
+                - jquants:/v2/equities/master
+              as_of: "2026-09-30"
+              unit: JPY
+              classification: RAW+COMPUTED
+              formula_version: "price-change-v2, jp-fins-ttm-v1"
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-01T14:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: Unsupported market, or an invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 400
+            error:
+              code: MARKET_NOT_SUPPORTED
+              message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+            meta:
+              error: Bad Request
+              statusCode: 400
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is not in the J-Quants listing or is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu 99999
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

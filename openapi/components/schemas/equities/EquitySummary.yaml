@@ -1,0 +1,282 @@
+type: object
+description: |
+  End-of-day snapshot of one Japanese equity. All numbers are raw, in their native
+  unit (JPY, shares, %). A block with no data is `null` (or an empty array), never
+  an error.
+required:
+  - symbol
+  - code
+  - market
+  - exchange
+  - currency
+  - quote
+  - overview
+  - tradingActivity
+  - periodChanges
+  - ratios
+properties:
+  symbol:
+    type: string
+    description: 5-character J-Quants code.
+    example: "72030"
+  code:
+    type: string
+    description: Exchange ticker. Preferred shares whose last character is not `0` keep all 5 characters (e.g. `25935`).
+    example: "7203"
+  market:
+    type: string
+    enum: [jp]
+    example: jp
+  name:
+    type:
+      - string
+      - "null"
+    example: TOYOTA MOTOR CORPORATION
+  nameLocal:
+    type:
+      - string
+      - "null"
+    description: Company name in Japanese.
+    example: トヨタ自動車
+  exchange:
+    type: string
+    example: Tokyo Stock Exchange
+  marketSegment:
+    type:
+      - string
+      - "null"
+    description: TSE market segment (Prime, Standard, Growth).
+    example: Prime
+  sector:
+    type:
+      - object
+      - "null"
+    description: TSE 33-sector classification.
+    properties:
+      code:
+        type: string
+        example: "3700"
+      name:
+        type:
+          - string
+          - "null"
+        example: Transportation Equipment
+      classification:
+        type: string
+        enum: [TSE33]
+        example: TSE33
+  currency:
+    type: string
+    enum: [JPY]
+    example: JPY
+  quote:
+    type: object
+    description: |
+      Closing price of the latest session (`priceType` is always `close` — not a
+      delayed intraday quote). `change` / `changePercent` are the same numbers as
+      `periodChanges.change1d`.
+    properties:
+      price:
+        type:
+          - number
+          - "null"
+        example: 2920
+      previousClose:
+        type:
+          - number
+          - "null"
+        example: 2881.5
+      change:
+        type:
+          - number
+          - "null"
+        example: 38.5
+      changePercent:
+        type:
+          - number
+          - "null"
+        example: 1.3361
+      priceType:
+        type: string
+        enum: [close]
+        example: close
+      tradingDate:
+        type:
+          - string
+          - "null"
+        format: date
+        example: "2026-09-30"
+      closeTime:
+        type: string
+        description: Session close time in `timezone` (TSE closes at 15:30 JST).
+        example: "15:30"
+      timezone:
+        type: string
+        example: Asia/Tokyo
+  overview:
+    type: object
+    properties:
+      tradingUnit:
+        type: integer
+        description: Board lot — 100 shares on every TSE stock.
+        example: 100
+      sharesOutstanding:
+        type:
+          - number
+          - "null"
+        description: |
+          Shares issued **including treasury shares** (the base J-Quants uses for
+          `marketCap`). Shares in circulation = `sharesOutstanding − treasuryShares`.
+        example: 14594987460
+      treasuryShares:
+        type:
+          - number
+          - "null"
+        example: 2753153800
+      sharesAsOf:
+        type:
+          - string
+          - "null"
+        format: date
+        example: "2026-06-30"
+      marketCap:
+        type:
+          - number
+          - "null"
+        description: Market capitalisation in JPY, as published by J-Quants.
+        example: 42617363383200
+      marketCapAsOf:
+        type:
+          - string
+          - "null"
+        format: date
+        example: "2026-09-30"
+  tradingActivity:
+    type: object
+    description: Volume and trading value of the latest session, with % change versus the previous session.
+    properties:
+      tradingDate:
+        type:
+          - string
+          - "null"
+        format: date
+        example: "2026-09-30"
+      volume:
+        type:
+          - number
+          - "null"
+        example: 29166700
+      volumeChangePercent:
+        type:
+          - number
+          - "null"
+        example: -14.51
+      tradingValue:
+        type:
+          - number
+          - "null"
+        description: Trading value in JPY.
+        example: 84918791500
+      tradingValueChangePercent:
+        type:
+          - number
+          - "null"
+        example: -13.97
+  periodChanges:
+    type: object
+    description: |
+      Split-adjusted price change in % over each window. `ytdChange` is measured from
+      the last close of the previous year. A window longer than the listing history
+      is `null`.
+    properties:
+      asOf:
+        type:
+          - string
+          - "null"
+        format: date
+        example: "2026-09-30"
+      change1d:
+        type:
+          - number
+          - "null"
+        example: 1.3361
+      change3m:
+        type:
+          - number
+          - "null"
+        example: 4.12
+      change6m:
+        type:
+          - number
+          - "null"
+        example: -2.35
+      ytdChange:
+        type:
+          - number
+          - "null"
+        example: 6.8
+      change12m:
+        type:
+          - number
+          - "null"
+        example: 10.05
+      change3y:
+        type:
+          - number
+          - "null"
+        example: 21.4
+  ratios:
+    type: object
+    description: |
+      Trailing-twelve-month ratios. `basis` names the reporting period used; `notes`
+      explains any `null` ratio: `negative_earnings`, `insufficient_history`,
+      `no_price`, `no_book_value`.
+    properties:
+      peRatio:
+        type:
+          - number
+          - "null"
+        example: 8.3101
+      pbRatio:
+        type:
+          - number
+          - "null"
+        example: 0.9268
+      roe:
+        type:
+          - number
+          - "null"
+        description: Return on equity, in %.
+        example: 12.2259
+      eps:
+        type:
+          - number
+          - "null"
+        description: Earnings per share in JPY — sum of the last four periods' EPS.
+        example: 351.38
+      basis:
+        type:
+          - object
+          - "null"
+        properties:
+          type:
+            type: string
+            enum: [TTM]
+            example: TTM
+          fiscalPeriod:
+            type: string
+            example: 1Q
+          periodEnd:
+            type: string
+            format: date
+            example: "2026-06-30"
+          disclosedAt:
+            type: string
+            format: date-time
+            example: "2026-08-04T05:00:00Z"
+      notes:
+        type: array
+        items:
+          type: string
+          enum: [negative_earnings, insufficient_history, no_price, no_book_value]
+        example: []

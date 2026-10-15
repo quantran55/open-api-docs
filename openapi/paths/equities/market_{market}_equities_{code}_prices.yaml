@@ -1,0 +1,119 @@
+get:
+  operationId: equityPrices
+  tags:
+    - Equities
+  summary: Japan equity daily prices
+  description: |
+    Daily closing prices, oldest to newest. Each point carries both the raw `close`
+    / `volume` (what actually traded that day) and the split-adjusted
+    `adjustedClose` / `adjustedVolume` on the share base of the latest session — use
+    the adjusted fields for charts so the series does not jump at splits.
+
+    History starts in October 2021; a window longer than that returns
+    `isPartial: true`.
+  x-feature-code: macro_data
+  x-api-weight: 3
+  parameters:
+    - name: market
+      in: path
+      required: true
+      description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+      schema:
+        type: string
+        enum: [jp]
+        example: jp
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+      schema:
+        type: string
+        example: "7203"
+    - name: range
+      in: query
+      required: false
+      description: |
+        Window to return. `5d` is the last 5 sessions; `max` is the full history.
+      schema:
+        type: string
+        enum: [5d, 1m, 3m, 6m, 1y, 3y, 5y, max]
+        default: 1y
+  responses:
+    "200":
+      description: Daily price series for the requested window.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityPricesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              range: 1y
+              from: "2025-10-01"
+              to: "2026-09-30"
+              isPartial: false
+              points:
+                - date: "2025-10-01"
+                  close: 2850
+                  adjustedClose: 2850
+                  volume: 31200400
+                  adjustedVolume: 31200400
+                  tradingValue: 88917000000
+                - date: "2026-09-30"
+                  close: 2920
+                  adjustedClose: 2920
+                  volume: 29166700
+                  adjustedVolume: 29166700
+                  tradingValue: 84918791500
+            meta:
+              source:
+                - jquants:/v2/equities/bars/daily
+              as_of: "2026-09-30"
+              unit: JPY
+              classification: RAW+COMPUTED
+              formula_version: jp-split-adjust-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-01T14:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: Unsupported market, or an invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 400
+            error:
+              code: MARKET_NOT_SUPPORTED
+              message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+            meta:
+              error: Bad Request
+              statusCode: 400
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is not in the J-Quants listing or is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu 99999
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,72 @@
+type: object
+description: |
+  Peers in the same TSE 33-sector (common shares on Prime / Standard / Growth),
+  largest market cap first. When the sector has fewer stocks than `limit`, peers
+  from the same market segment fill the list and `basis` becomes `sector33_segment`.
+required:
+  - basis
+  - items
+properties:
+  basis:
+    type: string
+    enum: [sector33, sector33_segment]
+    example: sector33
+  sector:
+    type:
+      - object
+      - "null"
+    properties:
+      code:
+        type: string
+        example: "3700"
+      name:
+        type:
+          - string
+          - "null"
+        example: Transportation Equipment
+  items:
+    type: array
+    items:
+      type: object
+      required:
+        - symbol
+        - code
+      properties:
+        symbol:
+          type: string
+          example: "72670"
+        code:
+          type: string
+          example: "7267"
+        name:
+          type:
+            - string
+            - "null"
+          example: HONDA MOTOR CO.,LTD.
+        price:
+          type:
+            - number
+            - "null"
+          example: 1520.5
+        change:
+          type:
+            - number
+            - "null"
+          description: 1-day change, same formula as the snapshot endpoint.
+          example: 12
+        changePercent:
+          type:
+            - number
+            - "null"
+          example: 0.7955
+        tradingDate:
+          type:
+            - string
+            - "null"
+          format: date
+          example: "2026-09-30"
+        marketCap:
+          type:
+            - number
+            - "null"
+          example: 8235000000000

@@ -1,0 +1,50 @@
+description: |
+  Response metadata for the Equities domain. On top of `timestamp`, every equities
+  response says where the numbers came from and how fresh they are.
+allOf:
+  - $ref: "../common/Meta.yaml"
+  - type: object
+    properties:
+      source:
+        type: array
+        items:
+          type: string
+        description: Upstream datasets behind the payload (J-Quants, Yahoo Finance).
+        example:
+          - jquants:/v2/equities/bars/daily
+      as_of:
+        type:
+          - string
+          - "null"
+        description: Date the data refers to (latest trading date, latest fiscal period, …).
+        example: "2026-09-30"
+      unit:
+        type: string
+        description: Currency or unit of the numeric fields (`JPY`, `JPY/share`).
+        example: JPY
+      classification:
+        type: string
+        enum: [RAW, COMPUTED, RAW+COMPUTED]
+        description: Whether values are passed through as published, computed by HayInsights, or both.
+        example: RAW+COMPUTED
+      formula_version:
+        type:
+          - string
+          - "null"
+        description: Version tag of the formulas used for computed fields.
+        example: jp-split-adjust-v1
+      was_restated:
+        type: boolean
+        description: Whether any value was restated after first publication.
+        example: false
+      served_from_cache:
+        type: boolean
+        description: Whether the response was served from cache.
+        example: true
+      cache_expires_at:
+        type:
+          - string
+          - "null"
+        format: date-time
+        description: When the cached copy expires (6 h; 24 h for financial statements).
+        example: "2026-10-01T14:00:00.000Z"

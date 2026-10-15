@@ -3,6 +3,25 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.3.0" description="2026-10-15">
+  **Equities domain.**
+
+  **Added**
+
+  - **Equities** — Japanese stock detail for Tokyo Stock Exchange listings, under
+    `/market/{market}/equities/{code}` (`market` is `jp` for now; `code` accepts
+    `7203` or `72030`):
+    - `GET /market/{market}/equities/{code}` — end-of-day snapshot: quote, overview,
+      trading activity, period changes and TTM ratios.
+    - `GET …/events` — dividends and earnings releases within ±30 days.
+    - `GET …/prices` — daily closes, raw and split-adjusted.
+    - `GET …/financial-statements` — income statement or balance sheet as a tree.
+    - `GET …/related-stocks` — TSE 33-sector peers by market cap.
+
+  Equities is gated by the existing `macro_data` feature code, like News, Calendar
+  and Market.
+</Update>
+
 <Update label="0.2.0" description="2026-09-16">
   **News, Calendar and Market domains; Real Estate restructured.**
 

@@ -120,6 +120,16 @@
               "GET /openapi/v1/market/indices/snapshot",
               "GET /openapi/v1/market/global-indices"
             ]
+          },
+          {
+            "group": "Equities",
+            "pages": [
+              "GET /openapi/v1/market/{market}/equities/{code}",
+              "GET /openapi/v1/market/{market}/equities/{code}/events",
+              "GET /openapi/v1/market/{market}/equities/{code}/prices",
+              "GET /openapi/v1/market/{market}/equities/{code}/financial-statements",
+              "GET /openapi/v1/market/{market}/equities/{code}/related-stocks"
+            ]
           }
         ]
       },

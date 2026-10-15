@@ -1,0 +1,112 @@
+get:
+  operationId: equityEvents
+  tags:
+    - Equities
+  summary: Japan equity events
+  description: |
+    Dividends and scheduled earnings releases within ±30 days of today (Tokyo
+    time), nearest first.
+
+    A dividend is dated by its **ex-dividend date**. `status: expected` is
+    estimated from the company's own forecast (J-Quants); `status: confirmed` means
+    the actual payout is published (Yahoo Finance). `items` is empty when no event
+    falls in the window.
+  x-feature-code: macro_data
+  x-api-weight: 1
+  parameters:
+    - name: market
+      in: path
+      required: true
+      description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+      schema:
+        type: string
+        enum: [jp]
+        example: jp
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+      schema:
+        type: string
+        example: "7203"
+  responses:
+    "200":
+      description: Events around today for the requested stock.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityEventsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              asOf: "2026-10-01"
+              window:
+                from: "2026-09-01"
+                to: "2026-10-31"
+              items:
+                - type: dividend
+                  date: "2026-09-29"
+                  exDate: "2026-09-29"
+                  recordDate: "2026-09-30"
+                  dividendPeriod: 2Q
+                  amountPerShare: 50
+                  currency: JPY
+                  status: confirmed
+                - type: earnings_release
+                  date: "2026-11-05"
+                  fiscalPeriod: 2Q
+                  status: scheduled
+            meta:
+              source:
+                - jquants:/v2/fins/summary
+                - yahoo:v8/finance/chart
+                - jquants:/v2/fins/earnings-date
+              as_of: "2026-10-01"
+              unit: JPY/share
+              classification: RAW+COMPUTED
+              formula_version: jp-dividend-exdate-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-01T14:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: Unsupported market, or an invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 400
+            error:
+              code: MARKET_NOT_SUPPORTED
+              message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+            meta:
+              error: Bad Request
+              statusCode: 400
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is not in the J-Quants listing or is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu 99999
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

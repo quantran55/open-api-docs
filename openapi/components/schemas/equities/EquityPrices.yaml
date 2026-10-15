@@ -1,0 +1,33 @@
+type: object
+description: Daily price series, oldest to newest.
+required:
+  - range
+  - isPartial
+  - points
+properties:
+  range:
+    type: string
+    enum: [5d, 1m, 3m, 6m, 1y, 3y, 5y, max]
+    example: 1y
+  from:
+    type:
+      - string
+      - "null"
+    format: date
+    description: First date of the window (`null` for `5d` and `max`).
+    example: "2025-10-01"
+  to:
+    type:
+      - string
+      - "null"
+    format: date
+    description: Latest trading date in the series.
+    example: "2026-09-30"
+  isPartial:
+    type: boolean
+    description: "`true` when the requested window is longer than the available history (data starts October 2021)."
+    example: false
+  points:
+    type: array
+    items:
+      $ref: "./EquityPricePoint.yaml"

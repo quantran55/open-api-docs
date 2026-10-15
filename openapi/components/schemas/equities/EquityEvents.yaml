@@ -1,0 +1,29 @@
+type: object
+description: |
+  Dividends and earnings releases within ±30 days of today (Tokyo time), nearest
+  first. `items` is empty when nothing falls in the window.
+required:
+  - asOf
+  - window
+  - items
+properties:
+  asOf:
+    type: string
+    format: date
+    description: Today in Tokyo time — the centre of the window.
+    example: "2026-10-01"
+  window:
+    type: object
+    properties:
+      from:
+        type: string
+        format: date
+        example: "2026-09-01"
+      to:
+        type: string
+        format: date
+        example: "2026-10-31"
+  items:
+    type: array
+    items:
+      $ref: "./EquityEvent.yaml"

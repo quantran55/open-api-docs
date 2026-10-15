@@ -1,0 +1,128 @@
+get:
+  operationId: equityFinancialStatements
+  tags:
+    - Equities
+  summary: Japan equity financial statements
+  description: |
+    Income statement (TTM + 3 fiscal years) or balance sheet (4 fiscal years, no
+    TTM), as Yahoo Finance line items arranged in a tree.
+
+    All rows share `columns`; read a figure with `row.values[column.key]`. Column
+    labels use each company's actual fiscal year end (e.g. `Mar 31, 2026`).
+    `columns` and `rows` are empty while the statement has not been collected yet.
+  x-feature-code: macro_data
+  x-api-weight: 3
+  parameters:
+    - name: market
+      in: path
+      required: true
+      description: Market code. Only `jp` (Tokyo Stock Exchange) is supported for now.
+      schema:
+        type: string
+        enum: [jp]
+        example: jp
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 4-character ticker (`7203`) or the 5-character J-Quants code (`72030`).
+      schema:
+        type: string
+        example: "7203"
+    - name: statement
+      in: query
+      required: false
+      description: Which statement to return.
+      schema:
+        type: string
+        enum: [income-statement, balance-sheet]
+        default: income-statement
+  responses:
+    "200":
+      description: The requested financial statement.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityFinancialStatementsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              statement: income-statement
+              currency: JPY
+              columns:
+                - key: ttm
+                  label: TTM
+                  periodType: ttm
+                  periodEnd: "2026-06-30"
+                - key: "2026-03-31"
+                  label: Mar 31, 2026
+                  periodType: annual
+                  periodEnd: "2026-03-31"
+              rows:
+                - key: TotalRevenue
+                  label: Total Revenue
+                  unit: JPY
+                  values:
+                    ttm: 51957026000000
+                    "2026-03-31": 50684952000000
+                  children:
+                    - key: OperatingRevenue
+                      label: Operating Revenue
+                      unit: JPY
+                      values:
+                        ttm: 51957026000000
+                        "2026-03-31": 50684952000000
+                      children: []
+              dataAsOf: "2026-06-30"
+              lastUpdatedAt: "2026-10-01T14:00:12.000Z"
+            meta:
+              source:
+                - yahoo:ws/fundamentals-timeseries
+              as_of: "2026-06-30"
+              unit: JPY
+              classification: RAW
+              formula_version: yahoo-statement-catalog-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-02T08:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: Unsupported market, or an invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 400
+            error:
+              code: MARKET_NOT_SUPPORTED
+              message: Thị trường "us" chưa được hỗ trợ — hiện chỉ có jp
+            meta:
+              error: Bad Request
+              statusCode: 400
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is not in the J-Quants listing or is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu 99999
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

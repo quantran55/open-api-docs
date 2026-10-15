@@ -57,6 +57,7 @@ x-hayinsights-quota:
     Real Estate: 2
     Calendar: 2
     Market: 2
+    Equities: "1-3"
     News: "2-3"
     Commodities: 3
     Crypto: 3
@@ -82,6 +83,8 @@ tags:
     description: Economic calendar — rate decisions, CPI and GDP releases, market holidays and asset-level events.
   - name: Market
     description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
+  - name: Equities
+    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers.
 
 x-tagGroups:
   - name: Market Data
@@ -95,6 +98,7 @@ x-tagGroups:
       - News
       - Calendar
       - Market
+      - Equities
 
 # Populated per-domain during Phase 2/3. Keep static/specific routes BEFORE
 # `{param}` catch-alls to avoid no-ambiguous-paths violations.
@@ -233,6 +237,18 @@ paths:
     $ref: "./paths/market/market_indices_snapshot.yaml"
   /openapi/v1/market/global-indices:
     $ref: "./paths/market/market_global-indices.yaml"
+
+  # ── Equities ───────────────────────────────────────────────────────────
+  /openapi/v1/market/{market}/equities/{code}:
+    $ref: "./paths/equities/market_{market}_equities_{code}.yaml"
+  /openapi/v1/market/{market}/equities/{code}/events:
+    $ref: "./paths/equities/market_{market}_equities_{code}_events.yaml"
+  /openapi/v1/market/{market}/equities/{code}/prices:
+    $ref: "./paths/equities/market_{market}_equities_{code}_prices.yaml"
+  /openapi/v1/market/{market}/equities/{code}/financial-statements:
+    $ref: "./paths/equities/market_{market}_equities_{code}_financial-statements.yaml"
+  /openapi/v1/market/{market}/equities/{code}/related-stocks:
+    $ref: "./paths/equities/market_{market}_equities_{code}_related-stocks.yaml"
 
 components:
   securitySchemes:

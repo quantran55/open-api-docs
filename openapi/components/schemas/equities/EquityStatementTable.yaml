@@ -1,0 +1,63 @@
+type: object
+description: |
+  Financial statement as a table: columns are periods, rows are a tree of line
+  items. The income statement has TTM + 3 fiscal years; the balance sheet has 4
+  fiscal years (no TTM). `columns` and `rows` are empty while the statement has not
+  been collected yet.
+required:
+  - statement
+  - currency
+  - columns
+  - rows
+properties:
+  statement:
+    type: string
+    enum: [income-statement, balance-sheet]
+    example: income-statement
+  currency:
+    type: string
+    example: JPY
+  columns:
+    type: array
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - periodType
+        - periodEnd
+      properties:
+        key:
+          type: string
+          description: Key into each row's `values`.
+          example: ttm
+        label:
+          type: string
+          description: Display label — the company's actual fiscal year end, e.g. `Mar 31, 2026`.
+          example: TTM
+        periodType:
+          type: string
+          enum: [ttm, annual]
+          example: ttm
+        periodEnd:
+          type: string
+          format: date
+          example: "2026-06-30"
+  rows:
+    type: array
+    items:
+      $ref: "./EquityStatementRow.yaml"
+  dataAsOf:
+    type:
+      - string
+      - "null"
+    format: date
+    description: End of the latest period in the table.
+    example: "2026-06-30"
+  lastUpdatedAt:
+    type:
+      - string
+      - "null"
+    format: date-time
+    description: Last time HayInsights updated the figures.
+    example: "2026-10-01T14:00:12.000Z"

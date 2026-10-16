@@ -1,0 +1,109 @@
+get:
+  operationId: macroFdiVnBreakdown
+  tags:
+    - Macro
+  summary: Vietnam FDI breakdown
+  description: |
+    Vietnam's FDI for one month at one level — province, partner country or industry — sorted by
+    registered capital, descending. Values are year to date (1 January to the end of the period) unless
+    `mode=monthly`. `share` is against the national total, so the shares of `items` add up to less than
+    1 when `limit` trims the list; the rest is in `others`. `periods` lists the months available. The
+    source does not publish realized capital at these levels.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: level
+      in: query
+      required: true
+      description: Breakdown level.
+      schema:
+        type: string
+        enum:
+          - province
+          - country
+          - industry
+        example: province
+    - name: period
+      in: query
+      required: false
+      description: Month (YYYY-MM). Defaults to the latest month with data.
+      schema:
+        type: string
+        pattern: ^\d{4}-(0[1-9]|1[0-2])$
+        example: 2026-09
+    - name: mode
+      in: query
+      required: false
+      description: '`cumulative` (year to date, as published) or `monthly` (that month only, derived).'
+      schema:
+        type: string
+        enum:
+          - cumulative
+          - monthly
+        default: cumulative
+    - name: limit
+      in: query
+      required: false
+      description: Number of items, sorted by registered capital.
+      schema:
+        type: integer
+        minimum: 1
+        example: 10
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: FDI into Vietnam by province, partner or industry.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroFdiVnBreakdownResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              displayUnit: Million USD
+              unit: USD
+              source: Ministry of Finance (FIA)
+              latestPeriod: 2026-09
+              period: 2026-09
+              level: province
+              total: 28540.1
+              itemCount: 63
+              items:
+                - code: '79'
+                  name: Ho Chi Minh City
+                  nameLocal: TP. Hồ Chí Minh
+                  registered: 3520.4
+                  share: 0.123
+                  projectsNew: 812
+              others:
+                registered: 25019.7
+                share: 0.877
+                itemCount: 62
+              periods:
+                - 2026-09
+                - 2026-08
+                - 2026-07
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

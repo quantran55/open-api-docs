@@ -1,0 +1,84 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          required:
+            - reportDate
+            - period
+            - periodEndDate
+            - totalOku
+          properties:
+            reportDate:
+              type: string
+              description: Report month (YYYY-MM).
+              example: 2026-03
+            period:
+              type: string
+              description: Quarter label.
+              example: Q1 2026
+            periodEndDate:
+              type: string
+              description: Last day of the quarter.
+              format: date
+              example: '2026-03-31'
+            totalOku:
+              type: &id001
+                - number
+                - 'null'
+              description: Total debt, billion JPY.
+              example: 1324000.5
+            governmentBondsOku:
+              type: *id001
+              description: Government bonds, billion JPY.
+              example: 1150000.2
+            generalBondsOku:
+              type: *id001
+              description: General bonds, billion JPY.
+              example: 1100000.0
+            longTermBondsOku:
+              type: *id001
+              description: Long-term bonds, billion JPY.
+            mediumTermBondsOku:
+              type: *id001
+              description: Medium-term bonds, billion JPY.
+            shortTermBondsOku:
+              type: *id001
+              description: Short-term bonds, billion JPY.
+            filpBondsOku:
+              type: *id001
+              description: FILP bonds, billion JPY.
+            borrowingsOku:
+              type: *id001
+              description: Borrowings, billion JPY.
+            financingBillsOku:
+              type: *id001
+              description: Financing bills, billion JPY.
+            govGuaranteedDebtsOku:
+              type: *id001
+              description: Government-guaranteed debt, billion JPY.
+            generalBondsPct:
+              type: *id001
+              description: General bonds as % of total.
+              example: 83.1
+            financingBillsPct:
+              type: *id001
+              description: Financing bills as % of total.
+              example: 7.4
+            filpBondsPct:
+              type: *id001
+              description: FILP bonds as % of total.
+              example: 7.1
+            borrowingsPct:
+              type: *id001
+              description: Borrowings as % of total.
+              example: 2.3
+            debtToGdpRatio:
+              type: *id001
+              description: Debt to rolling four-quarter GDP (decimal).
+              example: 2.17

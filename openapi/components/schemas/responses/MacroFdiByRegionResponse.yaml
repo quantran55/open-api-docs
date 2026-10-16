@@ -1,0 +1,139 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - unit
+          - displayUnit
+          - source
+          - latestPeriod
+          - regions
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          unit:
+            type: string
+            description: Storage unit of every value.
+            example: USD
+          unitScale:
+            type: number
+            description: Multiplier from the stored value to `unit`.
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Unit the values are expressed in.
+            example: Million USD
+          source:
+            type: string
+            description: Publisher of the data.
+            example: JETRO
+          sourceUrl:
+            type: string
+            description: Where the source publishes the data.
+            example: https://www.jetro.go.jp/en/reports/statistics/
+          latestPeriod:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest period with data.
+            example: 2026-Q2
+          knowledgeAt:
+            type: *id001
+            description: When the system learned the served figures.
+            example: '2026-09-10T00:00:00.000Z'
+          wasRestated:
+            type: boolean
+            description: True when the source revised at least one served figure.
+            example: false
+          from:
+            type: *id001
+            description: First period of the window (inclusive).
+            example: 2025-Q3
+          to:
+            type: *id001
+            description: Last period of the window (inclusive).
+            example: 2026-Q2
+          quarters:
+            type: integer
+            description: Number of quarters in the window.
+            example: 4
+          regions:
+            type: array
+            items:
+              type: object
+              required:
+                - code
+                - name
+              properties:
+                code:
+                  type: string
+                  description: Region code.
+                  example: asia
+                name:
+                  type: string
+                  description: Region name.
+                  example: Asia
+            description: Regions in display order.
+          inward:
+            type: array
+            items: &id003
+              type: object
+              required:
+                - period
+                - total
+                - values
+                - unallocated
+                - isPreliminary
+              properties:
+                period:
+                  type: string
+                  description: Quarter label.
+                  example: 2026-Q2
+                total:
+                  type: &id002
+                    - number
+                    - 'null'
+                  description: World total for the quarter.
+                  example: 52800
+                values:
+                  type: object
+                  description: Value per region code (see `regions`). Missing figures are null, never 0.
+                  properties: {}
+                  additionalProperties:
+                    type: *id002
+                markers:
+                  type: object
+                  description: Source marker per region code, when the source flags a figure.
+                  properties: {}
+                  additionalProperties:
+                    type: string
+                unallocated:
+                  type: *id002
+                  description: World total minus the sum of regions with a figure.
+                  example: 1200
+                isPreliminary:
+                  type: boolean
+                  example: false
+            description: Present unless `direction=outward`.
+          outward:
+            type: array
+            items: *id003
+            description: Present unless `direction=inward`.
+          seriesBreak:
+            type: object
+            description: Present when the source changed its method inside the window.
+            properties:
+              at:
+                type: string
+                description: Period where the break starts.
+                example: 2014-Q1
+              reason:
+                type: string
+                description: Why the series is not comparable across the break.

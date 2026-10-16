@@ -35,11 +35,11 @@ tags:
   - name: Crypto
     description: Crypto market overview, dominance, bubble map, on-chain and derivatives metrics.
   - name: ETF
-    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth and fund composition.
+    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth, fund composition and Bank of Japan ETF holdings.
   - name: FX
     description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
   - name: Macro
-    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI and trade by region.
   - name: Real Estate
     description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
   - name: News
@@ -990,6 +990,117 @@ paths:
                     contributionArea: 1.69419
                 meta:
                   timestamp: '2026-06-19T08:50:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/boj-holdings:
+    get:
+      operationId: etfBojHoldings
+      tags:
+        - ETF
+      summary: BOJ ETF holdings history
+      description: |
+        Monthly Bank of Japan ETF holdings (trillion JPY) next to the size of the Japanese ETF market (JITA,
+        100 million JPY) and the BOJ's share of it, with annotations on key policy changes. Defaults to the
+        last ten years.
+      x-feature-code: etf_data
+      x-api-weight: 2
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start month (YYYY-MM).
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+            example: 2016-01
+        - name: to
+          in: query
+          required: false
+          description: End month (YYYY-MM).
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+            example: 2026-09
+      responses:
+        '200':
+          description: Monthly BOJ ETF holdings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfBojHoldingsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - month: 2024-02
+                    holdingsCho: 37.2
+                    totalMarketOku: 1135000
+                    bojPctOfMarket: 32.8
+                  - month: 2024-03
+                    holdingsCho: 37.2
+                    totalMarketOku: 1182000
+                    bojPctOfMarket: 31.5
+                    annotation:
+                      month: 2024-03
+                      label: BOJ ends ETF purchases
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/etf/boj-holdings/latest:
+    get:
+      operationId: etfBojHoldingsLatest
+      tags:
+        - ETF
+      summary: BOJ ETF holdings latest
+      description: |
+        Latest Bank of Japan ETF holdings with market context — total ETF market net assets, the BOJ's share
+        and net flow — and the status of the BOJ's ETF purchase policy.
+      x-feature-code: etf_data
+      x-api-weight: 2
+      responses:
+        '200':
+          description: Latest BOJ ETF holdings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtfBojHoldingsLatestResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  latestSnapshot:
+                    reportDate: '2026-09-20'
+                    holdingsCho: 37.2
+                    holdingsOku: 372000
+                    holdingsUsd: 251000000000
+                  marketContext:
+                    reportDate: '2026-08-31'
+                    totalMarketOku: 1210000
+                    bojPctOfMarket: 30.7
+                    netFlowOku: 1200
+                  policy:
+                    status: stopped
+                    statusLabel: Purchases stopped
+                    lastPurchaseDate: '2024-03-19'
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -2335,6 +2446,1203 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fdi/flows:
+    get:
+      operationId: macroFdiFlows
+      tags:
+        - Macro
+      summary: Japan FDI flows
+      description: |
+        Japan's quarterly outward and inward foreign direct investment (JETRO, million USD). Defaults to the
+        12 most recent quarters, up to 40. Pick the window with `quarters`, or with `from`/`to` (both
+        inclusive). Missing quarters are null, never 0; a negative value is a net withdrawal. A reversed or
+        over-long window returns 400 with the reason.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: Only `jp` is available.
+          schema:
+            type: string
+            enum:
+              - jp
+            default: jp
+        - name: quarters
+          in: query
+          required: false
+          description: Number of most recent quarters (1–40).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 40
+            default: 12
+        - name: from
+          in: query
+          required: false
+          description: First quarter (inclusive), e.g. `2023-Q3`.
+          schema:
+            type: string
+            pattern: ^\d{4}-Q[1-4]$
+            example: 2023-Q3
+        - name: to
+          in: query
+          required: false
+          description: Last quarter (inclusive). Defaults to the latest quarter with data.
+          schema:
+            type: string
+            pattern: ^\d{4}-Q[1-4]$
+            example: 2026-Q2
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Quarterly FDI flows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFdiFlowsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: jp
+                  unit: USD
+                  unitScale: 1000000
+                  displayUnit: Million USD
+                  source: JETRO
+                  sourceUrl: https://www.jetro.go.jp/en/reports/statistics/
+                  recordingPrinciple: directional principle
+                  latestPeriod: 2026-Q2
+                  knowledgeAt: '2026-09-10T00:00:00.000Z'
+                  wasRestated: false
+                  from: 2026-Q1
+                  to: 2026-Q2
+                  quarters: 2
+                  series:
+                    - period: 2026-Q1
+                      outward: 53261.8
+                      inward: 5729.2
+                      isPreliminary: false
+                    - period: 2026-Q2
+                      outward: 48110.4
+                      inward: 6120.9
+                      isPreliminary: true
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+                  source: JETRO
+                  as_of: 2026-Q2
+                  latest_period: 2026-Q2
+                  unit: Million USD
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fdi/by-region:
+    get:
+      operationId: macroFdiByRegion
+      tags:
+        - Macro
+      summary: Japan FDI by region
+      description: |
+        Japan's quarterly FDI split across 7 world regions (JETRO, million USD). Defaults to the 4 most
+        recent quarters, up to 12, same window for inward and outward. Omit `direction` to get both.
+        `regions` keeps a fixed order so each region keeps its colour. Each quarter carries `total` (World)
+        and `unallocated` (World minus the regions that have a figure).
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: Only `jp` is available.
+          schema:
+            type: string
+            enum:
+              - jp
+            default: jp
+        - name: quarters
+          in: query
+          required: false
+          description: Number of most recent quarters (1–12).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            default: 4
+        - name: from
+          in: query
+          required: false
+          description: First quarter (inclusive).
+          schema:
+            type: string
+            pattern: ^\d{4}-Q[1-4]$
+            example: 2025-Q3
+        - name: to
+          in: query
+          required: false
+          description: Last quarter (inclusive).
+          schema:
+            type: string
+            pattern: ^\d{4}-Q[1-4]$
+            example: 2026-Q2
+        - name: direction
+          in: query
+          required: false
+          description: Omit to return both directions.
+          schema:
+            type: string
+            enum:
+              - outward
+              - inward
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Quarterly FDI by region.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFdiByRegionResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: jp
+                  unit: USD
+                  unitScale: 1000000
+                  displayUnit: Million USD
+                  source: JETRO
+                  latestPeriod: 2026-Q2
+                  from: 2026-Q2
+                  to: 2026-Q2
+                  quarters: 1
+                  regions:
+                    - code: asia
+                      name: Asia
+                    - code: north_america
+                      name: North America
+                  outward:
+                    - period: 2026-Q2
+                      total: 48110.4
+                      values:
+                        asia: 12045.2
+                        north_america: 21876
+                      unallocated: 14189.2
+                      isPreliminary: true
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fdi/by-industry:
+    get:
+      operationId: macroFdiByIndustry
+      tags:
+        - Macro
+      summary: Japan FDI by industry
+      description: |
+        Yearly industry structure of Japan's FDI, in two groups: Manufacturing and Non-manufacturing (JETRO,
+        million USD). Defaults to Outward and the latest year with data for that direction; `years` lists
+        the selectable years. Each group returns the top `limit` industries by absolute value (default 10,
+        `limit=all` for every industry); `itemCount` is how many the source lists. There is no "Other" item,
+        so `share` values do not add up to 1. When a group contains a negative figure, `hasNegative` is true
+        and every `share` is null.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: Only `jp` is available.
+          schema:
+            type: string
+            enum:
+              - jp
+            default: jp
+        - name: direction
+          in: query
+          required: false
+          description: FDI direction.
+          schema:
+            type: string
+            enum:
+              - outward
+              - inward
+            default: outward
+        - name: year
+          in: query
+          required: false
+          description: Calendar year. Defaults to the latest year with data.
+          schema:
+            type: integer
+            example: 2025
+        - name: limit
+          in: query
+          required: false
+          description: 'Industries per group: a number (1–50) or `all`.'
+          schema:
+            type: string
+            example: '10'
+            default: '10'
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: FDI industry structure for one year.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFdiByIndustryResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: jp
+                  displayUnit: Million USD
+                  unit: USD
+                  source: JETRO
+                  latestPeriod: '2025'
+                  direction: outward
+                  year: 2025
+                  years:
+                    - 2023
+                    - 2024
+                    - 2025
+                  total: 189400.5
+                  isPreliminary: false
+                  shareFormulaVersion: v1
+                  groups:
+                    - code: manufacturing
+                      name: Manufacturing
+                      total: 78200.1
+                      hasNegative: false
+                      shareAvailable: true
+                      itemCount: 18
+                      items:
+                        - code: transport_equipment
+                          name: Transport equipment
+                          value: 15320.4
+                          share: 0.196
+                          classification: RAW
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fdi/vn/flows:
+    get:
+      operationId: macroFdiVnFlows
+      tags:
+        - Macro
+      summary: Vietnam FDI flows
+      description: |
+        Vietnam's inward FDI — registered and realized capital for the whole country, million USD. `series`
+        holds the amount for each month on its own (derived as the difference between two consecutive year-
+        to-date figures); the year-to-date figures the source publishes are in `registeredYtd` /
+        `realizedYtd`. `cumulative` holds the year-to-date lines per year. `months` (12 / 36 / 60) only
+        trims `series`. Missing months are null, never 0.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: months
+          in: query
+          required: false
+          description: Months in `series` (1–60).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 60
+            example: 12
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Monthly and cumulative FDI into Vietnam.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFdiVnFlowsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: vn
+                  unit: USD
+                  unitScale: 1000000
+                  displayUnit: Million USD
+                  source: Ministry of Finance (FIA)
+                  latestPeriod: 2026-09
+                  months: 2
+                  from: 2026-08
+                  to: 2026-09
+                  series:
+                    - period: 2026-08
+                      registered: 3120.5
+                      realized: 2205
+                      registeredYtd: 26389.8
+                      realizedYtd: 16790
+                      registeredYoy: 9.8
+                      cutoffDay: 31
+                      source: mof
+                    - period: 2026-09
+                      registered: 2150.3
+                      realized: 2010
+                      registeredYtd: 28540.1
+                      realizedYtd: 18800
+                      registeredYoy: 12.4
+                      cutoffDay: 30
+                      source: mof
+                  cumulative:
+                    - year: 2026
+                      registered:
+                        - 4330.1
+                        - 6900.2
+                        - 10980
+                      realized:
+                        - 1510
+                        - 3100
+                        - 5410
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fdi/vn/breakdown:
+    get:
+      operationId: macroFdiVnBreakdown
+      tags:
+        - Macro
+      summary: Vietnam FDI breakdown
+      description: |
+        Vietnam's FDI for one month at one level — province, partner country or industry — sorted by
+        registered capital, descending. Values are year to date (1 January to the end of the period) unless
+        `mode=monthly`. `share` is against the national total, so the shares of `items` add up to less than
+        1 when `limit` trims the list; the rest is in `others`. `periods` lists the months available. The
+        source does not publish realized capital at these levels.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: level
+          in: query
+          required: true
+          description: Breakdown level.
+          schema:
+            type: string
+            enum:
+              - province
+              - country
+              - industry
+            example: province
+        - name: period
+          in: query
+          required: false
+          description: Month (YYYY-MM). Defaults to the latest month with data.
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+            example: 2026-09
+        - name: mode
+          in: query
+          required: false
+          description: '`cumulative` (year to date, as published) or `monthly` (that month only, derived).'
+          schema:
+            type: string
+            enum:
+              - cumulative
+              - monthly
+            default: cumulative
+        - name: limit
+          in: query
+          required: false
+          description: Number of items, sorted by registered capital.
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: FDI into Vietnam by province, partner or industry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFdiVnBreakdownResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: vn
+                  displayUnit: Million USD
+                  unit: USD
+                  source: Ministry of Finance (FIA)
+                  latestPeriod: 2026-09
+                  period: 2026-09
+                  level: province
+                  total: 28540.1
+                  itemCount: 63
+                  items:
+                    - code: '79'
+                      name: Ho Chi Minh City
+                      nameLocal: TP. Hồ Chí Minh
+                      registered: 3520.4
+                      share: 0.123
+                      projectsNew: 812
+                  others:
+                    registered: 25019.7
+                    share: 0.877
+                    itemCount: 62
+                  periods:
+                    - 2026-09
+                    - 2026-08
+                    - 2026-07
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/interbank-rates:
+    get:
+      operationId: macroInterbankRates
+      tags:
+        - Macro
+      summary: Interbank rate history (US/JP)
+      description: |
+        Ten years of interbank rates for one country — overnight, 1-week, 1-month, 3-month and 6-month —
+        plus the latest overnight and 3-month reading. A tenor the source does not publish is null, never 0
+        (the US only has overnight). For Japan's daily TIBOR and official overnight call rate use
+        `/macro/interbank-rates/jp/tibor` and `/macro/interbank-rates/jp/overnight`; for Vietnam use
+        `/macro/interbank-rates/vn`.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: Country.
+          schema:
+            type: string
+            enum:
+              - us
+              - jp
+            default: us
+      responses:
+        '200':
+          description: Interbank rate history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroInterbankRatesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: US
+                  latest:
+                    date: '2026-09-01'
+                    interbankRatesOn: 4.33
+                    interbankRates3m: null
+                  series:
+                    - date: '2026-08-01'
+                      interbankRatesOn: 4.33
+                      interbankRates1w: null
+                      interbankRates1m: null
+                      interbankRates3m: null
+                      interbankRates6m: null
+                    - date: '2026-09-01'
+                      interbankRatesOn: 4.33
+                      interbankRates1w: null
+                      interbankRates1m: null
+                      interbankRates3m: null
+                      interbankRates6m: null
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/interbank-rates/jp/tibor:
+    get:
+      operationId: macroInterbankRatesJpTibor
+      tags:
+        - Macro
+      summary: Japan TIBOR rates
+      description: |
+        Daily Japanese Yen TIBOR (JBA) for the 1-week, 1-month, 3-month and 6-month tenors. A tenor without
+        a figure is null, never 0. When the table has no data yet, `points` is empty and `latestDate` is
+        null.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: Look-back window, counted back from the latest date with data (not from today).
+          schema:
+            type: string
+            enum:
+              - 1M
+              - 3M
+              - 6M
+              - 1Y
+              - 3Y
+            default: 1M
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Daily TIBOR.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroInterbankRatesJpTiborResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  source: JBA TIBOR Administration
+                  unit: '%'
+                  latestDate: '2026-10-15'
+                  wasRestated: false
+                  country: jp
+                  period: 1M
+                  from: '2026-09-15'
+                  to: '2026-10-15'
+                  points:
+                    - date: '2026-10-15'
+                      tibor1w: 0.62
+                      tibor1m: 0.68
+                      tibor3m: 0.78
+                      tibor6m: 0.86
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/interbank-rates/jp/overnight:
+    get:
+      operationId: macroInterbankRatesJpOvernight
+      tags:
+        - Macro
+      summary: Japan overnight call rate
+      description: |
+        Bank of Japan uncollateralized overnight call rate (official, average). The official figure comes
+        out around 10:00 JST the next business day, so `latestDate` usually trails TIBOR by one day.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: Look-back window, counted back from the latest date with data (not from today).
+          schema:
+            type: string
+            enum:
+              - 1M
+              - 3M
+              - 6M
+              - 1Y
+              - 3Y
+            default: 1M
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Daily overnight call rate.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroInterbankRatesJpOvernightResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  source: Bank of Japan
+                  unit: '%'
+                  latestDate: '2026-10-14'
+                  wasRestated: false
+                  country: jp
+                  period: 1M
+                  from: '2026-09-14'
+                  to: '2026-10-14'
+                  points:
+                    - date: '2026-10-14'
+                      value: 0.477
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/interbank-rates/vn:
+    get:
+      operationId: macroInterbankRatesVn
+      tags:
+        - Macro
+      summary: Vietnam interbank rates
+      description: |
+        Daily Vietnamese interbank rates and traded volumes by tenor, from the State Bank of Vietnam. Rates
+        are in percent, volumes in billion VND; a tenor without a figure is null. Defaults to the last year;
+        the `from`–`to` range may not exceed 1,098 days.
+      x-feature-code: macro_data
+      x-api-weight: 3
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start date. Defaults to one year before `to`.
+          schema:
+            type: string
+            format: date
+            example: '2025-10-01'
+        - name: to
+          in: query
+          required: false
+          description: End date. Defaults to today.
+          schema:
+            type: string
+            format: date
+            example: '2026-09-30'
+      responses:
+        '200':
+          description: Daily interbank rates in Vietnam.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroInterbankRatesVnResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - date: '2026-09-30'
+                    date_type: daily
+                    country: VN
+                    interbank_rates_on: 4.1
+                    interbank_rates_1w: 4.35
+                    interbank_rates_2w: 4.5
+                    interbank_rates_1m: 4.8
+                    interbank_rates_3m: 5.05
+                    interbank_rates_6m: 5.3
+                    interbank_rates_9m: 5.6
+                    interbank_rates_12m: null
+                    interbank_amount_on: 412500
+                    interbank_amount_1w: 38200
+                    interbank_amount_2w: 9100
+                    interbank_amount_1m: 4300
+                    interbank_amount_3m: 1200
+                    interbank_amount_6m: 300
+                    interbank_amount_9m: 50
+                    federal_funds_rate: null
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/trade/turnover:
+    get:
+      operationId: macroTradeTurnover
+      tags:
+        - Macro
+      summary: Export/import turnover
+      description: |
+        Export value, import value and trade balance for one country. `balance` is returned as published
+        rather than recomputed (for the US it is the Census figure, not the difference of two rounded
+        values). Incomplete periods have `isPartial` and `coverage`. Japan publishes every granularity;
+        Vietnam and the US only publish months — their quarters and years are summed by the system and
+        flagged `isDerived`.
+        Returns 404 when no data has been collected for the country yet.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: true
+          description: Country.
+          schema:
+            type: string
+            enum:
+              - jp
+              - vn
+              - us
+            example: jp
+        - name: granularity
+          in: query
+          required: false
+          description: Period granularity.
+          schema:
+            type: string
+            enum:
+              - month
+              - quarter
+              - year
+              - fiscal_year
+            default: month
+        - name: range
+          in: query
+          required: false
+          description: Look-back window, counted back from the latest period with data.
+          schema:
+            type: string
+            enum:
+              - 1y
+              - 3y
+              - 5y
+              - max
+            default: 1y
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Export/import series.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroTradeTurnoverResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: jp
+                  unit: JPY
+                  unitScale: 1000
+                  displayDivisor: 1000000
+                  displayUnit: Billion Yen
+                  seasonallyAdjusted: false
+                  source: Ministry of Finance Japan
+                  taxonomy: continent
+                  asOfPeriod: 2026-08
+                  granularity: quarter
+                  range: 1y
+                  series:
+                    - period: 2026-Q2
+                      periodType: quarter
+                      exportValue: 25321000000
+                      importValue: 26105000000
+                      balance: -784000000
+                      isPartial: false
+                      isDerived: false
+                      revisionStatus: definite
+                      knowledgeAt: '2026-07-17T00:00:00.000Z'
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+                  source: Ministry of Finance Japan
+                  as_of: 2026-08
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/trade/by-region:
+    get:
+      operationId: macroTradeByRegion
+      tags:
+        - Macro
+      summary: Export/import by region
+      description: |
+        Exports or imports of one country split by region for one period. There is always an item for the
+        part not attributed to any region, so the items add up to `total`. Each item has a `classification`:
+        RAW is published by the source, DERIVED is computed. Pick the period with `granularity` (latest
+        month / quarter / year) or name it with `period`; `period` wins when both are given.
+        Returns 404 when no data has been collected for the country yet.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: true
+          description: Country.
+          schema:
+            type: string
+            enum:
+              - jp
+              - vn
+              - us
+            example: jp
+        - name: flow
+          in: query
+          required: false
+          description: Trade flow.
+          schema:
+            type: string
+            enum:
+              - export
+              - import
+            default: export
+        - name: granularity
+          in: query
+          required: false
+          description: Use the latest period of this granularity.
+          schema:
+            type: string
+            enum:
+              - month
+              - quarter
+              - year
+              - fiscal_year
+            default: month
+        - name: period
+          in: query
+          required: false
+          description: 'Exact period: `2026-06`, `2026-Q2`, `2026` or `2026-FY`.'
+          schema:
+            type: string
+            pattern: ^\d{4}(-(0[1-9]|1[0-2])|-Q[1-4]|-FY)?$
+            example: 2026-Q2
+        - name: taxonomy
+          in: query
+          required: false
+          description: Region grouping. Defaults to continents for Japan and Vietnam and Census regions for the US.
+          schema:
+            type: string
+            enum:
+              - source
+              - continent
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: Trade split by region.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroTradeByRegionResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: jp
+                  unit: JPY
+                  unitScale: 1000
+                  displayDivisor: 1000000
+                  displayUnit: Billion Yen
+                  seasonallyAdjusted: false
+                  source: Ministry of Finance Japan
+                  taxonomy: continent
+                  asOfPeriod: 2026-08
+                  period: 2026-Q2
+                  granularity: quarter
+                  flow: export
+                  isPartial: false
+                  total: 25321000000
+                  items:
+                    - code: asia
+                      name: Asia
+                      value: 14990000000
+                      share: 0.592
+                      classification: RAW
+                    - code: north_america
+                      name: North America
+                      value: 5621000000
+                      share: 0.222
+                      classification: RAW
+                  reconciliation:
+                    sumOfItems: 25321000000
+                    total: 25321000000
+                    diff: 0
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+                  source: Ministry of Finance Japan
+                  as_of: 2026-Q2
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/japan/gdp-breakdown:
+    get:
+      operationId: macroJapanGdpBreakdown
+      tags:
+        - Macro
+      summary: Japan GDP expenditure breakdown
+      description: |
+        Japan's nominal GDP split by expenditure component — private consumption (C), government consumption
+        (G), the five investment items (I) and net exports (X − M) — in billion JPY. `interval=annual` sums
+        the quarters of each year; a year with fewer than four quarters has `isPartial: true` and `quarters`
+        < 4. Defaults to the last ten years.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start date (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2016-01-01'
+        - name: to
+          in: query
+          required: false
+          description: End date (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2026-06-30'
+        - name: interval
+          in: query
+          required: false
+          description: Quarterly rows or yearly sums.
+          schema:
+            type: string
+            enum:
+              - quarterly
+              - annual
+            default: quarterly
+      responses:
+        '200':
+          description: GDP by expenditure component.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroJapanGdpBreakdownResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - period: '2025-01-01'
+                    periodLabel: '2025'
+                    gdpTotal: 609000.2
+                    privateConsumption: 335000.1
+                    governmentConsumption: 128000.4
+                    investmentTotal: 151714.6
+                    privateResidentialInvestment: 22600.8
+                    privateNonResiInvestment: 97000.5
+                    changePrivateInventories: 1400.2
+                    publicInvestment: 30700
+                    changePublicInventories: 13.1
+                    netExports: -6000.3
+                    exports: 128000
+                    imports: 134000.3
+                    quarters: 4
+                    isPartial: false
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/japan/central-gov-debt:
+    get:
+      operationId: macroJapanCentralGovDebt
+      tags:
+        - Macro
+      summary: Japan central government debt breakdown
+      description: |
+        Quarterly snapshots of Japan's central government debt (Ministry of Finance) split by instrument —
+        government bonds (general, long/medium/short-term, FILP), borrowings, financing bills and
+        government-guaranteed debt — in billion JPY, with each main instrument's share of the total and the
+        debt-to-GDP ratio. Defaults to the last ten years. For debt as % of GDP across countries use
+        `/macro/monetary-policy/central-government-debt`.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start month (YYYY-MM).
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+            example: 2021-01
+        - name: to
+          in: query
+          required: false
+          description: End month (YYYY-MM).
+          schema:
+            type: string
+            pattern: ^\d{4}-(0[1-9]|1[0-2])$
+            example: 2026-06
+      responses:
+        '200':
+          description: Quarterly central government debt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroJapanCentralGovDebtResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  - reportDate: 2026-03
+                    period: Q1 2026
+                    periodEndDate: '2026-03-31'
+                    totalOku: 1324000.5
+                    governmentBondsOku: 1150000.2
+                    generalBondsOku: 1100000
+                    longTermBondsOku: 720000
+                    mediumTermBondsOku: 260000
+                    shortTermBondsOku: 120000
+                    filpBondsOku: 94000
+                    borrowingsOku: 30500
+                    financingBillsOku: 98000
+                    govGuaranteedDebtsOku: 45500.3
+                    generalBondsPct: 83.1
+                    financingBillsPct: 7.4
+                    filpBondsPct: 7.1
+                    borrowingsPct: 2.3
+                    debtToGdpRatio: 2.17
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /openapi/v1/macro/indicators/gdp-growth-rate:
     get:
       operationId: macroIndicatorGdpGrowthRate
@@ -3388,6 +4696,186 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/interbank-rates:
+    get:
+      operationId: macroIndicatorInterbankRates
+      tags:
+        - Macro
+      summary: Indicator — Interbank rates table (US/JP/VN)
+      description: |
+        Interbank rate table with one column per tenor (Overnight / 1-week / 1-month / 3-month) and one row
+        per country, each cell holding the most recent data point of that tenor. `rows[].dates` gives the
+        date of every cell: cells in one row can differ (Japan's overnight rate is published a business day
+        after TIBOR; the US is monthly). The US only has Overnight (FRED); Japan uses BOJ + TIBOR; Vietnam
+        uses the State Bank interbank rates. A country whose source fails returns `available: false`.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      responses:
+        '200':
+          description: Interbank rates table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorInterbankRatesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: interbank-rates
+                  unit: '%'
+                  tenors:
+                    - key: 'on'
+                      label: Overnight
+                    - key: 1w
+                      label: 1-week
+                    - key: 1m
+                      label: 1-month
+                    - key: 3m
+                      label: 3-month
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: true
+                      date: '2026-09-01'
+                      values:
+                        - 4.33
+                        - null
+                        - null
+                        - null
+                      display:
+                        - '4.33'
+                        - —
+                        - —
+                        - —
+                      dates:
+                        - '2026-09-01'
+                        - null
+                        - null
+                        - null
+                    - country: VN
+                      countryName: Vietnam
+                      available: true
+                      date: '2026-09-28'
+                      values:
+                        - 4.1
+                        - 4.35
+                        - 4.8
+                        - 5.05
+                      display:
+                        - '4.10'
+                        - '4.35'
+                        - '4.80'
+                        - '5.05'
+                      dates:
+                        - '2026-09-28'
+                        - '2026-09-28'
+                        - '2026-09-28'
+                        - '2026-09-28'
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/fdi:
+    get:
+      operationId: macroIndicatorFdi
+      tags:
+        - Macro
+      summary: Indicator — FDI table (JP)
+      description: |
+        Japan's outward and inward foreign direct investment for the two most recent quarters that have data
+        (JETRO publishes with a ~2-month lag, so the columns are not anchored to today), oldest to newest.
+        Rows are the two directions — Outward, then Inward — always both, with `available: false` when a
+        direction has no figure. Values are in million USD as published by JETRO: `values` holds the raw
+        numbers and `display` the formatted strings. Missing periods are null, never 0; a negative value is
+        a net withdrawal. For a longer window use `/macro/fdi/flows`.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: country
+          in: query
+          required: false
+          description: Only `jp` is available for now.
+          schema:
+            type: string
+            enum:
+              - jp
+            default: jp
+        - name: asOf
+          in: query
+          required: false
+          description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions by the source. Omit for the latest data.'
+          schema:
+            type: string
+            format: date
+            example: '2026-09-01'
+      responses:
+        '200':
+          description: FDI indicator table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorFdiResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: fdi
+                  metrics:
+                    - key: outward
+                      label: Outward
+                      unit: Million USD
+                    - key: inward
+                      label: Inward
+                      unit: Million USD
+                  columns:
+                    - period: 2026-Q1
+                      date: '2026-01-01'
+                    - period: 2026-Q2
+                      date: '2026-04-01'
+                  rows:
+                    - country: JP
+                      countryName: Japan
+                      available: true
+                      unit: Million USD
+                      values:
+                        - outward: 53261.8
+                          inward: 5729.2
+                        - outward: 48110.4
+                          inward: 6120.9
+                      display:
+                        - outward: 53,261.8
+                          inward: 5,729.2
+                        - outward: 48,110.4
+                          inward: 6,120.9
+                      markers:
+                        - {}
+                        - {}
+                  latestPeriod: 2026-Q2
+                  source: JETRO
+                  knowledgeAt: '2026-09-10T00:00:00.000Z'
+                  wasRestated: false
+                meta:
+                  timestamp: '2026-10-16T04:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -6417,6 +7905,141 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/EtfHeatmapItem'
+    EtfBojHoldingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                required:
+                  - month
+                  - holdingsCho
+                properties:
+                  month:
+                    type: string
+                    description: Month (YYYY-MM).
+                    example: 2024-03
+                  holdingsCho:
+                    type:
+                      - number
+                      - 'null'
+                    description: BOJ ETF holdings, trillion JPY.
+                    example: 37.2
+                  totalMarketOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Total ETF market net assets, 100 million JPY.
+                    example: 1182000
+                  bojPctOfMarket:
+                    type:
+                      - number
+                      - 'null'
+                    description: BOJ holdings as % of the ETF market.
+                    example: 31.5
+                  annotation:
+                    type: object
+                    description: Present on months with a key policy change.
+                    properties:
+                      month:
+                        type: string
+                        description: Month.
+                        example: 2024-03
+                      label:
+                        type: string
+                        description: Policy event.
+                        example: BOJ ends ETF purchases
+    EtfBojHoldingsLatestResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - latestSnapshot
+                - marketContext
+                - policy
+              properties:
+                latestSnapshot:
+                  type: object
+                  required:
+                    - reportDate
+                  properties:
+                    reportDate:
+                      type: string
+                      description: Balance-sheet date.
+                      format: date
+                      example: '2026-09-20'
+                    holdingsCho:
+                      type:
+                        - number
+                        - 'null'
+                      description: Holdings, trillion JPY.
+                      example: 37.2
+                    holdingsOku:
+                      type:
+                        - number
+                        - 'null'
+                      description: Holdings, 100 million JPY.
+                      example: 372000
+                    holdingsUsd:
+                      type:
+                        - number
+                        - 'null'
+                      description: Holdings in USD (approximate).
+                      example: 251000000000
+                marketContext:
+                  type: object
+                  properties:
+                    reportDate:
+                      type:
+                        - string
+                        - 'null'
+                      description: Market data date.
+                      format: date
+                      example: '2026-08-31'
+                    totalMarketOku:
+                      type:
+                        - number
+                        - 'null'
+                      description: Total ETF market net assets, 100 million JPY.
+                      example: 1210000
+                    bojPctOfMarket:
+                      type:
+                        - number
+                        - 'null'
+                      description: BOJ holdings as % of the ETF market.
+                      example: 30.7
+                    netFlowOku:
+                      type:
+                        - number
+                        - 'null'
+                      description: Net flow, 100 million JPY.
+                      example: 1200
+                policy:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      description: Purchase policy status.
+                      example: stopped
+                    statusLabel:
+                      type: string
+                      description: Status label.
+                      example: Purchases stopped
+                    lastPurchaseDate:
+                      type: string
+                      description: Last purchase date.
+                      format: date
+                      example: '2024-03-19'
     FundAssetAllocation:
       type: object
       description: Breakdown of a fund's assets across bonds, stocks and other instruments.
@@ -8180,6 +9803,1619 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RatesYieldsPoint'
+    MacroFdiFlowsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - unit
+                - displayUnit
+                - source
+                - latestPeriod
+                - series
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                unit:
+                  type: string
+                  description: Storage unit of every value.
+                  example: USD
+                unitScale:
+                  type: number
+                  description: Multiplier from the stored value to `unit`.
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Unit the values are expressed in.
+                  example: Million USD
+                source:
+                  type: string
+                  description: Publisher of the data.
+                  example: JETRO
+                sourceUrl:
+                  type: string
+                  description: Where the source publishes the data.
+                  example: https://www.jetro.go.jp/en/reports/statistics/
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest period with data.
+                  example: 2026-Q2
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the served figures.
+                  example: '2026-09-10T00:00:00.000Z'
+                wasRestated:
+                  type: boolean
+                  description: True when the source revised at least one served figure.
+                  example: false
+                from:
+                  type:
+                    - string
+                    - 'null'
+                  description: First period of the window (inclusive).
+                  example: 2025-Q3
+                to:
+                  type:
+                    - string
+                    - 'null'
+                  description: Last period of the window (inclusive).
+                  example: 2026-Q2
+                quarters:
+                  type: integer
+                  description: Number of quarters in the window.
+                  example: 4
+                recordingPrinciple:
+                  type: string
+                  description: Balance-of-payments recording principle used by the source.
+                  example: directional principle
+                series:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - outward
+                      - inward
+                      - isPreliminary
+                    properties:
+                      period:
+                        type: string
+                        description: Quarter label.
+                        example: 2026-Q2
+                      outward:
+                        type:
+                          - number
+                          - 'null'
+                        description: Outward FDI.
+                        example: 48110.4
+                      inward:
+                        type:
+                          - number
+                          - 'null'
+                        description: Inward FDI.
+                        example: 6120.9
+                      outwardMarker:
+                        type: string
+                        description: Source marker on the outward figure, e.g. `p` (preliminary).
+                      inwardMarker:
+                        type: string
+                        description: Source marker on the inward figure.
+                      isPreliminary:
+                        type: boolean
+                        example: false
+                seriesBreak:
+                  type: object
+                  description: Present when the source changed its method inside the window.
+                  properties:
+                    at:
+                      type: string
+                      description: Period where the break starts.
+                      example: 2014-Q1
+                    reason:
+                      type: string
+                      description: Why the series is not comparable across the break.
+    MacroFdiByRegionResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - unit
+                - displayUnit
+                - source
+                - latestPeriod
+                - regions
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                unit:
+                  type: string
+                  description: Storage unit of every value.
+                  example: USD
+                unitScale:
+                  type: number
+                  description: Multiplier from the stored value to `unit`.
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Unit the values are expressed in.
+                  example: Million USD
+                source:
+                  type: string
+                  description: Publisher of the data.
+                  example: JETRO
+                sourceUrl:
+                  type: string
+                  description: Where the source publishes the data.
+                  example: https://www.jetro.go.jp/en/reports/statistics/
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest period with data.
+                  example: 2026-Q2
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the served figures.
+                  example: '2026-09-10T00:00:00.000Z'
+                wasRestated:
+                  type: boolean
+                  description: True when the source revised at least one served figure.
+                  example: false
+                from:
+                  type:
+                    - string
+                    - 'null'
+                  description: First period of the window (inclusive).
+                  example: 2025-Q3
+                to:
+                  type:
+                    - string
+                    - 'null'
+                  description: Last period of the window (inclusive).
+                  example: 2026-Q2
+                quarters:
+                  type: integer
+                  description: Number of quarters in the window.
+                  example: 4
+                regions:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - code
+                      - name
+                    properties:
+                      code:
+                        type: string
+                        description: Region code.
+                        example: asia
+                      name:
+                        type: string
+                        description: Region name.
+                        example: Asia
+                  description: Regions in display order.
+                inward:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - total
+                      - values
+                      - unallocated
+                      - isPreliminary
+                    properties:
+                      period:
+                        type: string
+                        description: Quarter label.
+                        example: 2026-Q2
+                      total:
+                        type:
+                          - number
+                          - 'null'
+                        description: World total for the quarter.
+                        example: 52800
+                      values:
+                        type: object
+                        description: Value per region code (see `regions`). Missing figures are null, never 0.
+                        properties: {}
+                        additionalProperties:
+                          type:
+                            - number
+                            - 'null'
+                      markers:
+                        type: object
+                        description: Source marker per region code, when the source flags a figure.
+                        properties: {}
+                        additionalProperties:
+                          type: string
+                      unallocated:
+                        type:
+                          - number
+                          - 'null'
+                        description: World total minus the sum of regions with a figure.
+                        example: 1200
+                      isPreliminary:
+                        type: boolean
+                        example: false
+                  description: Present unless `direction=outward`.
+                outward:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - total
+                      - values
+                      - unallocated
+                      - isPreliminary
+                    properties:
+                      period:
+                        type: string
+                        description: Quarter label.
+                        example: 2026-Q2
+                      total:
+                        type:
+                          - number
+                          - 'null'
+                        description: World total for the quarter.
+                        example: 52800
+                      values:
+                        type: object
+                        description: Value per region code (see `regions`). Missing figures are null, never 0.
+                        properties: {}
+                        additionalProperties:
+                          type:
+                            - number
+                            - 'null'
+                      markers:
+                        type: object
+                        description: Source marker per region code, when the source flags a figure.
+                        properties: {}
+                        additionalProperties:
+                          type: string
+                      unallocated:
+                        type:
+                          - number
+                          - 'null'
+                        description: World total minus the sum of regions with a figure.
+                        example: 1200
+                      isPreliminary:
+                        type: boolean
+                        example: false
+                  description: Present unless `direction=inward`.
+                seriesBreak:
+                  type: object
+                  description: Present when the source changed its method inside the window.
+                  properties:
+                    at:
+                      type: string
+                      description: Period where the break starts.
+                      example: 2014-Q1
+                    reason:
+                      type: string
+                      description: Why the series is not comparable across the break.
+    MacroFdiByIndustryResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - unit
+                - displayUnit
+                - source
+                - latestPeriod
+                - direction
+                - year
+                - groups
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                unit:
+                  type: string
+                  description: Storage unit of every value.
+                  example: USD
+                unitScale:
+                  type: number
+                  description: Multiplier from the stored value to `unit`.
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Unit the values are expressed in.
+                  example: Million USD
+                source:
+                  type: string
+                  description: Publisher of the data.
+                  example: JETRO
+                sourceUrl:
+                  type: string
+                  description: Where the source publishes the data.
+                  example: https://www.jetro.go.jp/en/reports/statistics/
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest period with data.
+                  example: 2026-Q2
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the served figures.
+                  example: '2026-09-10T00:00:00.000Z'
+                wasRestated:
+                  type: boolean
+                  description: True when the source revised at least one served figure.
+                  example: false
+                direction:
+                  type: string
+                  description: Direction served.
+                  enum:
+                    - outward
+                    - inward
+                  example: outward
+                year:
+                  type:
+                    - integer
+                    - 'null'
+                  description: Year served.
+                  example: 2025
+                years:
+                  type: array
+                  items:
+                    type: integer
+                  description: Selectable years.
+                total:
+                  type:
+                    - number
+                    - 'null'
+                  description: Total FDI for the year.
+                  example: 189400.5
+                isPreliminary:
+                  type: boolean
+                  example: false
+                shareFormulaVersion:
+                  type: string
+                  description: Version of the share formula.
+                  example: v1
+                groups:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - code
+                      - name
+                      - total
+                      - items
+                    properties:
+                      code:
+                        type: string
+                        description: Group code.
+                        example: manufacturing
+                      name:
+                        type: string
+                        description: Group name.
+                        example: Manufacturing
+                      total:
+                        type:
+                          - number
+                          - 'null'
+                        description: Group total.
+                        example: 78200.1
+                      hasNegative:
+                        type: boolean
+                        example: false
+                      shareAvailable:
+                        type: boolean
+                        example: true
+                      itemCount:
+                        type: integer
+                        description: Industries listed by the source.
+                        example: 18
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - code
+                            - name
+                            - value
+                            - share
+                            - classification
+                          properties:
+                            code:
+                              type: string
+                              description: Industry code.
+                              example: transport_equipment
+                            name:
+                              type: string
+                              description: Industry name.
+                              example: Transport equipment
+                            value:
+                              type:
+                                - number
+                                - 'null'
+                              description: Value.
+                              example: 15320.4
+                            share:
+                              type:
+                                - number
+                                - 'null'
+                              description: Share of the group total (0–1).
+                              example: 0.196
+                            classification:
+                              type: string
+                              description: RAW = published by the source, DERIVED = computed.
+                              enum:
+                                - RAW
+                                - DERIVED
+                              example: RAW
+                            valueMarker:
+                              type: string
+                              description: Source marker on the value.
+    MacroFdiVnFlowsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - displayUnit
+                - source
+                - latestPeriod
+                - series
+                - cumulative
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: vn
+                unit:
+                  type: string
+                  description: Storage unit.
+                  example: USD
+                unitScale:
+                  type: number
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Unit the values are expressed in.
+                  example: Million USD
+                source:
+                  type: string
+                  description: Publisher.
+                  example: Ministry of Finance (FIA)
+                sourceUrl:
+                  type: string
+                  description: Where the source publishes the data.
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest month with data (YYYY-MM).
+                  example: 2026-09
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system downloaded the source file.
+                wasRestated:
+                  type: boolean
+                  example: false
+                months:
+                  type: integer
+                  example: 12
+                from:
+                  type:
+                    - string
+                    - 'null'
+                  description: First month of `series`.
+                  example: 2025-10
+                to:
+                  type:
+                    - string
+                    - 'null'
+                  description: Last month of `series`.
+                  example: 2026-09
+                series:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - registered
+                      - realized
+                    properties:
+                      period:
+                        type: string
+                        description: Month (YYYY-MM).
+                        example: 2026-09
+                      registered:
+                        type:
+                          - number
+                          - 'null'
+                        description: Registered capital for the month.
+                        example: 2150.3
+                      realized:
+                        type:
+                          - number
+                          - 'null'
+                        description: Realized capital for the month.
+                        example: 2010
+                      registeredYtd:
+                        type:
+                          - number
+                          - 'null'
+                        description: Registered capital, year to date.
+                        example: 28540.1
+                      realizedYtd:
+                        type:
+                          - number
+                          - 'null'
+                        description: Realized capital, year to date.
+                        example: 18800
+                      registeredYoy:
+                        type:
+                          - number
+                          - 'null'
+                        description: Year-over-year change of registered capital, in percent.
+                        example: 12.4
+                      cutoffDay:
+                        type:
+                          - integer
+                          - 'null'
+                        description: Day of month the source figure is cut off at.
+                        example: 30
+                      source:
+                        type: string
+                        description: Publisher of this point.
+                        enum:
+                          - mof
+                          - nso
+                        example: mof
+                cumulative:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - year
+                      - registered
+                      - realized
+                    properties:
+                      year:
+                        type: integer
+                        example: 2026
+                      registered:
+                        type: array
+                        items:
+                          type:
+                            - number
+                            - 'null'
+                        description: Year-to-date registered capital, January to December.
+                      realized:
+                        type: array
+                        items:
+                          type:
+                            - number
+                            - 'null'
+                        description: Year-to-date realized capital, January to December.
+                seriesBreak:
+                  type: object
+                  description: Present when the source changed its method inside the window.
+                  properties:
+                    at:
+                      type: string
+                      description: Period where the break starts.
+                      example: 2014-Q1
+                    reason:
+                      type: string
+                      description: Why the series is not comparable across the break.
+    MacroFdiVnBreakdownResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - displayUnit
+                - source
+                - period
+                - level
+                - items
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: vn
+                unit:
+                  type: string
+                  description: Storage unit.
+                  example: USD
+                unitScale:
+                  type: number
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Unit the values are expressed in.
+                  example: Million USD
+                source:
+                  type: string
+                  description: Publisher.
+                  example: Ministry of Finance (FIA)
+                sourceUrl:
+                  type: string
+                  description: Where the source publishes the data.
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest month with data (YYYY-MM).
+                  example: 2026-09
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system downloaded the source file.
+                wasRestated:
+                  type: boolean
+                  example: false
+                period:
+                  type: string
+                  description: Month served.
+                  example: 2026-09
+                level:
+                  type: string
+                  description: Level served.
+                  example: province
+                total:
+                  type:
+                    - number
+                    - 'null'
+                  description: National total registered capital.
+                  example: 28540.1
+                itemCount:
+                  type: integer
+                  description: Items available before `limit`.
+                  example: 63
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - code
+                      - name
+                      - registered
+                      - share
+                    properties:
+                      code:
+                        type: string
+                        description: Item code.
+                        example: '79'
+                      name:
+                        type: string
+                        description: English name.
+                        example: Ho Chi Minh City
+                      nameLocal:
+                        type: string
+                        description: Vietnamese name.
+                        example: TP. Hồ Chí Minh
+                      parentCode:
+                        type:
+                          - string
+                          - 'null'
+                        description: Parent code, when the level is nested.
+                      parentName:
+                        type:
+                          - string
+                          - 'null'
+                        description: Parent name.
+                      registered:
+                        type:
+                          - number
+                          - 'null'
+                        description: Registered capital.
+                        example: 3520.4
+                      share:
+                        type:
+                          - number
+                          - 'null'
+                        description: Share of the national total (0–1).
+                        example: 0.123
+                      projectsNew:
+                        type:
+                          - integer
+                          - 'null'
+                        description: Newly licensed projects.
+                        example: 812
+                others:
+                  type: object
+                  properties:
+                    registered:
+                      type:
+                        - number
+                        - 'null'
+                      description: Registered capital of the items left out.
+                      example: 9800
+                    share:
+                      type:
+                        - number
+                        - 'null'
+                      description: Their share.
+                      example: 0.343
+                    itemCount:
+                      type: integer
+                      example: 53
+                periods:
+                  type: array
+                  items:
+                    type: string
+                  description: Months available, newest first.
+    MacroInterbankRatesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - latest
+                - series
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: US
+                latest:
+                  type:
+                    - object
+                    - 'null'
+                  description: Latest overnight and 3-month reading.
+                  properties:
+                    date:
+                      type: string
+                      description: Date.
+                      format: date
+                      example: '2026-09-01'
+                    interbankRatesOn:
+                      type:
+                        - number
+                        - 'null'
+                      description: Overnight rate, %.
+                      example: 4.33
+                    interbankRates3m:
+                      type:
+                        - number
+                        - 'null'
+                      description: 3-month rate, %.
+                series:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - date
+                    properties:
+                      date:
+                        type: string
+                        description: Observation date.
+                        format: date
+                        example: '2026-09-01'
+                      interbankRatesOn:
+                        type:
+                          - number
+                          - 'null'
+                        description: Overnight, %.
+                        example: 4.33
+                      interbankRates1w:
+                        type:
+                          - number
+                          - 'null'
+                        description: 1-week, %.
+                      interbankRates1m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 1-month, %.
+                      interbankRates3m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 3-month, %.
+                      interbankRates6m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 6-month, %.
+    MacroInterbankRatesJpTiborResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - source
+                - unit
+                - latestDate
+                - period
+                - points
+              properties:
+                source:
+                  type: string
+                  description: Publisher.
+                  example: JBA TIBOR Administration
+                unit:
+                  type: string
+                  description: Unit.
+                  example: '%'
+                latestDate:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest date with data.
+                  format: date
+                  example: '2026-10-15'
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the figures.
+                wasRestated:
+                  type: boolean
+                  example: false
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                period:
+                  type: string
+                  description: Window served.
+                  example: 1M
+                from:
+                  type:
+                    - string
+                    - 'null'
+                  description: First date of the window.
+                  format: date
+                  example: '2026-09-15'
+                to:
+                  type:
+                    - string
+                    - 'null'
+                  description: Last date of the window.
+                  format: date
+                  example: '2026-10-15'
+                points:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - date
+                    properties:
+                      date:
+                        type: string
+                        description: Date.
+                        format: date
+                        example: '2026-10-15'
+                      tibor1w:
+                        type:
+                          - number
+                          - 'null'
+                        description: 1-week, %.
+                        example: 0.62
+                      tibor1m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 1-month, %.
+                        example: 0.68
+                      tibor3m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 3-month, %.
+                        example: 0.78
+                      tibor6m:
+                        type:
+                          - number
+                          - 'null'
+                        description: 6-month, %.
+                        example: 0.86
+    MacroInterbankRatesJpOvernightResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - source
+                - unit
+                - latestDate
+                - period
+                - points
+              properties:
+                source:
+                  type: string
+                  description: Publisher.
+                  example: JBA TIBOR Administration
+                unit:
+                  type: string
+                  description: Unit.
+                  example: '%'
+                latestDate:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest date with data.
+                  format: date
+                  example: '2026-10-15'
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the figures.
+                wasRestated:
+                  type: boolean
+                  example: false
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                period:
+                  type: string
+                  description: Window served.
+                  example: 1M
+                from:
+                  type:
+                    - string
+                    - 'null'
+                  description: First date of the window.
+                  format: date
+                  example: '2026-09-15'
+                to:
+                  type:
+                    - string
+                    - 'null'
+                  description: Last date of the window.
+                  format: date
+                  example: '2026-10-15'
+                points:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - date
+                      - value
+                    properties:
+                      date:
+                        type: string
+                        description: Date.
+                        format: date
+                        example: '2026-10-14'
+                      value:
+                        type: number
+                        description: Rate, %.
+                        example: 0.477
+    MacroInterbankRatesVnResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                required:
+                  - date
+                  - country
+                properties:
+                  date:
+                    type: string
+                    description: Date.
+                    format: date
+                    example: '2026-09-30'
+                  date_type:
+                    type: string
+                    description: Frequency.
+                    example: daily
+                  country:
+                    type: string
+                    description: Country code.
+                    example: VN
+                  interbank_rates_on:
+                    type:
+                      - number
+                      - 'null'
+                    description: Overnight, %.
+                    example: 4.1
+                  interbank_rates_1w:
+                    type:
+                      - number
+                      - 'null'
+                    description: 1-week, %.
+                    example: 4.35
+                  interbank_rates_2w:
+                    type:
+                      - number
+                      - 'null'
+                    description: 2-week, %.
+                  interbank_rates_1m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 1-month, %.
+                    example: 4.8
+                  interbank_rates_3m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 3-month, %.
+                    example: 5.05
+                  interbank_rates_6m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 6-month, %.
+                  interbank_rates_9m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 9-month, %.
+                  interbank_rates_12m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 12-month, %.
+                  interbank_amount_on:
+                    type:
+                      - number
+                      - 'null'
+                    description: Overnight volume, billion VND.
+                    example: 412500
+                  interbank_amount_1w:
+                    type:
+                      - number
+                      - 'null'
+                    description: 1-week volume, billion VND.
+                  interbank_amount_2w:
+                    type:
+                      - number
+                      - 'null'
+                    description: 2-week volume, billion VND.
+                  interbank_amount_1m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 1-month volume, billion VND.
+                  interbank_amount_3m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 3-month volume, billion VND.
+                  interbank_amount_6m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 6-month volume, billion VND.
+                  interbank_amount_9m:
+                    type:
+                      - number
+                      - 'null'
+                    description: 9-month volume, billion VND.
+                  federal_funds_rate:
+                    type:
+                      - number
+                      - 'null'
+                    description: US federal funds rate on the same date, %, when provided by the source.
+    MacroTradeTurnoverResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - unit
+                - displayUnit
+                - source
+                - series
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                unit:
+                  type: string
+                  description: Storage unit.
+                  example: JPY
+                unitScale:
+                  type: number
+                  example: 1000
+                displayDivisor:
+                  type: number
+                  description: Divide values by this to get `displayUnit`.
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Display unit.
+                  example: Billion Yen
+                seasonallyAdjusted:
+                  type: boolean
+                  example: false
+                source:
+                  type: string
+                  description: Publisher.
+                  example: Ministry of Finance Japan
+                taxonomy:
+                  type: string
+                  description: Region grouping.
+                  enum:
+                    - source
+                    - continent
+                  example: continent
+                asOfPeriod:
+                  type: string
+                  description: Latest period with data.
+                  example: 2026-08
+                granularity:
+                  type: string
+                  description: Granularity served.
+                  example: quarter
+                range:
+                  type: string
+                  description: Window served.
+                  example: 1y
+                series:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - periodType
+                      - exportValue
+                      - importValue
+                      - balance
+                      - isPartial
+                    properties:
+                      period:
+                        type: string
+                        description: Period label.
+                        example: 2026-Q2
+                      periodType:
+                        type: string
+                        description: Granularity of the point.
+                        example: quarter
+                      exportValue:
+                        type: number
+                        example: 25321000000
+                      importValue:
+                        type: number
+                        example: 26105000000
+                      balance:
+                        type: number
+                        example: -784000000
+                      isPartial:
+                        type: boolean
+                        example: false
+                      coverage:
+                        type: string
+                        description: Months covered by a partial period.
+                        example: 2026-07..2026-08
+                      isDerived:
+                        type: boolean
+                        description: Summed by the system from monthly figures.
+                        example: false
+                      revisionStatus:
+                        type: string
+                        description: Revision status.
+                        enum:
+                          - preliminary
+                          - provisional
+                          - definite
+                          - revised
+                        example: definite
+                      knowledgeAt:
+                        type: string
+                        description: When the system learned the figure.
+                        example: '2026-09-17T00:00:00.000Z'
+    MacroTradeByRegionResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - country
+                - displayUnit
+                - source
+                - period
+                - flow
+                - total
+                - items
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: jp
+                unit:
+                  type: string
+                  description: Storage unit.
+                  example: JPY
+                unitScale:
+                  type: number
+                  example: 1000
+                displayDivisor:
+                  type: number
+                  description: Divide values by this to get `displayUnit`.
+                  example: 1000000
+                displayUnit:
+                  type: string
+                  description: Display unit.
+                  example: Billion Yen
+                seasonallyAdjusted:
+                  type: boolean
+                  example: false
+                source:
+                  type: string
+                  description: Publisher.
+                  example: Ministry of Finance Japan
+                taxonomy:
+                  type: string
+                  description: Region grouping.
+                  enum:
+                    - source
+                    - continent
+                  example: continent
+                asOfPeriod:
+                  type: string
+                  description: Latest period with data.
+                  example: 2026-08
+                period:
+                  type: string
+                  description: Period served.
+                  example: 2026-Q2
+                granularity:
+                  type: string
+                  description: Granularity served.
+                  example: quarter
+                flow:
+                  type: string
+                  description: Flow served.
+                  enum:
+                    - export
+                    - import
+                  example: export
+                isPartial:
+                  type: boolean
+                  example: false
+                coverage:
+                  type: string
+                  description: Months covered by a partial period.
+                total:
+                  type: number
+                  example: 25321000000
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - code
+                      - name
+                      - value
+                      - share
+                      - classification
+                    properties:
+                      code:
+                        type: string
+                        description: Region code.
+                        example: asia
+                      name:
+                        type: string
+                        description: Region name.
+                        example: Asia
+                      value:
+                        type: number
+                        example: 14990000000
+                      share:
+                        type: number
+                        description: Share of `total` (0–1).
+                        example: 0.592
+                      classification:
+                        type: string
+                        description: RAW or DERIVED.
+                        enum:
+                          - RAW
+                          - DERIVED
+                        example: RAW
+                      note:
+                        type: string
+                        description: Note on the item.
+                      valueMarker:
+                        type: string
+                        description: Source marker on the value.
+                reconciliation:
+                  type: object
+                  description: Check that the items add up to the total.
+                  properties:
+                    sumOfItems:
+                      type: number
+                    total:
+                      type: number
+                    diff:
+                      type: number
+                    excluded:
+                      type: number
+    MacroJapanGdpBreakdownResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                required:
+                  - period
+                  - gdpTotal
+                properties:
+                  period:
+                    type: string
+                    description: Period start date.
+                    format: date
+                    example: '2025-01-01'
+                  periodLabel:
+                    type:
+                      - string
+                      - 'null'
+                    description: Period label.
+                    example: '2025'
+                  gdpTotal:
+                    type:
+                      - number
+                      - 'null'
+                    description: Nominal GDP, billion JPY.
+                    example: 609000.2
+                  privateConsumption:
+                    type:
+                      - number
+                      - 'null'
+                    description: Private consumption (C).
+                    example: 335000.1
+                  governmentConsumption:
+                    type:
+                      - number
+                      - 'null'
+                    description: Government consumption (G).
+                    example: 128000.4
+                  investmentTotal:
+                    type:
+                      - number
+                      - 'null'
+                    description: Total investment (I) — sum of the five items below.
+                    example: 152000
+                  privateResidentialInvestment:
+                    type:
+                      - number
+                      - 'null'
+                    description: Private residential investment.
+                    example: 22600.8
+                  privateNonResiInvestment:
+                    type:
+                      - number
+                      - 'null'
+                    description: Private non-residential investment.
+                    example: 97000.5
+                  changePrivateInventories:
+                    type:
+                      - number
+                      - 'null'
+                    description: Change in private inventories.
+                    example: 1400.2
+                  publicInvestment:
+                    type:
+                      - number
+                      - 'null'
+                    description: Public investment.
+                    example: 30700
+                  changePublicInventories:
+                    type:
+                      - number
+                      - 'null'
+                    description: Change in public inventories.
+                    example: 13.1
+                  netExports:
+                    type:
+                      - number
+                      - 'null'
+                    description: Net exports (X − M).
+                    example: -6000.3
+                  exports:
+                    type:
+                      - number
+                      - 'null'
+                    description: Exports (X).
+                    example: 128000
+                  imports:
+                    type:
+                      - number
+                      - 'null'
+                    description: Imports (M).
+                    example: 134000.3
+                  quarters:
+                    type: integer
+                    description: 'Annual rows only: quarters summed into the year (1–4).'
+                    example: 4
+                  isPartial:
+                    type: boolean
+                    description: 'Annual rows only: true when `quarters` < 4.'
+                    example: false
+    MacroJapanCentralGovDebtResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                required:
+                  - reportDate
+                  - period
+                  - periodEndDate
+                  - totalOku
+                properties:
+                  reportDate:
+                    type: string
+                    description: Report month (YYYY-MM).
+                    example: 2026-03
+                  period:
+                    type: string
+                    description: Quarter label.
+                    example: Q1 2026
+                  periodEndDate:
+                    type: string
+                    description: Last day of the quarter.
+                    format: date
+                    example: '2026-03-31'
+                  totalOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Total debt, billion JPY.
+                    example: 1324000.5
+                  governmentBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Government bonds, billion JPY.
+                    example: 1150000.2
+                  generalBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: General bonds, billion JPY.
+                    example: 1100000
+                  longTermBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Long-term bonds, billion JPY.
+                  mediumTermBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Medium-term bonds, billion JPY.
+                  shortTermBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Short-term bonds, billion JPY.
+                  filpBondsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: FILP bonds, billion JPY.
+                  borrowingsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Borrowings, billion JPY.
+                  financingBillsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Financing bills, billion JPY.
+                  govGuaranteedDebtsOku:
+                    type:
+                      - number
+                      - 'null'
+                    description: Government-guaranteed debt, billion JPY.
+                  generalBondsPct:
+                    type:
+                      - number
+                      - 'null'
+                    description: General bonds as % of total.
+                    example: 83.1
+                  financingBillsPct:
+                    type:
+                      - number
+                      - 'null'
+                    description: Financing bills as % of total.
+                    example: 7.4
+                  filpBondsPct:
+                    type:
+                      - number
+                      - 'null'
+                    description: FILP bonds as % of total.
+                    example: 7.1
+                  borrowingsPct:
+                    type:
+                      - number
+                      - 'null'
+                    description: Borrowings as % of total.
+                    example: 2.3
+                  debtToGdpRatio:
+                    type:
+                      - number
+                      - 'null'
+                    description: Debt to rolling four-quarter GDP (decimal).
+                    example: 2.17
     IndicatorColumn:
       type: object
       description: One period (column) of an indicator table.
@@ -8504,6 +11740,210 @@ components:
                   type: array
                   items:
                     $ref: '#/components/schemas/IndicatorDepositRateRow'
+    MacroIndicatorInterbankRatesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - indicator
+                - unit
+                - tenors
+                - rows
+              properties:
+                indicator:
+                  type: string
+                  description: Table identifier.
+                  example: interbank-rates
+                unit:
+                  type: string
+                  description: Unit shared by every cell.
+                  example: '%'
+                tenors:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IndicatorDepositTenor'
+                  description: Tenors in column order.
+                rows:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - country
+                      - countryName
+                      - available
+                      - values
+                    properties:
+                      country:
+                        type: string
+                        description: Country code.
+                        example: VN
+                      countryName:
+                        type: string
+                        description: Country name.
+                        example: Vietnam
+                      available:
+                        type: boolean
+                        example: true
+                      date:
+                        type:
+                          - string
+                          - 'null'
+                        description: Most recent date among the row's cells.
+                        format: date
+                        example: '2026-09-28'
+                      values:
+                        type: array
+                        items:
+                          type:
+                            - number
+                            - 'null'
+                        description: One value per tenor.
+                      display:
+                        type: array
+                        items:
+                          type: string
+                      dates:
+                        type: array
+                        items:
+                          type:
+                            - string
+                            - 'null'
+                        description: Date of each cell, aligned with `tenors`.
+    MacroIndicatorFdiResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - indicator
+                - metrics
+                - columns
+                - rows
+                - source
+              properties:
+                indicator:
+                  type: string
+                  description: Table identifier.
+                  example: fdi
+                metrics:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - key
+                      - label
+                      - unit
+                    properties:
+                      key:
+                        type: string
+                        description: Metric key.
+                        enum:
+                          - outward
+                          - inward
+                        example: outward
+                      label:
+                        type: string
+                        description: Display label.
+                        example: Outward
+                      unit:
+                        type: string
+                        description: Unit.
+                        example: Million USD
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - period
+                      - date
+                    properties:
+                      period:
+                        type: string
+                        description: Quarter label.
+                        example: 2026-Q2
+                      date:
+                        type: string
+                        description: Quarter start date.
+                        format: date
+                        example: '2026-04-01'
+                  description: Oldest to newest.
+                rows:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - country
+                      - countryName
+                      - available
+                      - values
+                    properties:
+                      country:
+                        type: string
+                        description: Country code.
+                        example: JP
+                      countryName:
+                        type: string
+                        description: Country name.
+                        example: Japan
+                      available:
+                        type: boolean
+                        example: true
+                      unit:
+                        type:
+                          - string
+                          - 'null'
+                        description: Unit of the row.
+                        example: Million USD
+                      values:
+                        type: array
+                        items:
+                          type:
+                            - object
+                            - 'null'
+                          additionalProperties:
+                            type:
+                              - number
+                              - 'null'
+                        description: One cell per column, keyed by metric.
+                      display:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties:
+                            type: string
+                      markers:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties:
+                            type: string
+                latestPeriod:
+                  type:
+                    - string
+                    - 'null'
+                  description: Latest quarter with data.
+                  example: 2026-Q2
+                source:
+                  type: string
+                  description: Publisher.
+                  example: JETRO
+                knowledgeAt:
+                  type:
+                    - string
+                    - 'null'
+                  description: When the system learned the figures.
+                wasRestated:
+                  type: boolean
+                  example: false
     RealEstateProvincePrice:
       type: object
       description: |
@@ -10568,7 +14008,7 @@ x-hayinsights-quota:
     code: RATE_LIMIT_EXCEEDED
     retryAfterHeader: Retry-After
   weightsByTag:
-    Macro: 2
+    Macro: 2-3
     Real Estate: 2
     Calendar: 2
     Market: 2
@@ -10577,7 +14017,7 @@ x-hayinsights-quota:
     Commodities: 3
     Crypto: 3
     FX: 3-6
-    ETF: 8
+    ETF: 2-8
 x-tagGroups:
   - name: Market Data
     tags:

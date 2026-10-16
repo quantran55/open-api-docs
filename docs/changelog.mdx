@@ -3,6 +3,29 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.4.0" description="2026-10-16">
+  **FDI, interbank rates, trade by region, Japan GDP and debt breakdowns, BOJ ETF holdings.**
+
+  Every dataset behind an "API" button in the HayInsights app now has its own
+  reference page.
+
+  **Added**
+
+  - **Macro · FDI** — `GET /macro/fdi/flows`, `GET /macro/fdi/by-region` and
+    `GET /macro/fdi/by-industry` (Japan, JETRO); `GET /macro/fdi/vn/flows` and
+    `GET /macro/fdi/vn/breakdown` (Vietnam); `GET /macro/indicators/fdi`.
+  - **Macro · Interbank rates** — `GET /macro/interbank-rates` (US/JP history),
+    `GET /macro/interbank-rates/jp/tibor`, `GET /macro/interbank-rates/jp/overnight`,
+    `GET /macro/interbank-rates/vn` (weight 3) and `GET /macro/indicators/interbank-rates`.
+  - **Macro · Trade** — `GET /macro/trade/turnover` and `GET /macro/trade/by-region`.
+  - **Macro · Japan** — `GET /macro/japan/gdp-breakdown` and
+    `GET /macro/japan/central-gov-debt`.
+  - **ETF** — `GET /etf/boj-holdings` and `GET /etf/boj-holdings/latest` (gated by
+    `etf_data`, weight 2).
+
+  New Macro routes are gated by `macro_data`.
+</Update>
+
 <Update label="0.3.0" description="2026-10-15">
   **Equities domain.**
 

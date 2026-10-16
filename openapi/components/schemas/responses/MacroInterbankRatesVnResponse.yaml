@@ -1,0 +1,82 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          required:
+            - date
+            - country
+          properties:
+            date:
+              type: string
+              description: Date.
+              format: date
+              example: '2026-09-30'
+            date_type:
+              type: string
+              description: Frequency.
+              example: daily
+            country:
+              type: string
+              description: Country code.
+              example: VN
+            interbank_rates_on:
+              type: &id001
+                - number
+                - 'null'
+              description: Overnight, %.
+              example: 4.1
+            interbank_rates_1w:
+              type: *id001
+              description: 1-week, %.
+              example: 4.35
+            interbank_rates_2w:
+              type: *id001
+              description: 2-week, %.
+            interbank_rates_1m:
+              type: *id001
+              description: 1-month, %.
+              example: 4.8
+            interbank_rates_3m:
+              type: *id001
+              description: 3-month, %.
+              example: 5.05
+            interbank_rates_6m:
+              type: *id001
+              description: 6-month, %.
+            interbank_rates_9m:
+              type: *id001
+              description: 9-month, %.
+            interbank_rates_12m:
+              type: *id001
+              description: 12-month, %.
+            interbank_amount_on:
+              type: *id001
+              description: Overnight volume, billion VND.
+              example: 412500
+            interbank_amount_1w:
+              type: *id001
+              description: 1-week volume, billion VND.
+            interbank_amount_2w:
+              type: *id001
+              description: 2-week volume, billion VND.
+            interbank_amount_1m:
+              type: *id001
+              description: 1-month volume, billion VND.
+            interbank_amount_3m:
+              type: *id001
+              description: 3-month volume, billion VND.
+            interbank_amount_6m:
+              type: *id001
+              description: 6-month volume, billion VND.
+            interbank_amount_9m:
+              type: *id001
+              description: 9-month volume, billion VND.
+            federal_funds_rate:
+              type: *id001
+              description: US federal funds rate on the same date, %, when provided by the source.

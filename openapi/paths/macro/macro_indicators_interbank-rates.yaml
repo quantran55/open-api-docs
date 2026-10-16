@@ -1,0 +1,86 @@
+get:
+  operationId: macroIndicatorInterbankRates
+  tags:
+    - Macro
+  summary: Indicator — Interbank rates table (US/JP/VN)
+  description: |
+    Interbank rate table with one column per tenor (Overnight / 1-week / 1-month / 3-month) and one row
+    per country, each cell holding the most recent data point of that tenor. `rows[].dates` gives the
+    date of every cell: cells in one row can differ (Japan's overnight rate is published a business day
+    after TIBOR; the US is monthly). The US only has Overnight (FRED); Japan uses BOJ + TIBOR; Vietnam
+    uses the State Bank interbank rates. A country whose source fails returns `available: false`.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  responses:
+    '200':
+      description: Interbank rates table.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroIndicatorInterbankRatesResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              indicator: interbank-rates
+              unit: '%'
+              tenors:
+                - key: 'on'
+                  label: Overnight
+                - key: 1w
+                  label: 1-week
+                - key: 1m
+                  label: 1-month
+                - key: 3m
+                  label: 3-month
+              rows:
+                - country: US
+                  countryName: United States
+                  available: true
+                  date: '2026-09-01'
+                  values:
+                    - 4.33
+                    - null
+                    - null
+                    - null
+                  display:
+                    - '4.33'
+                    - —
+                    - —
+                    - —
+                  dates:
+                    - '2026-09-01'
+                    - null
+                    - null
+                    - null
+                - country: VN
+                  countryName: Vietnam
+                  available: true
+                  date: '2026-09-28'
+                  values:
+                    - 4.1
+                    - 4.35
+                    - 4.8
+                    - 5.05
+                  display:
+                    - '4.10'
+                    - '4.35'
+                    - '4.80'
+                    - '5.05'
+                  dates:
+                    - '2026-09-28'
+                    - '2026-09-28'
+                    - '2026-09-28'
+                    - '2026-09-28'
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

@@ -1,0 +1,129 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - displayUnit
+          - source
+          - period
+          - level
+          - items
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: vn
+          unit:
+            type: string
+            description: Storage unit.
+            example: USD
+          unitScale:
+            type: number
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Unit the values are expressed in.
+            example: Million USD
+          source:
+            type: string
+            description: Publisher.
+            example: Ministry of Finance (FIA)
+          sourceUrl:
+            type: string
+            description: Where the source publishes the data.
+          latestPeriod:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest month with data (YYYY-MM).
+            example: 2026-09
+          knowledgeAt:
+            type: *id001
+            description: When the system downloaded the source file.
+          wasRestated:
+            type: boolean
+            example: false
+          period:
+            type: string
+            description: Month served.
+            example: 2026-09
+          level:
+            type: string
+            description: Level served.
+            example: province
+          total:
+            type: &id002
+              - number
+              - 'null'
+            description: National total registered capital.
+            example: 28540.1
+          itemCount:
+            type: integer
+            description: Items available before `limit`.
+            example: 63
+          items:
+            type: array
+            items:
+              type: object
+              required:
+                - code
+                - name
+                - registered
+                - share
+              properties:
+                code:
+                  type: string
+                  description: Item code.
+                  example: '79'
+                name:
+                  type: string
+                  description: English name.
+                  example: Ho Chi Minh City
+                nameLocal:
+                  type: string
+                  description: Vietnamese name.
+                  example: TP. Hồ Chí Minh
+                parentCode:
+                  type: *id001
+                  description: Parent code, when the level is nested.
+                parentName:
+                  type: *id001
+                  description: Parent name.
+                registered:
+                  type: *id002
+                  description: Registered capital.
+                  example: 3520.4
+                share:
+                  type: *id002
+                  description: Share of the national total (0–1).
+                  example: 0.123
+                projectsNew:
+                  type:
+                    - integer
+                    - 'null'
+                  description: Newly licensed projects.
+                  example: 812
+          others:
+            type: object
+            properties:
+              registered:
+                type: *id002
+                description: Registered capital of the items left out.
+                example: 9800.0
+              share:
+                type: *id002
+                description: Their share.
+                example: 0.343
+              itemCount:
+                type: integer
+                example: 53
+          periods:
+            type: array
+            items:
+              type: string
+            description: Months available, newest first.

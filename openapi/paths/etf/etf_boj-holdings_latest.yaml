@@ -1,0 +1,47 @@
+get:
+  operationId: etfBojHoldingsLatest
+  tags:
+    - ETF
+  summary: BOJ ETF holdings latest
+  description: |
+    Latest Bank of Japan ETF holdings with market context — total ETF market net assets, the BOJ's share
+    and net flow — and the status of the BOJ's ETF purchase policy.
+  x-feature-code: etf_data
+  x-api-weight: 2
+  responses:
+    '200':
+      description: Latest BOJ ETF holdings.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/EtfBojHoldingsLatestResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              latestSnapshot:
+                reportDate: '2026-09-20'
+                holdingsCho: 37.2
+                holdingsOku: 372000
+                holdingsUsd: 251000000000
+              marketContext:
+                reportDate: '2026-08-31'
+                totalMarketOku: 1210000
+                bojPctOfMarket: 30.7
+                netFlowOku: 1200
+              policy:
+                status: stopped
+                statusLabel: Purchases stopped
+                lastPurchaseDate: '2024-03-19'
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

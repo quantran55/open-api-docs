@@ -1,0 +1,69 @@
+get:
+  operationId: macroInterbankRatesJpOvernight
+  tags:
+    - Macro
+  summary: Japan overnight call rate
+  description: |
+    Bank of Japan uncollateralized overnight call rate (official, average). The official figure comes
+    out around 10:00 JST the next business day, so `latestDate` usually trails TIBOR by one day.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: Look-back window, counted back from the latest date with data (not from today).
+      schema:
+        type: string
+        enum:
+          - 1M
+          - 3M
+          - 6M
+          - 1Y
+          - 3Y
+        default: 1M
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: Daily overnight call rate.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroInterbankRatesJpOvernightResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              source: Bank of Japan
+              unit: '%'
+              latestDate: '2026-10-14'
+              wasRestated: false
+              country: jp
+              period: 1M
+              from: '2026-09-14'
+              to: '2026-10-14'
+              points:
+                - date: '2026-10-14'
+                  value: 0.477
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

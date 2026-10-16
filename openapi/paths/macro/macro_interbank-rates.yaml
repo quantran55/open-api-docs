@@ -1,0 +1,65 @@
+get:
+  operationId: macroInterbankRates
+  tags:
+    - Macro
+  summary: Interbank rate history (US/JP)
+  description: |
+    Ten years of interbank rates for one country — overnight, 1-week, 1-month, 3-month and 6-month —
+    plus the latest overnight and 3-month reading. A tenor the source does not publish is null, never 0
+    (the US only has overnight). For Japan's daily TIBOR and official overnight call rate use
+    `/macro/interbank-rates/jp/tibor` and `/macro/interbank-rates/jp/overnight`; for Vietnam use
+    `/macro/interbank-rates/vn`.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: Country.
+      schema:
+        type: string
+        enum:
+          - us
+          - jp
+        default: us
+  responses:
+    '200':
+      description: Interbank rate history.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroInterbankRatesResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: US
+              latest:
+                date: '2026-09-01'
+                interbankRatesOn: 4.33
+                interbankRates3m: null
+              series:
+                - date: '2026-08-01'
+                  interbankRatesOn: 4.33
+                  interbankRates1w: null
+                  interbankRates1m: null
+                  interbankRates3m: null
+                  interbankRates6m: null
+                - date: '2026-09-01'
+                  interbankRatesOn: 4.33
+                  interbankRates1w: null
+                  interbankRates1m: null
+                  interbankRates3m: null
+                  interbankRates6m: null
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

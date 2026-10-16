@@ -1,0 +1,142 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - displayUnit
+          - source
+          - latestPeriod
+          - series
+          - cumulative
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: vn
+          unit:
+            type: string
+            description: Storage unit.
+            example: USD
+          unitScale:
+            type: number
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Unit the values are expressed in.
+            example: Million USD
+          source:
+            type: string
+            description: Publisher.
+            example: Ministry of Finance (FIA)
+          sourceUrl:
+            type: string
+            description: Where the source publishes the data.
+          latestPeriod:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest month with data (YYYY-MM).
+            example: 2026-09
+          knowledgeAt:
+            type: *id001
+            description: When the system downloaded the source file.
+          wasRestated:
+            type: boolean
+            example: false
+          months:
+            type: integer
+            example: 12
+          from:
+            type: *id001
+            description: First month of `series`.
+            example: 2025-10
+          to:
+            type: *id001
+            description: Last month of `series`.
+            example: 2026-09
+          series:
+            type: array
+            items:
+              type: object
+              required:
+                - period
+                - registered
+                - realized
+              properties:
+                period:
+                  type: string
+                  description: Month (YYYY-MM).
+                  example: 2026-09
+                registered:
+                  type: &id002
+                    - number
+                    - 'null'
+                  description: Registered capital for the month.
+                  example: 2150.3
+                realized:
+                  type: *id002
+                  description: Realized capital for the month.
+                  example: 2010.0
+                registeredYtd:
+                  type: *id002
+                  description: Registered capital, year to date.
+                  example: 28540.1
+                realizedYtd:
+                  type: *id002
+                  description: Realized capital, year to date.
+                  example: 18800.0
+                registeredYoy:
+                  type: *id002
+                  description: Year-over-year change of registered capital, in percent.
+                  example: 12.4
+                cutoffDay:
+                  type:
+                    - integer
+                    - 'null'
+                  description: Day of month the source figure is cut off at.
+                  example: 30
+                source:
+                  type: string
+                  description: Publisher of this point.
+                  enum:
+                    - mof
+                    - nso
+                  example: mof
+          cumulative:
+            type: array
+            items:
+              type: object
+              required:
+                - year
+                - registered
+                - realized
+              properties:
+                year:
+                  type: integer
+                  example: 2026
+                registered:
+                  type: array
+                  items:
+                    type: *id002
+                  description: Year-to-date registered capital, January to December.
+                realized:
+                  type: array
+                  items:
+                    type: *id002
+                  description: Year-to-date realized capital, January to December.
+          seriesBreak:
+            type: object
+            description: Present when the source changed its method inside the window.
+            properties:
+              at:
+                type: string
+                description: Period where the break starts.
+                example: 2014-Q1
+              reason:
+                type: string
+                description: Why the series is not comparable across the break.

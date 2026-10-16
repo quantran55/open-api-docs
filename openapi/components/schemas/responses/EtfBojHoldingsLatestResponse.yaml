@@ -1,0 +1,75 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - latestSnapshot
+          - marketContext
+          - policy
+        properties:
+          latestSnapshot:
+            type: object
+            required:
+              - reportDate
+            properties:
+              reportDate:
+                type: string
+                description: Balance-sheet date.
+                format: date
+                example: '2026-09-20'
+              holdingsCho:
+                type: &id001
+                  - number
+                  - 'null'
+                description: Holdings, trillion JPY.
+                example: 37.2
+              holdingsOku:
+                type: *id001
+                description: Holdings, 100 million JPY.
+                example: 372000
+              holdingsUsd:
+                type: *id001
+                description: Holdings in USD (approximate).
+                example: 251000000000
+          marketContext:
+            type: object
+            properties:
+              reportDate:
+                type:
+                  - string
+                  - 'null'
+                description: Market data date.
+                format: date
+                example: '2026-08-31'
+              totalMarketOku:
+                type: *id001
+                description: Total ETF market net assets, 100 million JPY.
+                example: 1210000
+              bojPctOfMarket:
+                type: *id001
+                description: BOJ holdings as % of the ETF market.
+                example: 30.7
+              netFlowOku:
+                type: *id001
+                description: Net flow, 100 million JPY.
+                example: 1200
+          policy:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Purchase policy status.
+                example: stopped
+              statusLabel:
+                type: string
+                description: Status label.
+                example: Purchases stopped
+              lastPurchaseDate:
+                type: string
+                description: Last purchase date.
+                format: date
+                example: '2024-03-19'

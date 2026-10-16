@@ -1,0 +1,62 @@
+get:
+  operationId: etfBojHoldings
+  tags:
+    - ETF
+  summary: BOJ ETF holdings history
+  description: |
+    Monthly Bank of Japan ETF holdings (trillion JPY) next to the size of the Japanese ETF market (JITA,
+    100 million JPY) and the BOJ's share of it, with annotations on key policy changes. Defaults to the
+    last ten years.
+  x-feature-code: etf_data
+  x-api-weight: 2
+  parameters:
+    - name: from
+      in: query
+      required: false
+      description: Start month (YYYY-MM).
+      schema:
+        type: string
+        pattern: ^\d{4}-(0[1-9]|1[0-2])$
+        example: 2016-01
+    - name: to
+      in: query
+      required: false
+      description: End month (YYYY-MM).
+      schema:
+        type: string
+        pattern: ^\d{4}-(0[1-9]|1[0-2])$
+        example: 2026-09
+  responses:
+    '200':
+      description: Monthly BOJ ETF holdings.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/EtfBojHoldingsResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - month: 2024-02
+                holdingsCho: 37.2
+                totalMarketOku: 1135000
+                bojPctOfMarket: 32.8
+              - month: 2024-03
+                holdingsCho: 37.2
+                totalMarketOku: 1182000
+                bojPctOfMarket: 31.5
+                annotation:
+                  month: 2024-03
+                  label: BOJ ends ETF purchases
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

@@ -1,0 +1,107 @@
+get:
+  operationId: macroFdiFlows
+  tags:
+    - Macro
+  summary: Japan FDI flows
+  description: |
+    Japan's quarterly outward and inward foreign direct investment (JETRO, million USD). Defaults to the
+    12 most recent quarters, up to 40. Pick the window with `quarters`, or with `from`/`to` (both
+    inclusive). Missing quarters are null, never 0; a negative value is a net withdrawal. A reversed or
+    over-long window returns 400 with the reason.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: Only `jp` is available.
+      schema:
+        type: string
+        enum:
+          - jp
+        default: jp
+    - name: quarters
+      in: query
+      required: false
+      description: Number of most recent quarters (1–40).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 40
+        default: 12
+    - name: from
+      in: query
+      required: false
+      description: First quarter (inclusive), e.g. `2023-Q3`.
+      schema:
+        type: string
+        pattern: ^\d{4}-Q[1-4]$
+        example: 2023-Q3
+    - name: to
+      in: query
+      required: false
+      description: Last quarter (inclusive). Defaults to the latest quarter with data.
+      schema:
+        type: string
+        pattern: ^\d{4}-Q[1-4]$
+        example: 2026-Q2
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: Quarterly FDI flows.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroFdiFlowsResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: jp
+              unit: USD
+              unitScale: 1000000
+              displayUnit: Million USD
+              source: JETRO
+              sourceUrl: https://www.jetro.go.jp/en/reports/statistics/
+              recordingPrinciple: directional principle
+              latestPeriod: 2026-Q2
+              knowledgeAt: '2026-09-10T00:00:00.000Z'
+              wasRestated: false
+              from: 2026-Q1
+              to: 2026-Q2
+              quarters: 2
+              series:
+                - period: 2026-Q1
+                  outward: 53261.8
+                  inward: 5729.2
+                  isPreliminary: false
+                - period: 2026-Q2
+                  outward: 48110.4
+                  inward: 6120.9
+                  isPreliminary: true
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+              source: JETRO
+              as_of: 2026-Q2
+              latest_period: 2026-Q2
+              unit: Million USD
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

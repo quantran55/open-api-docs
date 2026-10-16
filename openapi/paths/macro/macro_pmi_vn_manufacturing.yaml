@@ -1,0 +1,127 @@
+get:
+  operationId: macroPmiVnManufacturing
+  tags:
+    - Macro
+  summary: Vietnam Manufacturing PMI (S&P Global)
+  description: |
+    Monthly S&P Global Vietnam Manufacturing PMI — the headline, seasonally adjusted
+    index, in index points. 50 means no change from the previous month; above 50 is
+    expansion, below 50 contraction.
+
+    `points` has one entry per month in the window, oldest first; a month without a
+    reading stays in the list with `value: null` — never 0. `latest` summarises the
+    newest reading: the change from the previous month in points, the status against
+    50, and how many consecutive months it has held that status.
+
+    S&P Global publishes each month's reading on the first working day of the
+    following month. Pass `asOf` to get the series as it was known at the end of a
+    past day (point-in-time, for backtests).
+
+    Source: S&P Global.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: |
+        Window length, counted back from the latest month that has a reading (that
+        month included). Case-insensitive.
+
+        | Value | Months |
+        | --- | --- |
+        | `3M` | 3 |
+        | `6M` | 6 |
+        | `1Y` | 12 |
+        | `3Y` | 36 |
+      schema:
+        type: string
+        enum:
+          - 3M
+          - 6M
+          - 1Y
+          - 3Y
+        default: 1Y
+        example: 3M
+    - name: asOf
+      in: query
+      required: false
+      description: |
+        Point-in-time date (`YYYY-MM-DD`): return only what was known by the end of
+        that day (UTC), leaving out readings and revisions published later. Omit for
+        the latest data.
+      schema:
+        type: string
+        format: date
+        example: "2026-10-01"
+  responses:
+    "200":
+      description: Monthly PMI series for the requested window.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroPmiManufacturingResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              seriesCode: manufacturing_pmi
+              threshold: 50
+              period: 3M
+              from: "2026-07"
+              to: "2026-09"
+              latest:
+                month: "2026-09"
+                value: 51.9
+                previousMonth: "2026-08"
+                previousValue: 53.3
+                change: -1.4
+                status: expansion
+                streak:
+                  months: 15
+                  since: "2025-07"
+                  isLowerBound: false
+                releasedAt: "2026-10-01T00:30:00.000Z"
+              points:
+                - month: "2026-07"
+                  value: 52.9
+                  change: 1.1
+                  status: expansion
+                - month: "2026-08"
+                  value: 53.3
+                  change: 0.4
+                  status: expansion
+                - month: "2026-09"
+                  value: 51.9
+                  change: -1.4
+                  status: expansion
+              source: S&P Global
+              unit: index_points
+              wasRestated: false
+            meta:
+              source: S&P Global
+              series: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+              as_of: "2026-09"
+              released_at: "2026-10-01T00:30:00.000Z"
+              unit: index_points
+              classification:
+                value: RAW
+                change: COMPUTED
+                status: COMPUTED
+                streak: COMPUTED
+              formula_version: pmi-summary-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-17T01:12:40.000Z"
+              timestamp: "2026-10-16T03:00:00.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

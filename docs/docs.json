@@ -90,6 +90,7 @@
               "GET /openapi/v1/macro/trade/by-region",
               "GET /openapi/v1/macro/japan/gdp-breakdown",
               "GET /openapi/v1/macro/japan/central-gov-debt",
+              "GET /openapi/v1/macro/pmi/vn/manufacturing",
               "GET /openapi/v1/macro/indicators/gdp-growth-rate",
               "GET /openapi/v1/macro/indicators/gdp-per-capita",
               "GET /openapi/v1/macro/indicators/central-government-debt",
@@ -104,7 +105,8 @@
               "GET /openapi/v1/macro/indicators/deposit-rates",
               "GET /openapi/v1/macro/indicators/government-bond-rates",
               "GET /openapi/v1/macro/indicators/interbank-rates",
-              "GET /openapi/v1/macro/indicators/fdi"
+              "GET /openapi/v1/macro/indicators/fdi",
+              "GET /openapi/v1/macro/indicators/pmi"
             ]
           },
           {

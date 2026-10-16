@@ -1,0 +1,63 @@
+description: |
+  Response metadata for the PMI series. On top of `timestamp`, it says where the
+  numbers came from, which fields HayInsights computes, and how fresh the response is.
+allOf:
+  - $ref: "../common/Meta.yaml"
+  - type: object
+    properties:
+      source:
+        type: string
+        description: Data provider.
+        example: S&P Global
+      series:
+        type: string
+        description: Full name of the series.
+        example: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+      as_of:
+        type: ["string", "null"]
+        description: Latest month in the window (`YYYY-MM`).
+        example: "2026-09"
+      released_at:
+        type: ["string", "null"]
+        format: date-time
+        description: When S&P Global published the latest reading (UTC).
+        example: "2026-10-01T00:30:00.000Z"
+      unit:
+        type: string
+        description: Unit of the numeric fields.
+        example: index_points
+      classification:
+        type: object
+        description: |
+          How each field was produced: `value` is passed through as S&P Global published
+          it; `change`, `status` and `streak` are computed by HayInsights.
+        properties:
+          value:
+            type: string
+            example: RAW
+          change:
+            type: string
+            example: COMPUTED
+          status:
+            type: string
+            example: COMPUTED
+          streak:
+            type: string
+            example: COMPUTED
+      formula_version:
+        type: string
+        description: Version tag of the formulas behind the computed fields.
+        example: pmi-summary-v1
+      was_restated:
+        type: boolean
+        description: Same as `data.wasRestated`.
+        example: false
+      served_from_cache:
+        type: boolean
+        description: Whether the response was served from cache.
+        example: true
+      cache_expires_at:
+        type: ["string", "null"]
+        format: date-time
+        description: When the cached copy expires (24 h; it is dropped as soon as a new reading is collected).
+        example: "2026-10-17T01:12:40.000Z"

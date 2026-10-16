@@ -1,0 +1,77 @@
+get:
+  operationId: macroIndicatorPmi
+  tags:
+    - Macro
+  summary: "Indicator — Manufacturing PMI table (US/JP/VN)"
+  description: |
+    Table of the S&P Global manufacturing PMI for all three economies, in index points
+    as published (one decimal; 50 = no change from the previous month). `columns`
+    holds the N most recent consecutive months (default 4), oldest first, counted back
+    from the latest month that has a reading; a month without a reading keeps its
+    column, with `null` in `values` and "—" in `display`. Currently only VN has data;
+    the US and JP rows return `available: false` with all-null values.
+
+    Source: S&P Global.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      description: Number of most recent months (columns) to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 4
+        example: 4
+  responses:
+    "200":
+      description: Manufacturing PMI table.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroIndicatorTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              indicator: pmi
+              unit: points
+              columns:
+                - period: Jun 2026
+                  date: "2026-06-30"
+                - period: Jul 2026
+                  date: "2026-07-31"
+                - period: Aug 2026
+                  date: "2026-08-31"
+                - period: Sep 2026
+                  date: "2026-09-30"
+              rows:
+                - country: US
+                  countryName: United States
+                  available: false
+                  values: [null, null, null, null]
+                  display: ["—", "—", "—", "—"]
+                - country: JP
+                  countryName: Japan
+                  available: false
+                  values: [null, null, null, null]
+                  display: ["—", "—", "—", "—"]
+                - country: VN
+                  countryName: Vietnam
+                  available: true
+                  values: [51.8, 52.9, 53.3, 51.9]
+                  display: ["51.8", "52.9", "53.3", "51.9"]
+            meta:
+              timestamp: "2026-10-16T03:00:00.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

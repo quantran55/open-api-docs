@@ -3,6 +3,23 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.5.0" description="2026-10-16">
+  **Vietnam Manufacturing PMI.**
+
+  **Added**
+
+  - **Macro · PMI** — the S&P Global Vietnam Manufacturing PMI, monthly, in index
+    points:
+    - `GET /macro/pmi/vn/manufacturing` — the series over a 3M, 6M, 1Y or 3Y window,
+      plus the latest reading's change, status against 50 and streak. Supports
+      `asOf` for point-in-time queries.
+    - `GET /macro/indicators/pmi` — the US/JP/VN indicator table; only VN has data
+      for now.
+
+  Both are gated by `macro_data` and cost 2 weight per call, like the other Macro
+  endpoints.
+</Update>
+
 <Update label="0.4.0" description="2026-10-16">
   **FDI, interbank rates, trade by region, Japan GDP and debt breakdowns, BOJ ETF holdings.**
 

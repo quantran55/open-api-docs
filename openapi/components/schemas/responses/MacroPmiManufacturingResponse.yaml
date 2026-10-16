@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        $ref: "../macro/PmiManufacturingSeries.yaml"
+      meta:
+        $ref: "../macro/PmiMeta.yaml"

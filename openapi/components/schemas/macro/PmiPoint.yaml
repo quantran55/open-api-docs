@@ -1,0 +1,36 @@
+type: object
+description: |
+  One month of the PMI series. A month without a reading stays in the list with
+  `value: null` — never 0 — so a chart can draw the gap.
+required:
+  - month
+  - value
+  - change
+  - status
+properties:
+  month:
+    type: string
+    pattern: "^\\d{4}-\\d{2}$"
+    description: Reference month (`YYYY-MM`).
+    example: "2026-09"
+  value:
+    type: ["number", "null"]
+    description: PMI reading in index points, one decimal as published. `null` when the month has no reading.
+    example: 51.9
+  change:
+    type: ["number", "null"]
+    description: |
+      Change from the previous month in index points (not percent). `null` when this
+      month or the previous one has no reading.
+    example: -1.4
+  status:
+    type: ["string", "null"]
+    enum:
+      - expansion
+      - no_change
+      - contraction
+      - null
+    description: |
+      Reading against the 50 line: `expansion` above 50, `no_change` at exactly 50,
+      `contraction` below 50. `null` when the month has no reading.
+    example: expansion

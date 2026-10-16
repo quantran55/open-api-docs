@@ -39,7 +39,7 @@ tags:
   - name: FX
     description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
   - name: Macro
-    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI and trade by region.
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI, trade by region and the manufacturing PMI.
   - name: Real Estate
     description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
   - name: News
@@ -3643,6 +3643,134 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/pmi/vn/manufacturing:
+    get:
+      operationId: macroPmiVnManufacturing
+      tags:
+        - Macro
+      summary: Vietnam Manufacturing PMI (S&P Global)
+      description: |
+        Monthly S&P Global Vietnam Manufacturing PMI — the headline, seasonally adjusted
+        index, in index points. 50 means no change from the previous month; above 50 is
+        expansion, below 50 contraction.
+
+        `points` has one entry per month in the window, oldest first; a month without a
+        reading stays in the list with `value: null` — never 0. `latest` summarises the
+        newest reading: the change from the previous month in points, the status against
+        50, and how many consecutive months it has held that status.
+
+        S&P Global publishes each month's reading on the first working day of the
+        following month. Pass `asOf` to get the series as it was known at the end of a
+        past day (point-in-time, for backtests).
+
+        Source: S&P Global.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: |
+            Window length, counted back from the latest month that has a reading (that
+            month included). Case-insensitive.
+
+            | Value | Months |
+            | --- | --- |
+            | `3M` | 3 |
+            | `6M` | 6 |
+            | `1Y` | 12 |
+            | `3Y` | 36 |
+          schema:
+            type: string
+            enum:
+              - 3M
+              - 6M
+              - 1Y
+              - 3Y
+            default: 1Y
+            example: 3M
+        - name: asOf
+          in: query
+          required: false
+          description: |
+            Point-in-time date (`YYYY-MM-DD`): return only what was known by the end of
+            that day (UTC), leaving out readings and revisions published later. Omit for
+            the latest data.
+          schema:
+            type: string
+            format: date
+            example: '2026-10-01'
+      responses:
+        '200':
+          description: Monthly PMI series for the requested window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroPmiManufacturingResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: vn
+                  seriesCode: manufacturing_pmi
+                  threshold: 50
+                  period: 3M
+                  from: 2026-07
+                  to: 2026-09
+                  latest:
+                    month: 2026-09
+                    value: 51.9
+                    previousMonth: 2026-08
+                    previousValue: 53.3
+                    change: -1.4
+                    status: expansion
+                    streak:
+                      months: 15
+                      since: 2025-07
+                      isLowerBound: false
+                    releasedAt: '2026-10-01T00:30:00.000Z'
+                  points:
+                    - month: 2026-07
+                      value: 52.9
+                      change: 1.1
+                      status: expansion
+                    - month: 2026-08
+                      value: 53.3
+                      change: 0.4
+                      status: expansion
+                    - month: 2026-09
+                      value: 51.9
+                      change: -1.4
+                      status: expansion
+                  source: S&P Global
+                  unit: index_points
+                  wasRestated: false
+                meta:
+                  source: S&P Global
+                  series: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+                  as_of: 2026-09
+                  released_at: '2026-10-01T00:30:00.000Z'
+                  unit: index_points
+                  classification:
+                    value: RAW
+                    change: COMPUTED
+                    status: COMPUTED
+                    streak: COMPUTED
+                  formula_version: pmi-summary-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-17T01:12:40.000Z'
+                  timestamp: '2026-10-16T03:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /openapi/v1/macro/indicators/gdp-growth-rate:
     get:
       operationId: macroIndicatorGdpGrowthRate
@@ -4876,6 +5004,108 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/indicators/pmi:
+    get:
+      operationId: macroIndicatorPmi
+      tags:
+        - Macro
+      summary: Indicator — Manufacturing PMI table (US/JP/VN)
+      description: |
+        Table of the S&P Global manufacturing PMI for all three economies, in index points
+        as published (one decimal; 50 = no change from the previous month). `columns`
+        holds the N most recent consecutive months (default 4), oldest first, counted back
+        from the latest month that has a reading; a month without a reading keeps its
+        column, with `null` in `values` and "—" in `display`. Currently only VN has data;
+        the US and JP rows return `available: false` with all-null values.
+
+        Source: S&P Global.
+      x-feature-code: macro_data
+      x-api-weight: 2
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of most recent months (columns) to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 4
+            example: 4
+      responses:
+        '200':
+          description: Manufacturing PMI table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroIndicatorTableResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  indicator: pmi
+                  unit: points
+                  columns:
+                    - period: Jun 2026
+                      date: '2026-06-30'
+                    - period: Jul 2026
+                      date: '2026-07-31'
+                    - period: Aug 2026
+                      date: '2026-08-31'
+                    - period: Sep 2026
+                      date: '2026-09-30'
+                  rows:
+                    - country: US
+                      countryName: United States
+                      available: false
+                      values:
+                        - null
+                        - null
+                        - null
+                        - null
+                      display:
+                        - —
+                        - —
+                        - —
+                        - —
+                    - country: JP
+                      countryName: Japan
+                      available: false
+                      values:
+                        - null
+                        - null
+                        - null
+                        - null
+                      display:
+                        - —
+                        - —
+                        - —
+                        - —
+                    - country: VN
+                      countryName: Vietnam
+                      available: true
+                      values:
+                        - 51.8
+                        - 52.9
+                        - 53.3
+                        - 51.9
+                      display:
+                        - '51.8'
+                        - '52.9'
+                        - '53.3'
+                        - '51.9'
+                meta:
+                  timestamp: '2026-10-16T03:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -11416,6 +11646,285 @@ components:
                       - 'null'
                     description: Debt to rolling four-quarter GDP (decimal).
                     example: 2.17
+    PmiLatest:
+      type: object
+      description: Summary of the latest month that has a reading.
+      required:
+        - month
+        - value
+        - previousMonth
+        - previousValue
+        - change
+        - status
+        - streak
+        - releasedAt
+      properties:
+        month:
+          type: string
+          pattern: ^\d{4}-\d{2}$
+          description: Month of the latest reading (`YYYY-MM`).
+          example: 2026-09
+        value:
+          type: number
+          description: Latest reading in index points.
+          example: 51.9
+        previousMonth:
+          type: string
+          pattern: ^\d{4}-\d{2}$
+          description: The month before `month`.
+          example: 2026-08
+        previousValue:
+          type:
+            - number
+            - 'null'
+          description: Reading for `previousMonth`; `null` when that month has no reading.
+          example: 53.3
+        change:
+          type:
+            - number
+            - 'null'
+          description: '`value − previousValue` in index points; `null` when `previousValue` is `null`.'
+          example: -1.4
+        status:
+          type: string
+          enum:
+            - expansion
+            - no_change
+            - contraction
+          description: '`expansion` above 50, `no_change` at exactly 50, `contraction` below 50.'
+          example: expansion
+        streak:
+          type: object
+          description: Consecutive months, counted back from `month`, with the same `status`.
+          required:
+            - months
+            - since
+            - isLowerBound
+          properties:
+            months:
+              type: integer
+              minimum: 1
+              description: Length of the streak, `month` included.
+              example: 15
+            since:
+              type: string
+              pattern: ^\d{4}-\d{2}$
+              description: First month of the streak.
+              example: 2025-07
+            isLowerBound:
+              type: boolean
+              description: |
+                `true` when the month before `since` has no reading (a gap, or before the
+                first month on record), so the real streak may be longer.
+              example: false
+        releasedAt:
+          type: string
+          format: date-time
+          description: When S&P Global published the latest reading (UTC).
+          example: '2026-10-01T00:30:00.000Z'
+    PmiPoint:
+      type: object
+      description: |
+        One month of the PMI series. A month without a reading stays in the list with
+        `value: null` — never 0 — so a chart can draw the gap.
+      required:
+        - month
+        - value
+        - change
+        - status
+      properties:
+        month:
+          type: string
+          pattern: ^\d{4}-\d{2}$
+          description: Reference month (`YYYY-MM`).
+          example: 2026-09
+        value:
+          type:
+            - number
+            - 'null'
+          description: PMI reading in index points, one decimal as published. `null` when the month has no reading.
+          example: 51.9
+        change:
+          type:
+            - number
+            - 'null'
+          description: |
+            Change from the previous month in index points (not percent). `null` when this
+            month or the previous one has no reading.
+          example: -1.4
+        status:
+          type:
+            - string
+            - 'null'
+          enum:
+            - expansion
+            - no_change
+            - contraction
+            - null
+          description: |
+            Reading against the 50 line: `expansion` above 50, `no_change` at exactly 50,
+            `contraction` below 50. `null` when the month has no reading.
+          example: expansion
+    PmiManufacturingSeries:
+      type: object
+      description: |
+        S&P Global Vietnam Manufacturing PMI over the requested window, with a summary of
+        the latest reading. When nothing is on record (for example an `asOf` before the
+        first reading), `from`, `to` and `latest` are `null` and `points` is empty.
+      required:
+        - country
+        - seriesCode
+        - threshold
+        - period
+        - from
+        - to
+        - latest
+        - points
+        - source
+        - unit
+        - wasRestated
+      properties:
+        country:
+          type: string
+          enum:
+            - vn
+          description: Country code, lowercase. Only Vietnam is available.
+          example: vn
+        seriesCode:
+          type: string
+          enum:
+            - manufacturing_pmi
+          description: Series identifier. Vietnam has a manufacturing PMI only.
+          example: manufacturing_pmi
+        threshold:
+          type: number
+          description: The 50 line — above it is expansion, below it contraction.
+          example: 50
+        period:
+          type: string
+          enum:
+            - 3M
+            - 6M
+            - 1Y
+            - 3Y
+          description: Window that was applied.
+          example: 3M
+        from:
+          type:
+            - string
+            - 'null'
+          pattern: ^\d{4}-\d{2}$
+          description: First month of the window (`YYYY-MM`).
+          example: 2026-07
+        to:
+          type:
+            - string
+            - 'null'
+          pattern: ^\d{4}-\d{2}$
+          description: Last month of the window — the latest month with a reading (as known at `asOf`, when given).
+          example: 2026-09
+        latest:
+          oneOf:
+            - $ref: '#/components/schemas/PmiLatest'
+            - type: 'null'
+        points:
+          type: array
+          description: One entry per month from `from` to `to`, oldest first.
+          items:
+            $ref: '#/components/schemas/PmiPoint'
+        source:
+          type: string
+          description: Data provider.
+          example: S&P Global
+        unit:
+          type: string
+          description: Unit of `value` and `change`.
+          example: index_points
+        wasRestated:
+          type: boolean
+          description: '`true` when S&P Global revised any month in the window after first publishing it.'
+          example: false
+    PmiMeta:
+      description: |
+        Response metadata for the PMI series. On top of `timestamp`, it says where the
+        numbers came from, which fields HayInsights computes, and how fresh the response is.
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+        - type: object
+          properties:
+            source:
+              type: string
+              description: Data provider.
+              example: S&P Global
+            series:
+              type: string
+              description: Full name of the series.
+              example: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+            as_of:
+              type:
+                - string
+                - 'null'
+              description: Latest month in the window (`YYYY-MM`).
+              example: 2026-09
+            released_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: When S&P Global published the latest reading (UTC).
+              example: '2026-10-01T00:30:00.000Z'
+            unit:
+              type: string
+              description: Unit of the numeric fields.
+              example: index_points
+            classification:
+              type: object
+              description: |
+                How each field was produced: `value` is passed through as S&P Global published
+                it; `change`, `status` and `streak` are computed by HayInsights.
+              properties:
+                value:
+                  type: string
+                  example: RAW
+                change:
+                  type: string
+                  example: COMPUTED
+                status:
+                  type: string
+                  example: COMPUTED
+                streak:
+                  type: string
+                  example: COMPUTED
+            formula_version:
+              type: string
+              description: Version tag of the formulas behind the computed fields.
+              example: pmi-summary-v1
+            was_restated:
+              type: boolean
+              description: Same as `data.wasRestated`.
+              example: false
+            served_from_cache:
+              type: boolean
+              description: Whether the response was served from cache.
+              example: true
+            cache_expires_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: When the cached copy expires (24 h; it is dropped as soon as a new reading is collected).
+              example: '2026-10-17T01:12:40.000Z'
+    MacroPmiManufacturingResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/PmiManufacturingSeries'
+            meta:
+              $ref: '#/components/schemas/PmiMeta'
     IndicatorColumn:
       type: object
       description: One period (column) of an indicator table.

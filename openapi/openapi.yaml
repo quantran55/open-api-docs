@@ -74,7 +74,7 @@ tags:
   - name: FX
     description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
   - name: Macro
-    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI and trade by region.
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI, trade by region and the manufacturing PMI.
   - name: Real Estate
     description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
   - name: News
@@ -208,6 +208,8 @@ paths:
     $ref: "./paths/macro/macro_japan_gdp-breakdown.yaml"
   /openapi/v1/macro/japan/central-gov-debt:
     $ref: "./paths/macro/macro_japan_central-gov-debt.yaml"
+  /openapi/v1/macro/pmi/vn/manufacturing:
+    $ref: "./paths/macro/macro_pmi_vn_manufacturing.yaml"
 
   /openapi/v1/macro/indicators/gdp-growth-rate:
     $ref: "./paths/macro/macro_indicators_gdp-growth-rate.yaml"
@@ -239,6 +241,8 @@ paths:
     $ref: "./paths/macro/macro_indicators_interbank-rates.yaml"
   /openapi/v1/macro/indicators/fdi:
     $ref: "./paths/macro/macro_indicators_fdi.yaml"
+  /openapi/v1/macro/indicators/pmi:
+    $ref: "./paths/macro/macro_indicators_pmi.yaml"
 
   # ── Real Estate ────────────────────────────────────────────────────────
   # Static / deeper routes BEFORE shorter `{param}` routes, mirroring the

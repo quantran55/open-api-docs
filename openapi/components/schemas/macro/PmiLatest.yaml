@@ -1,0 +1,71 @@
+type: object
+description: Summary of the latest month that has a reading.
+required:
+  - month
+  - value
+  - previousMonth
+  - previousValue
+  - change
+  - status
+  - streak
+  - releasedAt
+properties:
+  month:
+    type: string
+    pattern: "^\\d{4}-\\d{2}$"
+    description: Month of the latest reading (`YYYY-MM`).
+    example: "2026-09"
+  value:
+    type: number
+    description: Latest reading in index points.
+    example: 51.9
+  previousMonth:
+    type: string
+    pattern: "^\\d{4}-\\d{2}$"
+    description: The month before `month`.
+    example: "2026-08"
+  previousValue:
+    type: ["number", "null"]
+    description: Reading for `previousMonth`; `null` when that month has no reading.
+    example: 53.3
+  change:
+    type: ["number", "null"]
+    description: "`value − previousValue` in index points; `null` when `previousValue` is `null`."
+    example: -1.4
+  status:
+    type: string
+    enum:
+      - expansion
+      - no_change
+      - contraction
+    description: "`expansion` above 50, `no_change` at exactly 50, `contraction` below 50."
+    example: expansion
+  streak:
+    type: object
+    description: Consecutive months, counted back from `month`, with the same `status`.
+    required:
+      - months
+      - since
+      - isLowerBound
+    properties:
+      months:
+        type: integer
+        minimum: 1
+        description: Length of the streak, `month` included.
+        example: 15
+      since:
+        type: string
+        pattern: "^\\d{4}-\\d{2}$"
+        description: First month of the streak.
+        example: "2025-07"
+      isLowerBound:
+        type: boolean
+        description: |
+          `true` when the month before `since` has no reading (a gap, or before the
+          first month on record), so the real streak may be longer.
+        example: false
+  releasedAt:
+    type: string
+    format: date-time
+    description: When S&P Global published the latest reading (UTC).
+    example: "2026-10-01T00:30:00.000Z"

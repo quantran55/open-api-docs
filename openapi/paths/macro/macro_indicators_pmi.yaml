@@ -13,6 +13,9 @@ get:
 
     Source: S&P Global.
   x-feature-code: macro_data
+  # Fixed page URL: the API button of the PMI table (By Indicator) links straight here.
+  x-mint:
+    href: /api-reference/macro/indicators-pmi
   x-api-weight: 2
   parameters:
     - name: limit

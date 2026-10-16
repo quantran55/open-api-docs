@@ -19,6 +19,9 @@ get:
 
     Source: S&P Global.
   x-feature-code: macro_data
+  # Fixed page URL: the PMI chart's API button in the HayInsights app links straight here.
+  x-mint:
+    href: /api-reference/macro/pmi-vn-manufacturing
   x-api-weight: 2
   parameters:
     - name: period

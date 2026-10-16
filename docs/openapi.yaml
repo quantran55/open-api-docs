@@ -3665,6 +3665,8 @@ paths:
 
         Source: S&P Global.
       x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/macro/pmi-vn-manufacturing
       x-api-weight: 2
       parameters:
         - name: period
@@ -5024,6 +5026,8 @@ paths:
 
         Source: S&P Global.
       x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/macro/indicators-pmi
       x-api-weight: 2
       parameters:
         - name: limit

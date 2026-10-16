@@ -1,0 +1,44 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          required:
+            - month
+            - holdingsCho
+          properties:
+            month:
+              type: string
+              description: Month (YYYY-MM).
+              example: 2024-03
+            holdingsCho:
+              type: &id001
+                - number
+                - 'null'
+              description: BOJ ETF holdings, trillion JPY.
+              example: 37.2
+            totalMarketOku:
+              type: *id001
+              description: Total ETF market net assets, 100 million JPY.
+              example: 1182000
+            bojPctOfMarket:
+              type: *id001
+              description: BOJ holdings as % of the ETF market.
+              example: 31.5
+            annotation:
+              type: object
+              description: Present on months with a key policy change.
+              properties:
+                month:
+                  type: string
+                  description: Month.
+                  example: 2024-03
+                label:
+                  type: string
+                  description: Policy event.
+                  example: BOJ ends ETF purchases

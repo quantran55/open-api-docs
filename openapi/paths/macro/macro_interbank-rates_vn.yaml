@@ -1,0 +1,70 @@
+get:
+  operationId: macroInterbankRatesVn
+  tags:
+    - Macro
+  summary: Vietnam interbank rates
+  description: |
+    Daily Vietnamese interbank rates and traded volumes by tenor, from the State Bank of Vietnam. Rates
+    are in percent, volumes in billion VND; a tenor without a figure is null. Defaults to the last year;
+    the `from`–`to` range may not exceed 1,098 days.
+  x-feature-code: macro_data
+  x-api-weight: 3
+  parameters:
+    - name: from
+      in: query
+      required: false
+      description: Start date. Defaults to one year before `to`.
+      schema:
+        type: string
+        format: date
+        example: '2025-10-01'
+    - name: to
+      in: query
+      required: false
+      description: End date. Defaults to today.
+      schema:
+        type: string
+        format: date
+        example: '2026-09-30'
+  responses:
+    '200':
+      description: Daily interbank rates in Vietnam.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroInterbankRatesVnResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - date: '2026-09-30'
+                date_type: daily
+                country: VN
+                interbank_rates_on: 4.1
+                interbank_rates_1w: 4.35
+                interbank_rates_2w: 4.5
+                interbank_rates_1m: 4.8
+                interbank_rates_3m: 5.05
+                interbank_rates_6m: 5.3
+                interbank_rates_9m: 5.6
+                interbank_rates_12m: null
+                interbank_amount_on: 412500
+                interbank_amount_1w: 38200
+                interbank_amount_2w: 9100
+                interbank_amount_1m: 4300
+                interbank_amount_3m: 1200
+                interbank_amount_6m: 300
+                interbank_amount_9m: 50
+                federal_funds_rate: null
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

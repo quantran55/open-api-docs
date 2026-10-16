@@ -53,7 +53,7 @@ x-hayinsights-quota:
     code: RATE_LIMIT_EXCEEDED
     retryAfterHeader: Retry-After
   weightsByTag:
-    Macro: 2
+    Macro: "2-3"
     Real Estate: 2
     Calendar: 2
     Market: 2
@@ -62,7 +62,7 @@ x-hayinsights-quota:
     Commodities: 3
     Crypto: 3
     FX: "3-6"
-    ETF: 8
+    ETF: "2-8"
 
 tags:
   - name: Commodities
@@ -70,11 +70,11 @@ tags:
   - name: Crypto
     description: Crypto market overview, dominance, bubble map, on-chain and derivatives metrics.
   - name: ETF
-    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth and fund composition.
+    description: Exchange-traded fund listings, performance & net-flow rankings, heatmap, holdings, NAV growth, fund composition and Bank of Japan ETF holdings.
   - name: FX
     description: Foreign-exchange summary, live table, 90-day correlation matrix and the emerging-market stress monitor.
   - name: Macro
-    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt and policy rates / bond yields.
+    description: Macroeconomic indicators — GDP, CPI/PCE, exchange rates, population, central-government debt, policy rates / bond yields, interbank rates, FDI and trade by region.
   - name: Real Estate
     description: Land prices, transaction-level records, administrative geography (provinces / wards) and choropleth GeoJSON, by country.
   - name: News
@@ -136,6 +136,10 @@ paths:
     $ref: "./paths/etf/etf_top-netflow.yaml"
   /openapi/v1/etf/heatmap:
     $ref: "./paths/etf/etf_heatmap.yaml"
+  /openapi/v1/etf/boj-holdings:
+    $ref: "./paths/etf/etf_boj-holdings.yaml"
+  /openapi/v1/etf/boj-holdings/latest:
+    $ref: "./paths/etf/etf_boj-holdings_latest.yaml"
   /openapi/v1/etf/compare/fund-composition:
     $ref: "./paths/etf/etf_compare_fund-composition.yaml"
   /openapi/v1/etf/compare/nav-growth:
@@ -178,6 +182,32 @@ paths:
     $ref: "./paths/macro/macro_monetary-policy_central-government-debt.yaml"
   /openapi/v1/macro/monetary-policy/rates-yields:
     $ref: "./paths/macro/macro_monetary-policy_rates-yields.yaml"
+  /openapi/v1/macro/fdi/flows:
+    $ref: "./paths/macro/macro_fdi_flows.yaml"
+  /openapi/v1/macro/fdi/by-region:
+    $ref: "./paths/macro/macro_fdi_by-region.yaml"
+  /openapi/v1/macro/fdi/by-industry:
+    $ref: "./paths/macro/macro_fdi_by-industry.yaml"
+  /openapi/v1/macro/fdi/vn/flows:
+    $ref: "./paths/macro/macro_fdi_vn_flows.yaml"
+  /openapi/v1/macro/fdi/vn/breakdown:
+    $ref: "./paths/macro/macro_fdi_vn_breakdown.yaml"
+  /openapi/v1/macro/interbank-rates:
+    $ref: "./paths/macro/macro_interbank-rates.yaml"
+  /openapi/v1/macro/interbank-rates/jp/tibor:
+    $ref: "./paths/macro/macro_interbank-rates_jp_tibor.yaml"
+  /openapi/v1/macro/interbank-rates/jp/overnight:
+    $ref: "./paths/macro/macro_interbank-rates_jp_overnight.yaml"
+  /openapi/v1/macro/interbank-rates/vn:
+    $ref: "./paths/macro/macro_interbank-rates_vn.yaml"
+  /openapi/v1/macro/trade/turnover:
+    $ref: "./paths/macro/macro_trade_turnover.yaml"
+  /openapi/v1/macro/trade/by-region:
+    $ref: "./paths/macro/macro_trade_by-region.yaml"
+  /openapi/v1/macro/japan/gdp-breakdown:
+    $ref: "./paths/macro/macro_japan_gdp-breakdown.yaml"
+  /openapi/v1/macro/japan/central-gov-debt:
+    $ref: "./paths/macro/macro_japan_central-gov-debt.yaml"
 
   /openapi/v1/macro/indicators/gdp-growth-rate:
     $ref: "./paths/macro/macro_indicators_gdp-growth-rate.yaml"
@@ -205,6 +235,10 @@ paths:
     $ref: "./paths/macro/macro_indicators_deposit-rates.yaml"
   /openapi/v1/macro/indicators/government-bond-rates:
     $ref: "./paths/macro/macro_indicators_government-bond-rates.yaml"
+  /openapi/v1/macro/indicators/interbank-rates:
+    $ref: "./paths/macro/macro_indicators_interbank-rates.yaml"
+  /openapi/v1/macro/indicators/fdi:
+    $ref: "./paths/macro/macro_indicators_fdi.yaml"
 
   # ── Real Estate ────────────────────────────────────────────────────────
   # Static / deeper routes BEFORE shorter `{param}` routes, mirroring the

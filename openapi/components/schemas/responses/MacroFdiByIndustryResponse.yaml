@@ -1,0 +1,156 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - unit
+          - displayUnit
+          - source
+          - latestPeriod
+          - direction
+          - year
+          - groups
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          unit:
+            type: string
+            description: Storage unit of every value.
+            example: USD
+          unitScale:
+            type: number
+            description: Multiplier from the stored value to `unit`.
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Unit the values are expressed in.
+            example: Million USD
+          source:
+            type: string
+            description: Publisher of the data.
+            example: JETRO
+          sourceUrl:
+            type: string
+            description: Where the source publishes the data.
+            example: https://www.jetro.go.jp/en/reports/statistics/
+          latestPeriod:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest period with data.
+            example: 2026-Q2
+          knowledgeAt:
+            type: *id001
+            description: When the system learned the served figures.
+            example: '2026-09-10T00:00:00.000Z'
+          wasRestated:
+            type: boolean
+            description: True when the source revised at least one served figure.
+            example: false
+          direction:
+            type: string
+            description: Direction served.
+            enum:
+              - outward
+              - inward
+            example: outward
+          year:
+            type:
+              - integer
+              - 'null'
+            description: Year served.
+            example: 2025
+          years:
+            type: array
+            items:
+              type: integer
+            description: Selectable years.
+          total:
+            type: &id002
+              - number
+              - 'null'
+            description: Total FDI for the year.
+            example: 189400.5
+          isPreliminary:
+            type: boolean
+            example: false
+          shareFormulaVersion:
+            type: string
+            description: Version of the share formula.
+            example: v1
+          groups:
+            type: array
+            items:
+              type: object
+              required:
+                - code
+                - name
+                - total
+                - items
+              properties:
+                code:
+                  type: string
+                  description: Group code.
+                  example: manufacturing
+                name:
+                  type: string
+                  description: Group name.
+                  example: Manufacturing
+                total:
+                  type: *id002
+                  description: Group total.
+                  example: 78200.1
+                hasNegative:
+                  type: boolean
+                  example: false
+                shareAvailable:
+                  type: boolean
+                  example: true
+                itemCount:
+                  type: integer
+                  description: Industries listed by the source.
+                  example: 18
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - code
+                      - name
+                      - value
+                      - share
+                      - classification
+                    properties:
+                      code:
+                        type: string
+                        description: Industry code.
+                        example: transport_equipment
+                      name:
+                        type: string
+                        description: Industry name.
+                        example: Transport equipment
+                      value:
+                        type: *id002
+                        description: Value.
+                        example: 15320.4
+                      share:
+                        type: *id002
+                        description: Share of the group total (0–1).
+                        example: 0.196
+                      classification:
+                        type: string
+                        description: RAW = published by the source, DERIVED = computed.
+                        enum:
+                          - RAW
+                          - DERIVED
+                        example: RAW
+                      valueMarker:
+                        type: string
+                        description: Source marker on the value.

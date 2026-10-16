@@ -29,7 +29,7 @@ X-RateLimit-Weight-Used: 3
 
 | Domain | Feature | Weight per call |
 | --- | --- | --- |
-| Macro | `macro_data` | 2 |
+| Macro | `macro_data` | 2 · 3 (`interbank-rates/vn`) |
 | Real Estate | `realestate_data` | 2 |
 | Calendar | `macro_data` | 2 |
 | Market | `macro_data` | 2 |
@@ -38,7 +38,7 @@ X-RateLimit-Weight-Used: 3
 | Commodities | `commodities_data` | 3 |
 | Crypto | `crypto_data` | 3 |
 | FX | `fx_data` | 3 (`summary`, `table`) · 6 (`correlation`, `em-stress`) |
-| ETF | `etf_data` | 8 |
+| ETF | `etf_data` | 2 (`boj-holdings`) · 8 (all other ETF routes) |
 
 <Info>
   Example: on a plan with a 1,000 weight/minute budget you can make roughly 333

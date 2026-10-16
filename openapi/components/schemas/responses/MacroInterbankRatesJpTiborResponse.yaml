@@ -1,0 +1,84 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - source
+          - unit
+          - latestDate
+          - period
+          - points
+        properties:
+          source:
+            type: string
+            description: Publisher.
+            example: JBA TIBOR Administration
+          unit:
+            type: string
+            description: Unit.
+            example: '%'
+          latestDate:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest date with data.
+            format: date
+            example: '2026-10-15'
+          knowledgeAt:
+            type: *id001
+            description: When the system learned the figures.
+          wasRestated:
+            type: boolean
+            example: false
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          period:
+            type: string
+            description: Window served.
+            example: 1M
+          from:
+            type: *id001
+            description: First date of the window.
+            format: date
+            example: '2026-09-15'
+          to:
+            type: *id001
+            description: Last date of the window.
+            format: date
+            example: '2026-10-15'
+          points:
+            type: array
+            items:
+              type: object
+              required:
+                - date
+              properties:
+                date:
+                  type: string
+                  description: Date.
+                  format: date
+                  example: '2026-10-15'
+                tibor1w:
+                  type: &id002
+                    - number
+                    - 'null'
+                  description: 1-week, %.
+                  example: 0.62
+                tibor1m:
+                  type: *id002
+                  description: 1-month, %.
+                  example: 0.68
+                tibor3m:
+                  type: *id002
+                  description: 3-month, %.
+                  example: 0.78
+                tibor6m:
+                  type: *id002
+                  description: 6-month, %.
+                  example: 0.86

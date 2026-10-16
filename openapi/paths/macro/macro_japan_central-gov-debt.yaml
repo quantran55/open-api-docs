@@ -1,0 +1,71 @@
+get:
+  operationId: macroJapanCentralGovDebt
+  tags:
+    - Macro
+  summary: Japan central government debt breakdown
+  description: |
+    Quarterly snapshots of Japan's central government debt (Ministry of Finance) split by instrument —
+    government bonds (general, long/medium/short-term, FILP), borrowings, financing bills and
+    government-guaranteed debt — in billion JPY, with each main instrument's share of the total and the
+    debt-to-GDP ratio. Defaults to the last ten years. For debt as % of GDP across countries use
+    `/macro/monetary-policy/central-government-debt`.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: from
+      in: query
+      required: false
+      description: Start month (YYYY-MM).
+      schema:
+        type: string
+        pattern: ^\d{4}-(0[1-9]|1[0-2])$
+        example: 2021-01
+    - name: to
+      in: query
+      required: false
+      description: End month (YYYY-MM).
+      schema:
+        type: string
+        pattern: ^\d{4}-(0[1-9]|1[0-2])$
+        example: 2026-06
+  responses:
+    '200':
+      description: Quarterly central government debt.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroJapanCentralGovDebtResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - reportDate: 2026-03
+                period: Q1 2026
+                periodEndDate: '2026-03-31'
+                totalOku: 1324000.5
+                governmentBondsOku: 1150000.2
+                generalBondsOku: 1100000.0
+                longTermBondsOku: 720000.0
+                mediumTermBondsOku: 260000.0
+                shortTermBondsOku: 120000.0
+                filpBondsOku: 94000.0
+                borrowingsOku: 30500.0
+                financingBillsOku: 98000.0
+                govGuaranteedDebtsOku: 45500.3
+                generalBondsPct: 83.1
+                financingBillsPct: 7.4
+                filpBondsPct: 7.1
+                borrowingsPct: 2.3
+                debtToGdpRatio: 2.17
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

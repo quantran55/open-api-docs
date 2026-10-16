@@ -1,0 +1,114 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - unit
+          - displayUnit
+          - source
+          - latestPeriod
+          - series
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          unit:
+            type: string
+            description: Storage unit of every value.
+            example: USD
+          unitScale:
+            type: number
+            description: Multiplier from the stored value to `unit`.
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Unit the values are expressed in.
+            example: Million USD
+          source:
+            type: string
+            description: Publisher of the data.
+            example: JETRO
+          sourceUrl:
+            type: string
+            description: Where the source publishes the data.
+            example: https://www.jetro.go.jp/en/reports/statistics/
+          latestPeriod:
+            type: &id001
+              - string
+              - 'null'
+            description: Latest period with data.
+            example: 2026-Q2
+          knowledgeAt:
+            type: *id001
+            description: When the system learned the served figures.
+            example: '2026-09-10T00:00:00.000Z'
+          wasRestated:
+            type: boolean
+            description: True when the source revised at least one served figure.
+            example: false
+          from:
+            type: *id001
+            description: First period of the window (inclusive).
+            example: 2025-Q3
+          to:
+            type: *id001
+            description: Last period of the window (inclusive).
+            example: 2026-Q2
+          quarters:
+            type: integer
+            description: Number of quarters in the window.
+            example: 4
+          recordingPrinciple:
+            type: string
+            description: Balance-of-payments recording principle used by the source.
+            example: directional principle
+          series:
+            type: array
+            items:
+              type: object
+              required:
+                - period
+                - outward
+                - inward
+                - isPreliminary
+              properties:
+                period:
+                  type: string
+                  description: Quarter label.
+                  example: 2026-Q2
+                outward:
+                  type: &id002
+                    - number
+                    - 'null'
+                  description: Outward FDI.
+                  example: 48110.4
+                inward:
+                  type: *id002
+                  description: Inward FDI.
+                  example: 6120.9
+                outwardMarker:
+                  type: string
+                  description: Source marker on the outward figure, e.g. `p` (preliminary).
+                inwardMarker:
+                  type: string
+                  description: Source marker on the inward figure.
+                isPreliminary:
+                  type: boolean
+                  example: false
+          seriesBreak:
+            type: object
+            description: Present when the source changed its method inside the window.
+            properties:
+              at:
+                type: string
+                description: Period where the break starts.
+                example: 2014-Q1
+              reason:
+                type: string
+                description: Why the series is not comparable across the break.

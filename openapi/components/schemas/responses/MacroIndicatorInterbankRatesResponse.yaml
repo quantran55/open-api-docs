@@ -1,0 +1,71 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - indicator
+          - unit
+          - tenors
+          - rows
+        properties:
+          indicator:
+            type: string
+            description: Table identifier.
+            example: interbank-rates
+          unit:
+            type: string
+            description: Unit shared by every cell.
+            example: '%'
+          tenors:
+            type: array
+            items:
+              $ref: ../macro/IndicatorDepositTenor.yaml
+            description: Tenors in column order.
+          rows:
+            type: array
+            items:
+              type: object
+              required:
+                - country
+                - countryName
+                - available
+                - values
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: VN
+                countryName:
+                  type: string
+                  description: Country name.
+                  example: Vietnam
+                available:
+                  type: boolean
+                  example: true
+                date:
+                  type: &id001
+                    - string
+                    - 'null'
+                  description: Most recent date among the row's cells.
+                  format: date
+                  example: '2026-09-28'
+                values:
+                  type: array
+                  items:
+                    type:
+                      - number
+                      - 'null'
+                  description: One value per tenor.
+                display:
+                  type: array
+                  items:
+                    type: string
+                dates:
+                  type: array
+                  items:
+                    type: *id001
+                  description: Date of each cell, aligned with `tenors`.

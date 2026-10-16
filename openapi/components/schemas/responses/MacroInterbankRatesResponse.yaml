@@ -1,0 +1,65 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - latest
+          - series
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: US
+          latest:
+            type:
+              - object
+              - 'null'
+            description: Latest overnight and 3-month reading.
+            properties:
+              date:
+                type: string
+                description: Date.
+                format: date
+                example: '2026-09-01'
+              interbankRatesOn:
+                type: &id001
+                  - number
+                  - 'null'
+                description: Overnight rate, %.
+                example: 4.33
+              interbankRates3m:
+                type: *id001
+                description: 3-month rate, %.
+          series:
+            type: array
+            items:
+              type: object
+              required:
+                - date
+              properties:
+                date:
+                  type: string
+                  description: Observation date.
+                  format: date
+                  example: '2026-09-01'
+                interbankRatesOn:
+                  type: *id001
+                  description: Overnight, %.
+                  example: 4.33
+                interbankRates1w:
+                  type: *id001
+                  description: 1-week, %.
+                interbankRates1m:
+                  type: *id001
+                  description: 1-month, %.
+                interbankRates3m:
+                  type: *id001
+                  description: 3-month, %.
+                interbankRates6m:
+                  type: *id001
+                  description: 6-month, %.

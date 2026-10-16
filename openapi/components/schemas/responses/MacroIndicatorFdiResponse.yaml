@@ -1,0 +1,125 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - indicator
+          - metrics
+          - columns
+          - rows
+          - source
+        properties:
+          indicator:
+            type: string
+            description: Table identifier.
+            example: fdi
+          metrics:
+            type: array
+            items:
+              type: object
+              required:
+                - key
+                - label
+                - unit
+              properties:
+                key:
+                  type: string
+                  description: Metric key.
+                  enum:
+                    - outward
+                    - inward
+                  example: outward
+                label:
+                  type: string
+                  description: Display label.
+                  example: Outward
+                unit:
+                  type: string
+                  description: Unit.
+                  example: Million USD
+          columns:
+            type: array
+            items:
+              type: object
+              required:
+                - period
+                - date
+              properties:
+                period:
+                  type: string
+                  description: Quarter label.
+                  example: 2026-Q2
+                date:
+                  type: string
+                  description: Quarter start date.
+                  format: date
+                  example: '2026-04-01'
+            description: Oldest to newest.
+          rows:
+            type: array
+            items:
+              type: object
+              required:
+                - country
+                - countryName
+                - available
+                - values
+              properties:
+                country:
+                  type: string
+                  description: Country code.
+                  example: JP
+                countryName:
+                  type: string
+                  description: Country name.
+                  example: Japan
+                available:
+                  type: boolean
+                  example: true
+                unit:
+                  type: &id001
+                    - string
+                    - 'null'
+                  description: Unit of the row.
+                  example: Million USD
+                values:
+                  type: array
+                  items:
+                    type:
+                      - object
+                      - 'null'
+                    additionalProperties:
+                      type:
+                        - number
+                        - 'null'
+                  description: One cell per column, keyed by metric.
+                display:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties:
+                      type: string
+                markers:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties:
+                      type: string
+          latestPeriod:
+            type: *id001
+            description: Latest quarter with data.
+            example: 2026-Q2
+          source:
+            type: string
+            description: Publisher.
+            example: JETRO
+          knowledgeAt:
+            type: *id001
+            description: When the system learned the figures.
+          wasRestated:
+            type: boolean
+            example: false

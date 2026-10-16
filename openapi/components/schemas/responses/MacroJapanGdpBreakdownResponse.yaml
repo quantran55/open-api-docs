@@ -1,0 +1,83 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          required:
+            - period
+            - gdpTotal
+          properties:
+            period:
+              type: string
+              description: Period start date.
+              format: date
+              example: '2025-01-01'
+            periodLabel:
+              type:
+                - string
+                - 'null'
+              description: Period label.
+              example: '2025'
+            gdpTotal:
+              type: &id001
+                - number
+                - 'null'
+              description: Nominal GDP, billion JPY.
+              example: 609000.2
+            privateConsumption:
+              type: *id001
+              description: Private consumption (C).
+              example: 335000.1
+            governmentConsumption:
+              type: *id001
+              description: Government consumption (G).
+              example: 128000.4
+            investmentTotal:
+              type: *id001
+              description: Total investment (I) — sum of the five items below.
+              example: 152000.0
+            privateResidentialInvestment:
+              type: *id001
+              description: Private residential investment.
+              example: 22600.8
+            privateNonResiInvestment:
+              type: *id001
+              description: Private non-residential investment.
+              example: 97000.5
+            changePrivateInventories:
+              type: *id001
+              description: Change in private inventories.
+              example: 1400.2
+            publicInvestment:
+              type: *id001
+              description: Public investment.
+              example: 30700.0
+            changePublicInventories:
+              type: *id001
+              description: Change in public inventories.
+              example: 13.1
+            netExports:
+              type: *id001
+              description: Net exports (X − M).
+              example: -6000.3
+            exports:
+              type: *id001
+              description: Exports (X).
+              example: 128000.0
+            imports:
+              type: *id001
+              description: Imports (M).
+              example: 134000.3
+            quarters:
+              type: integer
+              description: 'Annual rows only: quarters summed into the year (1–4).'
+              example: 4
+            isPartial:
+              type: boolean
+              description: 'Annual rows only: true when `quarters` < 4.'
+              example: false

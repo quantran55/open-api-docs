@@ -1,0 +1,129 @@
+get:
+  operationId: macroTradeByRegion
+  tags:
+    - Macro
+  summary: Export/import by region
+  description: |
+    Exports or imports of one country split by region for one period. There is always an item for the
+    part not attributed to any region, so the items add up to `total`. Each item has a `classification`:
+    RAW is published by the source, DERIVED is computed. Pick the period with `granularity` (latest
+    month / quarter / year) or name it with `period`; `period` wins when both are given.
+    Returns 404 when no data has been collected for the country yet.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: true
+      description: Country.
+      schema:
+        type: string
+        enum:
+          - jp
+          - vn
+          - us
+        example: jp
+    - name: flow
+      in: query
+      required: false
+      description: Trade flow.
+      schema:
+        type: string
+        enum:
+          - export
+          - import
+        default: export
+    - name: granularity
+      in: query
+      required: false
+      description: Use the latest period of this granularity.
+      schema:
+        type: string
+        enum:
+          - month
+          - quarter
+          - year
+          - fiscal_year
+        default: month
+    - name: period
+      in: query
+      required: false
+      description: 'Exact period: `2026-06`, `2026-Q2`, `2026` or `2026-FY`.'
+      schema:
+        type: string
+        pattern: ^\d{4}(-(0[1-9]|1[0-2])|-Q[1-4]|-FY)?$
+        example: 2026-Q2
+    - name: taxonomy
+      in: query
+      required: false
+      description: Region grouping. Defaults to continents for Japan and Vietnam and Census regions for the US.
+      schema:
+        type: string
+        enum:
+          - source
+          - continent
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: Trade split by region.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroTradeByRegionResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: jp
+              unit: JPY
+              unitScale: 1000
+              displayDivisor: 1000000
+              displayUnit: Billion Yen
+              seasonallyAdjusted: false
+              source: Ministry of Finance Japan
+              taxonomy: continent
+              asOfPeriod: 2026-08
+              period: 2026-Q2
+              granularity: quarter
+              flow: export
+              isPartial: false
+              total: 25321000000
+              items:
+                - code: asia
+                  name: Asia
+                  value: 14990000000
+                  share: 0.592
+                  classification: RAW
+                - code: north_america
+                  name: North America
+                  value: 5621000000
+                  share: 0.222
+                  classification: RAW
+              reconciliation:
+                sumOfItems: 25321000000
+                total: 25321000000
+                diff: 0
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+              source: Ministry of Finance Japan
+              as_of: 2026-Q2
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

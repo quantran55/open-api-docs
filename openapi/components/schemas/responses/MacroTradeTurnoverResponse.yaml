@@ -1,0 +1,113 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - unit
+          - displayUnit
+          - source
+          - series
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          unit:
+            type: string
+            description: Storage unit.
+            example: JPY
+          unitScale:
+            type: number
+            example: 1000
+          displayDivisor:
+            type: number
+            description: Divide values by this to get `displayUnit`.
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Display unit.
+            example: Billion Yen
+          seasonallyAdjusted:
+            type: boolean
+            example: false
+          source:
+            type: string
+            description: Publisher.
+            example: Ministry of Finance Japan
+          taxonomy:
+            type: string
+            description: Region grouping.
+            enum:
+              - source
+              - continent
+            example: continent
+          asOfPeriod:
+            type: string
+            description: Latest period with data.
+            example: 2026-08
+          granularity:
+            type: string
+            description: Granularity served.
+            example: quarter
+          range:
+            type: string
+            description: Window served.
+            example: 1y
+          series:
+            type: array
+            items:
+              type: object
+              required:
+                - period
+                - periodType
+                - exportValue
+                - importValue
+                - balance
+                - isPartial
+              properties:
+                period:
+                  type: string
+                  description: Period label.
+                  example: 2026-Q2
+                periodType:
+                  type: string
+                  description: Granularity of the point.
+                  example: quarter
+                exportValue:
+                  type: number
+                  example: 25321000000
+                importValue:
+                  type: number
+                  example: 26105000000
+                balance:
+                  type: number
+                  example: -784000000
+                isPartial:
+                  type: boolean
+                  example: false
+                coverage:
+                  type: string
+                  description: Months covered by a partial period.
+                  example: 2026-07..2026-08
+                isDerived:
+                  type: boolean
+                  description: Summed by the system from monthly figures.
+                  example: false
+                revisionStatus:
+                  type: string
+                  description: Revision status.
+                  enum:
+                    - preliminary
+                    - provisional
+                    - definite
+                    - revised
+                  example: definite
+                knowledgeAt:
+                  type: string
+                  description: When the system learned the figure.
+                  example: '2026-09-17T00:00:00.000Z'

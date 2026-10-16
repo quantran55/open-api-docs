@@ -1,0 +1,110 @@
+get:
+  operationId: macroFdiByIndustry
+  tags:
+    - Macro
+  summary: Japan FDI by industry
+  description: |
+    Yearly industry structure of Japan's FDI, in two groups: Manufacturing and Non-manufacturing (JETRO,
+    million USD). Defaults to Outward and the latest year with data for that direction; `years` lists
+    the selectable years. Each group returns the top `limit` industries by absolute value (default 10,
+    `limit=all` for every industry); `itemCount` is how many the source lists. There is no "Other" item,
+    so `share` values do not add up to 1. When a group contains a negative figure, `hasNegative` is true
+    and every `share` is null.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: false
+      description: Only `jp` is available.
+      schema:
+        type: string
+        enum:
+          - jp
+        default: jp
+    - name: direction
+      in: query
+      required: false
+      description: FDI direction.
+      schema:
+        type: string
+        enum:
+          - outward
+          - inward
+        default: outward
+    - name: year
+      in: query
+      required: false
+      description: Calendar year. Defaults to the latest year with data.
+      schema:
+        type: integer
+        example: 2025
+    - name: limit
+      in: query
+      required: false
+      description: 'Industries per group: a number (1–50) or `all`.'
+      schema:
+        type: string
+        example: '10'
+        default: '10'
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: FDI industry structure for one year.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroFdiByIndustryResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: jp
+              displayUnit: Million USD
+              unit: USD
+              source: JETRO
+              latestPeriod: '2025'
+              direction: outward
+              year: 2025
+              years:
+                - 2023
+                - 2024
+                - 2025
+              total: 189400.5
+              isPreliminary: false
+              shareFormulaVersion: v1
+              groups:
+                - code: manufacturing
+                  name: Manufacturing
+                  total: 78200.1
+                  hasNegative: false
+                  shareAvailable: true
+                  itemCount: 18
+                  items:
+                    - code: transport_equipment
+                      name: Transport equipment
+                      value: 15320.4
+                      share: 0.196
+                      classification: RAW
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

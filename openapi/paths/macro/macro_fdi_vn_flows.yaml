@@ -1,0 +1,93 @@
+get:
+  operationId: macroFdiVnFlows
+  tags:
+    - Macro
+  summary: Vietnam FDI flows
+  description: |
+    Vietnam's inward FDI — registered and realized capital for the whole country, million USD. `series`
+    holds the amount for each month on its own (derived as the difference between two consecutive year-
+    to-date figures); the year-to-date figures the source publishes are in `registeredYtd` /
+    `realizedYtd`. `cumulative` holds the year-to-date lines per year. `months` (12 / 36 / 60) only
+    trims `series`. Missing months are null, never 0.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: months
+      in: query
+      required: false
+      description: Months in `series` (1–60).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 60
+        example: 12
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: Monthly and cumulative FDI into Vietnam.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroFdiVnFlowsResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              unit: USD
+              unitScale: 1000000
+              displayUnit: Million USD
+              source: Ministry of Finance (FIA)
+              latestPeriod: 2026-09
+              months: 2
+              from: 2026-08
+              to: 2026-09
+              series:
+                - period: 2026-08
+                  registered: 3120.5
+                  realized: 2205.0
+                  registeredYtd: 26389.8
+                  realizedYtd: 16790.0
+                  registeredYoy: 9.8
+                  cutoffDay: 31
+                  source: mof
+                - period: 2026-09
+                  registered: 2150.3
+                  realized: 2010.0
+                  registeredYtd: 28540.1
+                  realizedYtd: 18800.0
+                  registeredYoy: 12.4
+                  cutoffDay: 30
+                  source: mof
+              cumulative:
+                - year: 2026
+                  registered:
+                    - 4330.1
+                    - 6900.2
+                    - 10980.0
+                  realized:
+                    - 1510.0
+                    - 3100.0
+                    - 5410.0
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

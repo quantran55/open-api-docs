@@ -1,0 +1,78 @@
+get:
+  operationId: macroJapanGdpBreakdown
+  tags:
+    - Macro
+  summary: Japan GDP expenditure breakdown
+  description: |
+    Japan's nominal GDP split by expenditure component — private consumption (C), government consumption
+    (G), the five investment items (I) and net exports (X − M) — in billion JPY. `interval=annual` sums
+    the quarters of each year; a year with fewer than four quarters has `isPartial: true` and `quarters`
+    < 4. Defaults to the last ten years.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: from
+      in: query
+      required: false
+      description: Start date (YYYY-MM-DD).
+      schema:
+        type: string
+        format: date
+        example: '2016-01-01'
+    - name: to
+      in: query
+      required: false
+      description: End date (YYYY-MM-DD).
+      schema:
+        type: string
+        format: date
+        example: '2026-06-30'
+    - name: interval
+      in: query
+      required: false
+      description: Quarterly rows or yearly sums.
+      schema:
+        type: string
+        enum:
+          - quarterly
+          - annual
+        default: quarterly
+  responses:
+    '200':
+      description: GDP by expenditure component.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroJapanGdpBreakdownResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              - period: '2025-01-01'
+                periodLabel: '2025'
+                gdpTotal: 609000.2
+                privateConsumption: 335000.1
+                governmentConsumption: 128000.4
+                investmentTotal: 151714.6
+                privateResidentialInvestment: 22600.8
+                privateNonResiInvestment: 97000.5
+                changePrivateInventories: 1400.2
+                publicInvestment: 30700.0
+                changePublicInventories: 13.1
+                netExports: -6000.3
+                exports: 128000.0
+                imports: 134000.3
+                quarters: 4
+                isPartial: false
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

@@ -1,0 +1,107 @@
+get:
+  operationId: macroTradeTurnover
+  tags:
+    - Macro
+  summary: Export/import turnover
+  description: |
+    Export value, import value and trade balance for one country. `balance` is returned as published
+    rather than recomputed (for the US it is the Census figure, not the difference of two rounded
+    values). Incomplete periods have `isPartial` and `coverage`. Japan publishes every granularity;
+    Vietnam and the US only publish months — their quarters and years are summed by the system and
+    flagged `isDerived`.
+    Returns 404 when no data has been collected for the country yet.
+  x-feature-code: macro_data
+  x-api-weight: 2
+  parameters:
+    - name: country
+      in: query
+      required: true
+      description: Country.
+      schema:
+        type: string
+        enum:
+          - jp
+          - vn
+          - us
+        example: jp
+    - name: granularity
+      in: query
+      required: false
+      description: Period granularity.
+      schema:
+        type: string
+        enum:
+          - month
+          - quarter
+          - year
+          - fiscal_year
+        default: month
+    - name: range
+      in: query
+      required: false
+      description: Look-back window, counted back from the latest period with data.
+      schema:
+        type: string
+        enum:
+          - 1y
+          - 3y
+          - 5y
+          - max
+        default: 1y
+    - name: asOf
+      in: query
+      required: false
+      description: 'Backtest: return exactly what the system knew at the end of that day (UTC), not later revisions
+        by the source. Omit for the latest data.'
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+  responses:
+    '200':
+      description: Export/import series.
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/responses/MacroTradeTurnoverResponse.yaml
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: jp
+              unit: JPY
+              unitScale: 1000
+              displayDivisor: 1000000
+              displayUnit: Billion Yen
+              seasonallyAdjusted: false
+              source: Ministry of Finance Japan
+              taxonomy: continent
+              asOfPeriod: 2026-08
+              granularity: quarter
+              range: 1y
+              series:
+                - period: 2026-Q2
+                  periodType: quarter
+                  exportValue: 25321000000
+                  importValue: 26105000000
+                  balance: -784000000
+                  isPartial: false
+                  isDerived: false
+                  revisionStatus: definite
+                  knowledgeAt: '2026-07-17T00:00:00.000Z'
+            meta:
+              timestamp: '2026-10-16T04:00:00.000Z'
+              source: Ministry of Finance Japan
+              as_of: 2026-08
+    '400':
+      $ref: ../../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../../components/responses/NotFound.yaml
+    '429':
+      $ref: ../../components/responses/RateLimited.yaml
+    '500':
+      $ref: ../../components/responses/InternalError.yaml

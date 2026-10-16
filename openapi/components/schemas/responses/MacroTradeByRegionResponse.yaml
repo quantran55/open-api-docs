@@ -1,0 +1,129 @@
+allOf:
+  - $ref: ../common/EnvelopeBase.yaml
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        required:
+          - country
+          - displayUnit
+          - source
+          - period
+          - flow
+          - total
+          - items
+        properties:
+          country:
+            type: string
+            description: Country code.
+            example: jp
+          unit:
+            type: string
+            description: Storage unit.
+            example: JPY
+          unitScale:
+            type: number
+            example: 1000
+          displayDivisor:
+            type: number
+            description: Divide values by this to get `displayUnit`.
+            example: 1000000
+          displayUnit:
+            type: string
+            description: Display unit.
+            example: Billion Yen
+          seasonallyAdjusted:
+            type: boolean
+            example: false
+          source:
+            type: string
+            description: Publisher.
+            example: Ministry of Finance Japan
+          taxonomy:
+            type: string
+            description: Region grouping.
+            enum:
+              - source
+              - continent
+            example: continent
+          asOfPeriod:
+            type: string
+            description: Latest period with data.
+            example: 2026-08
+          period:
+            type: string
+            description: Period served.
+            example: 2026-Q2
+          granularity:
+            type: string
+            description: Granularity served.
+            example: quarter
+          flow:
+            type: string
+            description: Flow served.
+            enum:
+              - export
+              - import
+            example: export
+          isPartial:
+            type: boolean
+            example: false
+          coverage:
+            type: string
+            description: Months covered by a partial period.
+          total:
+            type: number
+            example: 25321000000
+          items:
+            type: array
+            items:
+              type: object
+              required:
+                - code
+                - name
+                - value
+                - share
+                - classification
+              properties:
+                code:
+                  type: string
+                  description: Region code.
+                  example: asia
+                name:
+                  type: string
+                  description: Region name.
+                  example: Asia
+                value:
+                  type: number
+                  example: 14990000000
+                share:
+                  type: number
+                  description: Share of `total` (0–1).
+                  example: 0.592
+                classification:
+                  type: string
+                  description: RAW or DERIVED.
+                  enum:
+                    - RAW
+                    - DERIVED
+                  example: RAW
+                note:
+                  type: string
+                  description: Note on the item.
+                valueMarker:
+                  type: string
+                  description: Source marker on the value.
+          reconciliation:
+            type: object
+            description: Check that the items add up to the total.
+            properties:
+              sumOfItems:
+                type: number
+              total:
+                type: number
+              diff:
+                type: number
+              excluded:
+                type: number

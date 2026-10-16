@@ -13,13 +13,13 @@ get:
   parameters:
     - name: country
       in: query
-      required: false
-      description: Only `jp` is available.
+      required: true
+      description: Country. Only `jp` is available; Vietnam is under `/macro/fdi/vn/*`.
       schema:
         type: string
         enum:
           - jp
-        default: jp
+        example: jp
     - name: quarters
       in: query
       required: false

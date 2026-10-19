@@ -213,6 +213,10 @@
     {
       "source": "/",
       "destination": "/introduction"
+    },
+    {
+      "source": "/api-reference/macro/indicator-—-fdi-table-jp",
+      "destination": "/api-reference/macro/indicators-fdi"
     }
   ]
 }

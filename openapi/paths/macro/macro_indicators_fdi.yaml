@@ -2,21 +2,34 @@ get:
   operationId: macroIndicatorFdi
   tags:
     - Macro
-  summary: Indicator — FDI table (JP)
+  summary: Indicator — FDI table (US/JP/VN)
   description: |
-    Japan's outward and inward foreign direct investment for the two most recent quarters that have data
-    (JETRO publishes with a ~2-month lag, so the columns are not anchored to today), oldest to newest.
-    Rows are the two directions — Outward, then Inward — always both, with `available: false` when a
-    direction has no figure. Values are in million USD as published by JETRO: `values` holds the raw
-    numbers and `display` the formatted strings. Missing periods are null, never 0; a negative value is
-    a net withdrawal. For a longer window use `/macro/fdi/flows`.
+    Foreign direct investment for the United States, Japan and Vietnam over the two most recent quarters,
+    oldest to newest. The columns are the two latest quarters with data in either Japan or Vietnam — not
+    anchored to today, because JETRO publishes about two months after the quarter ends. Each cell holds
+    two metrics, `outward` and `inward`, in million USD (the unit is on `rows[].unit`).
+
+    - **`JP`** (JETRO): outward and inward FDI for the quarter. A negative value is a net withdrawal.
+    - **`VN`** (Foreign Investment Agency, Ministry of Finance): `inward` only — registered capital within
+      the quarter (the three months of that quarter, not year to date). Only complete quarters appear;
+      `outward` is always null.
+    - **`US`**: no source yet — `available: false`, every cell `—`.
+
+    A country without a figure for a quarter returns a null cell (`display` shows `—`), never 0. `values`
+    holds the raw numbers and `display` the formatted strings. `source` names JETRO, the Japanese source.
+    For longer series use `/macro/fdi/flows` (Japan) or `/macro/fdi/vn/flows` (Vietnam).
   x-feature-code: macro_data
+  # Fixed page URL: the API button of the FDI table (By Indicator) links straight here.
+  x-mint:
+    href: /api-reference/macro/indicators-fdi
+    metadata:
+      sidebarTitle: Indicator — FDI table (US/JP/VN)
   x-api-weight: 2
   parameters:
     - name: country
       in: query
       required: false
-      description: Only `jp` is available for now.
+      description: Source country of the JETRO series. Only `jp` is accepted; the response always holds the US, JP and VN rows.
       schema:
         type: string
         enum:
@@ -46,16 +59,31 @@ get:
               metrics:
                 - key: outward
                   label: Outward
-                  unit: Million USD
+                  unit: ''
                 - key: inward
                   label: Inward
-                  unit: Million USD
+                  unit: ''
               columns:
-                - period: 2026-Q1
-                  date: '2026-01-01'
-                - period: 2026-Q2
-                  date: '2026-04-01'
+                - period: Q2 2026
+                  date: '2026-06-30'
+                - period: Q3 2026
+                  date: '2026-09-30'
               rows:
+                - country: US
+                  countryName: United States
+                  available: false
+                  unit: null
+                  values:
+                    - null
+                    - null
+                  display:
+                    - outward: —
+                      inward: —
+                    - outward: —
+                      inward: —
+                  markers:
+                    - {}
+                    - {}
                 - country: JP
                   countryName: Japan
                   available: true
@@ -63,17 +91,33 @@ get:
                   values:
                     - outward: 53261.8
                       inward: 5729.2
-                    - outward: 48110.4
-                      inward: 6120.9
+                    - null
                   display:
                     - outward: 53,261.8
                       inward: 5,729.2
-                    - outward: 48,110.4
-                      inward: 6,120.9
+                    - outward: —
+                      inward: —
                   markers:
                     - {}
                     - {}
-              latestPeriod: 2026-Q2
+                - country: VN
+                  countryName: Vietnam
+                  available: true
+                  unit: Million USD
+                  values:
+                    - outward: null
+                      inward: 19451.5
+                    - outward: null
+                      inward: 15707
+                  display:
+                    - outward: —
+                      inward: 19,451.5
+                    - outward: —
+                      inward: 15,707.0
+                  markers:
+                    - {}
+                    - {}
+              latestPeriod: 2026-Q3
               source: JETRO
               knowledgeAt: '2026-09-10T00:00:00.000Z'
               wasRestated: false

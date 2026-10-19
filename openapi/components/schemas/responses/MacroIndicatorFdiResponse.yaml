@@ -39,8 +39,8 @@ allOf:
                   example: Outward
                 unit:
                   type: string
-                  description: Unit.
-                  example: Million USD
+                  description: Always empty — the unit is on `rows[].unit`.
+                  example: ''
           columns:
             type: array
             items:
@@ -52,13 +52,13 @@ allOf:
                 period:
                   type: string
                   description: Quarter label.
-                  example: 2026-Q2
+                  example: Q3 2026
                 date:
                   type: string
-                  description: Quarter start date.
+                  description: Last day of the quarter.
                   format: date
-                  example: '2026-04-01'
-            description: Oldest to newest.
+                  example: '2026-09-30'
+            description: The two latest quarters with data in Japan or Vietnam, oldest to newest.
           rows:
             type: array
             items:
@@ -71,20 +71,25 @@ allOf:
               properties:
                 country:
                   type: string
-                  description: Country code.
-                  example: JP
+                  description: Country code. Always three rows, in this order.
+                  enum:
+                    - US
+                    - JP
+                    - VN
+                  example: VN
                 countryName:
                   type: string
                   description: Country name.
                   example: Japan
                 available:
                   type: boolean
+                  description: False when the country has no figure in any column (the US for now).
                   example: true
                 unit:
-                  type: &id001
+                  type:
                     - string
                     - 'null'
-                  description: Unit of the row.
+                  description: Unit of the row; null when `available` is false.
                   example: Million USD
                 values:
                   type: array
@@ -96,7 +101,9 @@ allOf:
                       type:
                         - number
                         - 'null'
-                  description: One cell per column, keyed by metric.
+                  description: |
+                    One cell per column, keyed by metric (`outward`, `inward`). A cell is null when the
+                    country has no figure for that quarter. Vietnam's `outward` is always null.
                 display:
                   type: array
                   items:
@@ -110,15 +117,19 @@ allOf:
                     additionalProperties:
                       type: string
           latestPeriod:
-            type: *id001
-            description: Latest quarter with data.
-            example: 2026-Q2
+            type:
+              - string
+              - 'null'
+            description: Latest quarter in the table (`YYYY-Qn`).
+            example: 2026-Q3
           source:
             type: string
-            description: Publisher.
+            description: Publisher of the Japanese series. The Vietnam row comes from the Foreign Investment Agency.
             example: JETRO
           knowledgeAt:
-            type: *id001
+            type:
+              - string
+              - 'null'
             description: When the system learned the figures.
           wasRestated:
             type: boolean

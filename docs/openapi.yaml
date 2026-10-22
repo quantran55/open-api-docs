@@ -49,7 +49,7 @@ tags:
   - name: Market
     description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
   - name: Equities
-    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers.
+    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers — plus Vietnamese stock (HOSE / HNX / UPCoM) daily prices and financial statements.
 paths:
   /openapi/v1/commodities:
     get:
@@ -6385,6 +6385,364 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/vn/equities/{code}/prices:
+    get:
+      operationId: vnEquityPrices
+      tags:
+        - Equities
+      summary: Vietnam equity daily prices
+      description: |
+        Daily closing prices of one Vietnamese stock (HOSE / HNX / UPCoM), oldest to
+        newest. Same route as the Japan endpoint with `market` = `vn`.
+
+        `close` / `volume` are what actually traded that day. `adjustedClose` is the
+        source's corporate-action-adjusted price (falls back to `close`) — use it for
+        charts so the series does not jump at dividends or bonus issues.
+        `adjustedVolume` equals `volume` (volume is not adjusted for Vietnam).
+      x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/equities/vietnam-equity-daily-prices
+      x-api-weight: 3
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+          schema:
+            type: string
+            pattern: ^[A-Za-z0-9]{3}$
+            example: FPT
+        - name: range
+          in: query
+          required: false
+          description: |
+            Window to return. `5d` is the last 5 sessions; `max` is the full history.
+          schema:
+            type: string
+            enum:
+              - 5d
+              - 1m
+              - 3m
+              - 6m
+              - 1y
+              - 3y
+              - 5y
+              - max
+            default: 1y
+      responses:
+        '200':
+          description: Daily price series for the requested window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityPricesResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  range: 1y
+                  from: '2025-10-01'
+                  to: '2026-09-30'
+                  isPartial: false
+                  points:
+                    - date: '2025-10-01'
+                      close: 112500
+                      adjustedClose: 110800
+                      volume: 4210300
+                      adjustedVolume: 4210300
+                      tradingValue: 473658750000
+                    - date: '2026-09-30'
+                      close: 128000
+                      adjustedClose: 128000
+                      volume: 3875600
+                      adjustedVolume: 3875600
+                      tradingValue: 496076800000
+                meta:
+                  source:
+                    - vnsc:/stock-realtime
+                    - vnsc:/stocks/{symbol}/trading/history
+                    - vnsc:/quotes/stocks/{symbol}/history
+                  as_of: '2026-09-30'
+                  unit: VND
+                  classification: RAW
+                  formula_version: vnsc-adjusted-close-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T09:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: An invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is malformed or not in the Vietnam listing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu XYZ
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/vn/equities/{code}/financial-statements:
+    get:
+      operationId: vnEquityFinancialStatements
+      tags:
+        - Equities
+      summary: Vietnam equity financial statements
+      description: |
+        Income statement (TTM + 3 fiscal years) or balance sheet (4 fiscal years, no
+        TTM) of one Vietnamese stock, as line items arranged in a tree. Same route as
+        the Japan endpoint with `market` = `vn`.
+
+        All rows share `columns`; read a figure with `row.values[column.key]`. Column
+        labels are fiscal years (`TTM`, `2025`, `2024`, `2023`). TTM is computed for the
+        income statement only.
+
+        On top of the Japan shape, the Vietnam response carries:
+        - `template` — which line-item layout applies: `bank`, `corporate`,
+          `securities` or `insurance`.
+        - `latestQuarter` — the newest quarter included in TTM (e.g. `Q2 2026`), or
+          `null`.
+
+        `columns` and `rows` are empty while the statement has not been collected yet.
+      x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/equities/vietnam-equity-financial-statements
+      x-api-weight: 3
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+          schema:
+            type: string
+            pattern: ^[A-Za-z0-9]{3}$
+            example: FPT
+        - name: statement
+          in: query
+          required: false
+          description: Which statement to return.
+          schema:
+            type: string
+            enum:
+              - income-statement
+              - balance-sheet
+            default: income-statement
+      responses:
+        '200':
+          description: The requested financial statement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityFinancialStatementsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  statement: income-statement
+                  currency: VND
+                  template: corporate
+                  latestQuarter: Q2 2026
+                  columns:
+                    - key: ttm
+                      label: TTM
+                      periodType: ttm
+                      periodEnd: '2026-06-30'
+                    - key: '2025-12-31'
+                      label: '2025'
+                      periodType: annual
+                      periodEnd: '2025-12-31'
+                  rows:
+                    - key: NetRevenue
+                      label: Net Revenue
+                      unit: VND
+                      values:
+                        ttm: 68512000000000
+                        '2025-12-31': 62850000000000
+                      children: []
+                  dataAsOf: '2026-06-30'
+                  lastUpdatedAt: '2026-10-01T14:00:12.000Z'
+                meta:
+                  source:
+                    - vnsc:/v2/financial-statement/statement
+                  as_of: '2026-06-30'
+                  unit: VND
+                  classification: RAW+COMPUTED
+                  formula_version: vnsc-statement-catalog-v1, vn-fins-ttm-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-02T08:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: An invalid query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is malformed or not in the Vietnam listing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu XYZ
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/market/vn/equities/{code}/netflows:
+    get:
+      operationId: vnEquityNetflows
+      tags:
+        - Equities
+      summary: Vietnam equity investor net flows
+      description: |
+        Buy, sell and net value of one Vietnamese stock traded by foreign investors
+        or by securities companies' proprietary desks, oldest to newest. Values are
+        in VND and include order-matching and put-through trades. Vietnam only.
+
+        `1m` / `3m` return one point per session. `6m` / `1y` return one point per
+        month (sum of that month's sessions; the current month runs up to the latest
+        session).
+      x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/equities/vietnam-equity-investor-net-flows
+      x-api-weight: 2
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+          schema:
+            type: string
+            pattern: ^[A-Za-z0-9]{3}$
+            example: VCB
+        - name: investor
+          in: query
+          required: true
+          description: '`foreign` = foreign investors; `proprietary` = securities companies'' proprietary trading.'
+          schema:
+            type: string
+            enum:
+              - foreign
+              - proprietary
+            example: foreign
+        - name: range
+          in: query
+          required: false
+          description: Window to return, counted back from the latest session.
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 6m
+              - 1y
+            default: 1m
+      responses:
+        '200':
+          description: Net flow series for the requested investor group and window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquityNetflowsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  investor: foreign
+                  range: 1m
+                  resolution: day
+                  currency: VND
+                  asOf: '2026-09-30'
+                  from: '2026-08-31'
+                  availableRanges:
+                    - 1m
+                    - 3m
+                    - 6m
+                    - 1y
+                  points:
+                    - period: '2026-08-31'
+                      buyValue: 154200000000
+                      sellValue: 171850000000
+                      netValue: -17650000000
+                      sessions: 1
+                    - period: '2026-09-30'
+                      buyValue: 182450000000
+                      sellValue: 156320000000
+                      netValue: 26130000000
+                      sessions: 1
+                meta:
+                  source:
+                    - vnsc:/stocks/{symbol}/trading/foreign/history
+                  as_of: '2026-09-30'
+                  unit: VND
+                  classification: RAW
+                  formula_version: vn-netflow-v1
+                  was_restated: false
+                  served_from_cache: true
+                  cache_expires_at: '2026-10-01T09:00:00.000Z'
+                  timestamp: '2026-10-01T08:00:00.000Z'
+        '400':
+          description: An invalid or missing query parameter (`investor` is required).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The stock code is malformed or not in the Vietnam listing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+              example:
+                success: false
+                statusCode: 404
+                error:
+                  code: EQUITY_NOT_FOUND
+                  message: Không tìm thấy mã cổ phiếu XYZ
+                meta:
+                  error: Not Found
+                  statusCode: 404
+                  timestamp: '2026-10-01T08:00:00.000Z'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -13644,6 +14002,385 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/GlobalIndex'
+    EquityPricePoint:
+      type: object
+      description: One trading day.
+      required:
+        - date
+        - close
+        - adjustedClose
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-30'
+        close:
+          type: number
+          description: Raw close — the price actually traded that day.
+          example: 2920
+        adjustedClose:
+          type: number
+          description: Close adjusted for splits to the share base of the latest session. Use it for charts so the line does not jump at splits.
+          example: 2920
+        volume:
+          type:
+            - number
+            - 'null'
+          description: Raw volume — shares actually traded that day.
+          example: 29166700
+        adjustedVolume:
+          type:
+            - number
+            - 'null'
+          description: Volume on the same share base as `adjustedClose` (a 1:4 split multiplies earlier volume by 4).
+          example: 29166700
+        tradingValue:
+          type:
+            - number
+            - 'null'
+          description: Trading value in JPY (unaffected by splits).
+          example: 84918791500
+    EquityPrices:
+      type: object
+      description: Daily price series, oldest to newest.
+      required:
+        - range
+        - isPartial
+        - points
+      properties:
+        range:
+          type: string
+          enum:
+            - 5d
+            - 1m
+            - 3m
+            - 6m
+            - 1y
+            - 3y
+            - 5y
+            - max
+          example: 1y
+        from:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: First date of the window (`null` for `5d` and `max`).
+          example: '2025-10-01'
+        to:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Latest trading date in the series.
+          example: '2026-09-30'
+        isPartial:
+          type: boolean
+          description: '`true` when the requested window is longer than the available history (data starts October 2021).'
+          example: false
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityPricePoint'
+    EquityMeta:
+      description: |
+        Response metadata for the Equities domain. On top of `timestamp`, every equities
+        response says where the numbers came from and how fresh they are.
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+        - type: object
+          properties:
+            source:
+              type: array
+              items:
+                type: string
+              description: Upstream datasets behind the payload (J-Quants, Yahoo Finance).
+              example:
+                - jquants:/v2/equities/bars/daily
+            as_of:
+              type:
+                - string
+                - 'null'
+              description: Date the data refers to (latest trading date, latest fiscal period, …).
+              example: '2026-09-30'
+            unit:
+              type: string
+              description: Currency or unit of the numeric fields (`JPY`, `JPY/share`).
+              example: JPY
+            classification:
+              type: string
+              enum:
+                - RAW
+                - COMPUTED
+                - RAW+COMPUTED
+              description: Whether values are passed through as published, computed by HayInsights, or both.
+              example: RAW+COMPUTED
+            formula_version:
+              type:
+                - string
+                - 'null'
+              description: Version tag of the formulas used for computed fields.
+              example: jp-split-adjust-v1
+            was_restated:
+              type: boolean
+              description: Whether any value was restated after first publication.
+              example: false
+            served_from_cache:
+              type: boolean
+              description: Whether the response was served from cache.
+              example: true
+            cache_expires_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: When the cached copy expires (6 h; 24 h for financial statements).
+              example: '2026-10-01T14:00:00.000Z'
+    EquityPricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityPrices'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityStatementRow:
+      type: object
+      description: One line item. Rows form a tree — `children` are sub-items of this line.
+      required:
+        - key
+        - label
+        - unit
+        - values
+        - children
+      properties:
+        key:
+          type: string
+          example: TotalRevenue
+        label:
+          type: string
+          example: Total Revenue
+        unit:
+          type: string
+          enum:
+            - JPY
+            - JPY/share
+            - shares
+            - ratio
+          example: JPY
+        values:
+          type: object
+          description: Value per column, keyed by `columns[].key`. A period with no figure is `null`.
+          additionalProperties:
+            type:
+              - number
+              - 'null'
+          example:
+            ttm: 51957026000000
+            '2026-03-31': 50684952000000
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityStatementRow'
+    EquityStatementTable:
+      type: object
+      description: |
+        Financial statement as a table: columns are periods, rows are a tree of line
+        items. The income statement has TTM + 3 fiscal years; the balance sheet has 4
+        fiscal years (no TTM). `columns` and `rows` are empty while the statement has not
+        been collected yet.
+      required:
+        - statement
+        - currency
+        - columns
+        - rows
+      properties:
+        statement:
+          type: string
+          enum:
+            - income-statement
+            - balance-sheet
+          example: income-statement
+        currency:
+          type: string
+          example: JPY
+        columns:
+          type: array
+          items:
+            type: object
+            required:
+              - key
+              - label
+              - periodType
+              - periodEnd
+            properties:
+              key:
+                type: string
+                description: Key into each row's `values`.
+                example: ttm
+              label:
+                type: string
+                description: Display label — the company's actual fiscal year end, e.g. `Mar 31, 2026`.
+                example: TTM
+              periodType:
+                type: string
+                enum:
+                  - ttm
+                  - annual
+                example: ttm
+              periodEnd:
+                type: string
+                format: date
+                example: '2026-06-30'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityStatementRow'
+        dataAsOf:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: End of the latest period in the table.
+          example: '2026-06-30'
+        lastUpdatedAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: Last time HayInsights updated the figures.
+          example: '2026-10-01T14:00:12.000Z'
+    EquityFinancialStatementsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityStatementTable'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
+    EquityNetflowPoint:
+      type: object
+      description: One period of investor net flow.
+      required:
+        - period
+        - buyValue
+        - sellValue
+        - netValue
+        - sessions
+      properties:
+        period:
+          type: string
+          description: '`YYYY-MM-DD` for daily resolution (`1m`, `3m`), `YYYY-MM` for monthly resolution (`6m`, `1y`).'
+          example: '2026-09-30'
+        buyValue:
+          type:
+            - number
+            - 'null'
+          description: Buy value in VND (order-matching + put-through). Summed over the month for monthly resolution.
+          example: 182450000000
+        sellValue:
+          type:
+            - number
+            - 'null'
+          description: Sell value in VND (order-matching + put-through). Summed over the month for monthly resolution.
+          example: 156320000000
+        netValue:
+          type: number
+          description: Net value in VND (buy − sell). Positive = net buying.
+          example: 26130000000
+        sessions:
+          type: integer
+          description: Trading sessions with data in the period (always 1 for daily resolution).
+          example: 1
+    EquityNetflows:
+      type: object
+      description: Net flow series of one investor group, oldest to newest.
+      required:
+        - investor
+        - range
+        - resolution
+        - currency
+        - asOf
+        - from
+        - availableRanges
+        - points
+      properties:
+        investor:
+          type: string
+          enum:
+            - foreign
+            - proprietary
+          example: foreign
+        range:
+          type: string
+          enum:
+            - 1m
+            - 3m
+            - 6m
+            - 1y
+          example: 1m
+        resolution:
+          type: string
+          enum:
+            - day
+            - month
+          description: '`day` for `1m` / `3m`, `month` for `6m` / `1y`.'
+          example: day
+        currency:
+          type: string
+          enum:
+            - VND
+          example: VND
+        asOf:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Latest session in the series (`null` when the stock has no flow data).
+          example: '2026-09-30'
+        from:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: First session in the returned window.
+          example: '2026-08-31'
+        availableRanges:
+          type: array
+          description: Ranges that contain at least one session.
+          items:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 6m
+              - 1y
+          example:
+            - 1m
+            - 3m
+            - 6m
+            - 1y
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquityNetflowPoint'
+    EquityNetflowsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/EquityNetflows'
+            meta:
+              $ref: '#/components/schemas/EquityMeta'
     EquitySummary:
       type: object
       description: |
@@ -13936,60 +14673,6 @@ components:
                   - no_price
                   - no_book_value
               example: []
-    EquityMeta:
-      description: |
-        Response metadata for the Equities domain. On top of `timestamp`, every equities
-        response says where the numbers came from and how fresh they are.
-      allOf:
-        - $ref: '#/components/schemas/Meta'
-        - type: object
-          properties:
-            source:
-              type: array
-              items:
-                type: string
-              description: Upstream datasets behind the payload (J-Quants, Yahoo Finance).
-              example:
-                - jquants:/v2/equities/bars/daily
-            as_of:
-              type:
-                - string
-                - 'null'
-              description: Date the data refers to (latest trading date, latest fiscal period, …).
-              example: '2026-09-30'
-            unit:
-              type: string
-              description: Currency or unit of the numeric fields (`JPY`, `JPY/share`).
-              example: JPY
-            classification:
-              type: string
-              enum:
-                - RAW
-                - COMPUTED
-                - RAW+COMPUTED
-              description: Whether values are passed through as published, computed by HayInsights, or both.
-              example: RAW+COMPUTED
-            formula_version:
-              type:
-                - string
-                - 'null'
-              description: Version tag of the formulas used for computed fields.
-              example: jp-split-adjust-v1
-            was_restated:
-              type: boolean
-              description: Whether any value was restated after first publication.
-              example: false
-            served_from_cache:
-              type: boolean
-              description: Whether the response was served from cache.
-              example: true
-            cache_expires_at:
-              type:
-                - string
-                - 'null'
-              format: date-time
-              description: When the cached copy expires (6 h; 24 h for financial statements).
-              example: '2026-10-01T14:00:00.000Z'
     EquitySummaryResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'
@@ -14129,214 +14812,6 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/EquityEvents'
-            meta:
-              $ref: '#/components/schemas/EquityMeta'
-    EquityPricePoint:
-      type: object
-      description: One trading day.
-      required:
-        - date
-        - close
-        - adjustedClose
-      properties:
-        date:
-          type: string
-          format: date
-          example: '2026-09-30'
-        close:
-          type: number
-          description: Raw close — the price actually traded that day.
-          example: 2920
-        adjustedClose:
-          type: number
-          description: Close adjusted for splits to the share base of the latest session. Use it for charts so the line does not jump at splits.
-          example: 2920
-        volume:
-          type:
-            - number
-            - 'null'
-          description: Raw volume — shares actually traded that day.
-          example: 29166700
-        adjustedVolume:
-          type:
-            - number
-            - 'null'
-          description: Volume on the same share base as `adjustedClose` (a 1:4 split multiplies earlier volume by 4).
-          example: 29166700
-        tradingValue:
-          type:
-            - number
-            - 'null'
-          description: Trading value in JPY (unaffected by splits).
-          example: 84918791500
-    EquityPrices:
-      type: object
-      description: Daily price series, oldest to newest.
-      required:
-        - range
-        - isPartial
-        - points
-      properties:
-        range:
-          type: string
-          enum:
-            - 5d
-            - 1m
-            - 3m
-            - 6m
-            - 1y
-            - 3y
-            - 5y
-            - max
-          example: 1y
-        from:
-          type:
-            - string
-            - 'null'
-          format: date
-          description: First date of the window (`null` for `5d` and `max`).
-          example: '2025-10-01'
-        to:
-          type:
-            - string
-            - 'null'
-          format: date
-          description: Latest trading date in the series.
-          example: '2026-09-30'
-        isPartial:
-          type: boolean
-          description: '`true` when the requested window is longer than the available history (data starts October 2021).'
-          example: false
-        points:
-          type: array
-          items:
-            $ref: '#/components/schemas/EquityPricePoint'
-    EquityPricesResponse:
-      allOf:
-        - $ref: '#/components/schemas/EnvelopeBase'
-        - type: object
-          required:
-            - data
-          properties:
-            data:
-              $ref: '#/components/schemas/EquityPrices'
-            meta:
-              $ref: '#/components/schemas/EquityMeta'
-    EquityStatementRow:
-      type: object
-      description: One line item. Rows form a tree — `children` are sub-items of this line.
-      required:
-        - key
-        - label
-        - unit
-        - values
-        - children
-      properties:
-        key:
-          type: string
-          example: TotalRevenue
-        label:
-          type: string
-          example: Total Revenue
-        unit:
-          type: string
-          enum:
-            - JPY
-            - JPY/share
-            - shares
-            - ratio
-          example: JPY
-        values:
-          type: object
-          description: Value per column, keyed by `columns[].key`. A period with no figure is `null`.
-          additionalProperties:
-            type:
-              - number
-              - 'null'
-          example:
-            ttm: 51957026000000
-            '2026-03-31': 50684952000000
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/EquityStatementRow'
-    EquityStatementTable:
-      type: object
-      description: |
-        Financial statement as a table: columns are periods, rows are a tree of line
-        items. The income statement has TTM + 3 fiscal years; the balance sheet has 4
-        fiscal years (no TTM). `columns` and `rows` are empty while the statement has not
-        been collected yet.
-      required:
-        - statement
-        - currency
-        - columns
-        - rows
-      properties:
-        statement:
-          type: string
-          enum:
-            - income-statement
-            - balance-sheet
-          example: income-statement
-        currency:
-          type: string
-          example: JPY
-        columns:
-          type: array
-          items:
-            type: object
-            required:
-              - key
-              - label
-              - periodType
-              - periodEnd
-            properties:
-              key:
-                type: string
-                description: Key into each row's `values`.
-                example: ttm
-              label:
-                type: string
-                description: Display label — the company's actual fiscal year end, e.g. `Mar 31, 2026`.
-                example: TTM
-              periodType:
-                type: string
-                enum:
-                  - ttm
-                  - annual
-                example: ttm
-              periodEnd:
-                type: string
-                format: date
-                example: '2026-06-30'
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/EquityStatementRow'
-        dataAsOf:
-          type:
-            - string
-            - 'null'
-          format: date
-          description: End of the latest period in the table.
-          example: '2026-06-30'
-        lastUpdatedAt:
-          type:
-            - string
-            - 'null'
-          format: date-time
-          description: Last time HayInsights updated the figures.
-          example: '2026-10-01T14:00:12.000Z'
-    EquityFinancialStatementsResponse:
-      allOf:
-        - $ref: '#/components/schemas/EnvelopeBase'
-        - type: object
-          required:
-            - data
-          properties:
-            data:
-              $ref: '#/components/schemas/EquityStatementTable'
             meta:
               $ref: '#/components/schemas/EquityMeta'
     EquityRelatedStocks:

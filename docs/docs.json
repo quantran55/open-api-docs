@@ -147,7 +147,10 @@
               "GET /openapi/v1/market/{market}/equities/{code}/events",
               "GET /openapi/v1/market/{market}/equities/{code}/prices",
               "GET /openapi/v1/market/{market}/equities/{code}/financial-statements",
-              "GET /openapi/v1/market/{market}/equities/{code}/related-stocks"
+              "GET /openapi/v1/market/{market}/equities/{code}/related-stocks",
+              "GET /openapi/v1/market/vn/equities/{code}/prices",
+              "GET /openapi/v1/market/vn/equities/{code}/financial-statements",
+              "GET /openapi/v1/market/vn/equities/{code}/netflows"
             ]
           }
         ]

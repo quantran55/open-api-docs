@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        $ref: "../equities/EquityNetflows.yaml"
+      meta:
+        $ref: "../equities/EquityMeta.yaml"

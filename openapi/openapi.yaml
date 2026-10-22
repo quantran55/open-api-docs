@@ -284,6 +284,8 @@ paths:
     $ref: "./paths/equities/market_vn_equities_{code}_prices.yaml"
   /openapi/v1/market/vn/equities/{code}/financial-statements:
     $ref: "./paths/equities/market_vn_equities_{code}_financial-statements.yaml"
+  /openapi/v1/market/vn/equities/{code}/netflows:
+    $ref: "./paths/equities/market_vn_equities_{code}_netflows.yaml"
   /openapi/v1/market/{market}/equities/{code}:
     $ref: "./paths/equities/market_{market}_equities_{code}.yaml"
   /openapi/v1/market/{market}/equities/{code}/events:

@@ -1,0 +1,54 @@
+type: object
+description: Net flow series of one investor group, oldest to newest.
+required:
+  - investor
+  - range
+  - resolution
+  - currency
+  - asOf
+  - from
+  - availableRanges
+  - points
+properties:
+  investor:
+    type: string
+    enum: [foreign, proprietary]
+    example: foreign
+  range:
+    type: string
+    enum: [1m, 3m, 6m, 1y]
+    example: 1m
+  resolution:
+    type: string
+    enum: [day, month]
+    description: "`day` for `1m` / `3m`, `month` for `6m` / `1y`."
+    example: day
+  currency:
+    type: string
+    enum: [VND]
+    example: VND
+  asOf:
+    type:
+      - string
+      - "null"
+    format: date
+    description: Latest session in the series (`null` when the stock has no flow data).
+    example: "2026-09-30"
+  from:
+    type:
+      - string
+      - "null"
+    format: date
+    description: First session in the returned window.
+    example: "2026-08-31"
+  availableRanges:
+    type: array
+    description: Ranges that contain at least one session.
+    items:
+      type: string
+      enum: [1m, 3m, 6m, 1y]
+    example: [1m, 3m, 6m, 1y]
+  points:
+    type: array
+    items:
+      $ref: "./EquityNetflowPoint.yaml"

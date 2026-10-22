@@ -1,0 +1,113 @@
+get:
+  operationId: vnEquityNetflows
+  tags:
+    - Equities
+  summary: Vietnam equity investor net flows
+  description: |
+    Buy, sell and net value of one Vietnamese stock traded by foreign investors
+    or by securities companies' proprietary desks, oldest to newest. Values are
+    in VND and include order-matching and put-through trades. Vietnam only.
+
+    `1m` / `3m` return one point per session. `6m` / `1y` return one point per
+    month (sum of that month's sessions; the current month runs up to the latest
+    session).
+  x-feature-code: macro_data
+  # Fixed page URL: the Vietnam stock detail net-flow charts' API buttons link straight here.
+  x-mint:
+    href: /api-reference/equities/vietnam-equity-investor-net-flows
+  x-api-weight: 2
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9]{3}$"
+        example: VCB
+    - name: investor
+      in: query
+      required: true
+      description: "`foreign` = foreign investors; `proprietary` = securities companies' proprietary trading."
+      schema:
+        type: string
+        enum: [foreign, proprietary]
+        example: foreign
+    - name: range
+      in: query
+      required: false
+      description: Window to return, counted back from the latest session.
+      schema:
+        type: string
+        enum: [1m, 3m, 6m, 1y]
+        default: 1m
+  responses:
+    "200":
+      description: Net flow series for the requested investor group and window.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityNetflowsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              investor: foreign
+              range: 1m
+              resolution: day
+              currency: VND
+              asOf: "2026-09-30"
+              from: "2026-08-31"
+              availableRanges: [1m, 3m, 6m, 1y]
+              points:
+                - period: "2026-08-31"
+                  buyValue: 154200000000
+                  sellValue: 171850000000
+                  netValue: -17650000000
+                  sessions: 1
+                - period: "2026-09-30"
+                  buyValue: 182450000000
+                  sellValue: 156320000000
+                  netValue: 26130000000
+                  sessions: 1
+            meta:
+              source:
+                - vnsc:/stocks/{symbol}/trading/foreign/history
+              as_of: "2026-09-30"
+              unit: VND
+              classification: RAW
+              formula_version: vn-netflow-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-01T09:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: An invalid or missing query parameter (`investor` is required).
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is malformed or not in the Vietnam listing.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu XYZ
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

@@ -1,0 +1,33 @@
+type: object
+description: One period of investor net flow.
+required:
+  - period
+  - buyValue
+  - sellValue
+  - netValue
+  - sessions
+properties:
+  period:
+    type: string
+    description: "`YYYY-MM-DD` for daily resolution (`1m`, `3m`), `YYYY-MM` for monthly resolution (`6m`, `1y`)."
+    example: "2026-09-30"
+  buyValue:
+    type:
+      - number
+      - "null"
+    description: Buy value in VND (order-matching + put-through). Summed over the month for monthly resolution.
+    example: 182450000000
+  sellValue:
+    type:
+      - number
+      - "null"
+    description: Sell value in VND (order-matching + put-through). Summed over the month for monthly resolution.
+    example: 156320000000
+  netValue:
+    type: number
+    description: Net value in VND (buy − sell). Positive = net buying.
+    example: 26130000000
+  sessions:
+    type: integer
+    description: Trading sessions with data in the period (always 1 for daily resolution).
+    example: 1

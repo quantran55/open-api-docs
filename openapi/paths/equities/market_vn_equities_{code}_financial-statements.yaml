@@ -1,0 +1,118 @@
+get:
+  operationId: vnEquityFinancialStatements
+  tags:
+    - Equities
+  summary: Vietnam equity financial statements
+  description: |
+    Income statement (TTM + 3 fiscal years) or balance sheet (4 fiscal years, no
+    TTM) of one Vietnamese stock, as line items arranged in a tree. Same route as
+    the Japan endpoint with `market` = `vn`.
+
+    All rows share `columns`; read a figure with `row.values[column.key]`. Column
+    labels are fiscal years (`TTM`, `2025`, `2024`, `2023`). TTM is computed for the
+    income statement only.
+
+    On top of the Japan shape, the Vietnam response carries:
+    - `template` — which line-item layout applies: `bank`, `corporate`,
+      `securities` or `insurance`.
+    - `latestQuarter` — the newest quarter included in TTM (e.g. `Q2 2026`), or
+      `null`.
+
+    `columns` and `rows` are empty while the statement has not been collected yet.
+  x-feature-code: macro_data
+  # Fixed page URL: the Vietnam stock detail Financials tab's API button links straight here.
+  x-mint:
+    href: /api-reference/equities/vietnam-equity-financial-statements
+  x-api-weight: 3
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9]{3}$"
+        example: FPT
+    - name: statement
+      in: query
+      required: false
+      description: Which statement to return.
+      schema:
+        type: string
+        enum: [income-statement, balance-sheet]
+        default: income-statement
+  responses:
+    "200":
+      description: The requested financial statement.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityFinancialStatementsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              statement: income-statement
+              currency: VND
+              template: corporate
+              latestQuarter: Q2 2026
+              columns:
+                - key: ttm
+                  label: TTM
+                  periodType: ttm
+                  periodEnd: "2026-06-30"
+                - key: "2025-12-31"
+                  label: "2025"
+                  periodType: annual
+                  periodEnd: "2025-12-31"
+              rows:
+                - key: NetRevenue
+                  label: Net Revenue
+                  unit: VND
+                  values:
+                    ttm: 68512000000000
+                    "2025-12-31": 62850000000000
+                  children: []
+              dataAsOf: "2026-06-30"
+              lastUpdatedAt: "2026-10-01T14:00:12.000Z"
+            meta:
+              source:
+                - vnsc:/v2/financial-statement/statement
+              as_of: "2026-06-30"
+              unit: VND
+              classification: RAW+COMPUTED
+              formula_version: vnsc-statement-catalog-v1, vn-fins-ttm-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-02T08:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: An invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is malformed or not in the Vietnam listing.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu XYZ
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

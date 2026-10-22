@@ -84,7 +84,7 @@ tags:
   - name: Market
     description: Index snapshots and global index closes — levels and daily moves for S&P 500, Nasdaq, Nikkei, VN-Index and others.
   - name: Equities
-    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers.
+    description: Japanese stock detail (Tokyo Stock Exchange) — end-of-day snapshot, corporate events, daily prices, financial statements and sector peers — plus Vietnamese stock (HOSE / HNX / UPCoM) daily prices and financial statements.
 
 x-tagGroups:
   - name: Market Data
@@ -277,6 +277,13 @@ paths:
     $ref: "./paths/market/market_global-indices.yaml"
 
   # ── Equities ───────────────────────────────────────────────────────────
+  # Vietnam: same backend route with market = vn, but its own pages (fixed URLs
+  # via x-mint.href) so the app's VN and JP API buttons link to different docs.
+  # Concrete `vn` paths BEFORE the `{market}` ones.
+  /openapi/v1/market/vn/equities/{code}/prices:
+    $ref: "./paths/equities/market_vn_equities_{code}_prices.yaml"
+  /openapi/v1/market/vn/equities/{code}/financial-statements:
+    $ref: "./paths/equities/market_vn_equities_{code}_financial-statements.yaml"
   /openapi/v1/market/{market}/equities/{code}:
     $ref: "./paths/equities/market_{market}_equities_{code}.yaml"
   /openapi/v1/market/{market}/equities/{code}/events:

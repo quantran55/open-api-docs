@@ -7,6 +7,10 @@ get:
     Quarterly central-government debt expressed as a percentage of GDP for a
     country, with the year-over-year change in the ratio.
   x-feature-code: macro_data
+  # Fixed page URL: the summary contains "%", which Mintlify leaves unencoded in the generated
+  # slug, so the sidebar link hit Cloudflare's 400 Bad Request.
+  x-mint:
+    href: /api-reference/macro/central-government-debt
   x-api-weight: 2
   parameters:
     - name: country

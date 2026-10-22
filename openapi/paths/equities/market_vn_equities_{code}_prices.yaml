@@ -1,0 +1,107 @@
+get:
+  operationId: vnEquityPrices
+  tags:
+    - Equities
+  summary: Vietnam equity daily prices
+  description: |
+    Daily closing prices of one Vietnamese stock (HOSE / HNX / UPCoM), oldest to
+    newest. Same route as the Japan endpoint with `market` = `vn`.
+
+    `close` / `volume` are what actually traded that day. `adjustedClose` is the
+    source's corporate-action-adjusted price (falls back to `close`) — use it for
+    charts so the series does not jump at dividends or bonus issues.
+    `adjustedVolume` equals `volume` (volume is not adjusted for Vietnam).
+  x-feature-code: macro_data
+  # Fixed page URL: the Vietnam stock detail price chart's API button links straight here.
+  x-mint:
+    href: /api-reference/equities/vietnam-equity-daily-prices
+  x-api-weight: 3
+  parameters:
+    - name: code
+      in: path
+      required: true
+      description: Stock code — the 3-character ticker (`FPT`, `VCB`, `A32`). Case-insensitive.
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9]{3}$"
+        example: FPT
+    - name: range
+      in: query
+      required: false
+      description: |
+        Window to return. `5d` is the last 5 sessions; `max` is the full history.
+      schema:
+        type: string
+        enum: [5d, 1m, 3m, 6m, 1y, 3y, 5y, max]
+        default: 1y
+  responses:
+    "200":
+      description: Daily price series for the requested window.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/EquityPricesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              range: 1y
+              from: "2025-10-01"
+              to: "2026-09-30"
+              isPartial: false
+              points:
+                - date: "2025-10-01"
+                  close: 112500
+                  adjustedClose: 110800
+                  volume: 4210300
+                  adjustedVolume: 4210300
+                  tradingValue: 473658750000
+                - date: "2026-09-30"
+                  close: 128000
+                  adjustedClose: 128000
+                  volume: 3875600
+                  adjustedVolume: 3875600
+                  tradingValue: 496076800000
+            meta:
+              source:
+                - vnsc:/stock-realtime
+                - vnsc:/stocks/{symbol}/trading/history
+                - vnsc:/quotes/stocks/{symbol}/history
+              as_of: "2026-09-30"
+              unit: VND
+              classification: RAW
+              formula_version: vnsc-adjusted-close-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-10-01T09:00:00.000Z"
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "400":
+      description: An invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "404":
+      description: The stock code is malformed or not in the Vietnam listing.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/common/ErrorBody.yaml"
+          example:
+            success: false
+            statusCode: 404
+            error:
+              code: EQUITY_NOT_FOUND
+              message: Không tìm thấy mã cổ phiếu XYZ
+            meta:
+              error: Not Found
+              statusCode: 404
+              timestamp: "2026-10-01T08:00:00.000Z"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

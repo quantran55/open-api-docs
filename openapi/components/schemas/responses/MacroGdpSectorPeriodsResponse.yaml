@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        $ref: "../macro/GdpSectorPeriods.yaml"
+      meta:
+        $ref: "../macro/GdpSectorMeta.yaml"

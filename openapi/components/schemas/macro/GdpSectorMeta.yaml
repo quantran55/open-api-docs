@@ -1,0 +1,87 @@
+description: |
+  Response metadata for Vietnam GDP by sector: where the numbers come from, their units,
+  which fields HayInsights computes, and how fresh the response is.
+allOf:
+  - $ref: "../common/Meta.yaml"
+  - type: object
+    properties:
+      source:
+        type: string
+        description: Data provider. NSO's terms require citing www.nso.gov.vn when reusing the data.
+        example: National Statistics Office of Viet Nam (www.nso.gov.vn)
+      source_url:
+        type: string
+        format: uri
+        description: The NSO report for the period, or NSO's national-accounts page for annual data.
+        example: https://www.nso.gov.vn/tin-tuc-thong-ke/2026/10/bao-cao-tinh-hinh-kinh-te-xa-hoi-quy-iii-va-9-thang-nam-2026/
+      as_of:
+        type: ["string", "null"]
+        description: Latest period with data for `type`.
+        example: 2026-Q3
+      knowledge_at:
+        type: ["string", "null"]
+        format: date-time
+        description: Same as `data.knowledgeAt` (single-period endpoint only).
+        example: "2026-10-03T01:00:06.000Z"
+      unit:
+        type: object
+        description: Unit of each value field — `VND` with scale 1e9 (billion VND) or `PERCENT`.
+        additionalProperties:
+          type: object
+          properties:
+            unit:
+              type: string
+              example: VND
+            scale:
+              type: number
+              example: 1000000000
+            display:
+              type: string
+              example: Billion VND
+      display_unit:
+        type: string
+        description: Unit label for the two value columns.
+        example: Billion VND
+      classification:
+        type: object
+        description: |
+          How each field was produced: values and shares as NSO published them (RAW);
+          growth converted to percent when NSO prints an index (DERIVED); every field of a
+          derived period is COMPUTED.
+        additionalProperties:
+          type: string
+          enum:
+            - RAW
+            - DERIVED
+            - COMPUTED
+        example:
+          currentPrice: RAW
+          constantPrice: RAW
+          shareOfGdp: RAW
+          yoyGrowth: DERIVED
+      classification_derived_points:
+        type: object
+        description: "Series endpoint only — classification that applies to points with `derived: true`."
+        additionalProperties:
+          type: string
+        example:
+          currentPrice: COMPUTED
+          constantPrice: COMPUTED
+          shareOfGdp: COMPUTED
+          yoyGrowth: COMPUTED
+      formula_version:
+        type: string
+        description: Version tag of the HayInsights transformations.
+        example: gdp-vn-sector-v1
+      was_restated:
+        type: boolean
+        description: Same as `data.wasRestated` (single-period endpoint only).
+        example: false
+      served_from_cache:
+        type: boolean
+        example: false
+      cache_expires_at:
+        type: ["string", "null"]
+        format: date-time
+        description: When the cached copy expires (24 h; dropped as soon as new data is collected).
+        example: "2026-11-03T07:10:49.165Z"

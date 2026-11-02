@@ -1,0 +1,55 @@
+type: object
+description: One period of a GDP-by-sector series and the release its numbers come from.
+required:
+  - period
+  - label
+  - estimateStatus
+  - priceBasis
+  - knowledgeAt
+  - wasRestated
+  - derived
+properties:
+  period:
+    type: string
+    description: "Period code, as accepted by `period`: `2026-Q3` (quarter), `2026-09` (year-to-date), `2025` (annual)."
+    example: 2026-Q3
+  label:
+    type: string
+    description: "Display label: `Q3 2026`, `9M 2026`, `FY 2025` (year-to-date, 12 months), `2025` (annual)."
+    example: Q3 2026
+  estimateStatus:
+    type: string
+    enum:
+      - estimate
+      - preliminary
+      - official
+    description: |
+      How final the numbers are, as NSO labels them: `estimate` (first release),
+      `preliminary` (revised in the next report, or a year marked preliminary),
+      `official` (annual years published without a label). If cells differ, the least final
+      label wins.
+    example: estimate
+  priceBasis:
+    type: ["string", "null"]
+    enum:
+      - constant_2010
+      - constant_2020
+      - null
+    description: Base year of `constantPrice` and `yoyGrowth`. 2010 up to Q4 2025, 2020 from Q1 2026; annual data uses 2010.
+    example: constant_2020
+  knowledgeAt:
+    type: string
+    format: date-time
+    description: When NSO published the release returned (UTC).
+    example: "2026-10-03T01:00:06.000Z"
+  wasRestated:
+    type: boolean
+    description: NSO has revised this period's numbers since the first release (or the period is derived).
+    example: false
+  derived:
+    type: boolean
+    description: |
+      `true` when the numbers are computed by HayInsights rather than printed by NSO.
+      Today only Q1 2026: its latest revision is published only as the preliminary 6-month
+      figure minus the preliminary Q2 figure (Q3 2026 report).
+    example: false

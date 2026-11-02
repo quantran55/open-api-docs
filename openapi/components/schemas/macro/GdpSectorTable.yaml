@@ -1,0 +1,129 @@
+type: object
+description: |
+  Vietnam GDP by sector for one period. When the period has no data, `sectors` is empty,
+  the period fields are `null` and `latestPeriod` is still set.
+required:
+  - country
+  - type
+  - period
+  - label
+  - latestPeriod
+  - estimateStatus
+  - priceBasis
+  - knowledgeAt
+  - wasRestated
+  - derived
+  - derivedFrom
+  - report
+  - sectors
+properties:
+  country:
+    type: string
+    enum:
+      - vn
+    example: vn
+  type:
+    type: string
+    enum:
+      - quarter
+      - ytd
+      - annual
+    example: quarter
+  period:
+    type: ["string", "null"]
+    description: Period returned — the one requested, or the latest when `period` is omitted.
+    example: 2026-Q3
+  label:
+    type: ["string", "null"]
+    example: Q3 2026
+  latestPeriod:
+    type: ["string", "null"]
+    description: Latest period with data for `type` (the table's "As of").
+    example: 2026-Q3
+  estimateStatus:
+    type: ["string", "null"]
+    enum:
+      - estimate
+      - preliminary
+      - official
+      - null
+    description: See `GdpSectorPeriodSummary.estimateStatus`.
+    example: estimate
+  priceBasis:
+    type: ["string", "null"]
+    enum:
+      - constant_2010
+      - constant_2020
+      - null
+    example: constant_2020
+  knowledgeAt:
+    type: ["string", "null"]
+    format: date-time
+    example: "2026-10-03T01:00:06.000Z"
+  wasRestated:
+    type: boolean
+    example: false
+  derived:
+    type: boolean
+    example: false
+  derivedFrom:
+    type: array
+    description: The two source periods when `derived` is `true` (6-month preliminary and Q2 preliminary); empty otherwise.
+    items:
+      type: object
+      required:
+        - type
+        - period
+        - label
+        - estimateStatus
+        - knowledgeAt
+      properties:
+        type:
+          type: string
+          enum:
+            - quarter
+            - ytd
+          example: ytd
+        period:
+          type: string
+          example: 2026-06
+        label:
+          type: string
+          example: 6M 2026
+        estimateStatus:
+          type: string
+          example: preliminary
+        knowledgeAt:
+          type: string
+          format: date-time
+          example: "2026-10-03T01:00:06.000Z"
+  report:
+    type: ["object", "null"]
+    description: The NSO quarterly report the numbers come from; `null` for `annual` (statistical database).
+    required:
+      - period
+      - label
+      - url
+      - publishedAt
+    properties:
+      period:
+        type: string
+        example: 2026-Q3
+      label:
+        type: string
+        example: Q3 2026
+      url:
+        type: ["string", "null"]
+        format: uri
+        example: https://www.nso.gov.vn/tin-tuc-thong-ke/2026/10/bao-cao-tinh-hinh-kinh-te-xa-hoi-quy-iii-va-9-thang-nam-2026/
+      publishedAt:
+        type: ["string", "null"]
+        format: date-time
+        example: "2026-10-03T01:00:06.000Z"
+  sectors:
+    type: array
+    description: |
+      The 28 rows in NSO's order. With `type=annual`, `agriculture`, `forestry`, `fishery`
+      and `industry` are always `null` — NSO's annual tables do not publish them.
+    items:
+      $ref: "./GdpSectorRow.yaml"

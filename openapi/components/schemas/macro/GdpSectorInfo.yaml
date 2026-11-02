@@ -1,0 +1,39 @@
+type: object
+description: Name and position of one of the 28 rows, in the order NSO prints them (VSIC 2018).
+required:
+  - sectorCode
+  - sectorName
+  - sectorShortName
+  - sectorNameVi
+  - level
+  - parentCode
+properties:
+  sectorCode:
+    type: string
+    description: |
+      Stable row code: `total`, the three economic sectors `agriculture_forestry_fishing`,
+      `industry_construction`, `services`, `product_taxes_less_subsidies`, and the industries
+      under them (e.g. `manufacturing`, `construction`, `real_estate`).
+    example: manufacturing
+  sectorName:
+    type: string
+    description: Full English name (ISIC wording).
+    example: Manufacturing
+  sectorShortName:
+    type: string
+    description: Short English name for table cells and chart legends.
+    example: Manufacturing
+  sectorNameVi:
+    type: string
+    description: Vietnamese name as NSO prints it.
+    example: Công nghiệp chế biến, chế tạo
+  level:
+    type: integer
+    minimum: 0
+    maximum: 3
+    description: "0 = GDP, 1 = economic sectors and product taxes, 2 = industries, 3 = sub-industries of industry. Children add up to their parent (source rounding under 1 billion VND)."
+    example: 3
+  parentCode:
+    type: ["string", "null"]
+    description: Code of the direct parent row; `null` for `total`.
+    example: industry

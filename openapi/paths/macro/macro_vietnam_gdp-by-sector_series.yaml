@@ -1,0 +1,146 @@
+get:
+  operationId: macroVietnamGdpBySectorSeries
+  tags:
+    - Macro
+  summary: Vietnam GDP by sector — time series
+  description: |
+    Every period of `type` in one call, oldest first — for charts, instead of one call
+    per period. Each point carries the period fields of the
+    [periods](/api-reference/macro/vietnam-gdp-by-sector-periods) endpoint and the four
+    values of the requested `sectors`; row names are listed once in `data.sectors`.
+    Every point equals the [single-period](/api-reference/macro/vietnam-gdp-by-sector)
+    response for that period, including the derived Q1 2026.
+
+    `priceBasis` changes from `constant_2010` to `constant_2020` at Q1 2026: do not chain
+    `constantPrice` levels across the change; `yoyGrowth` stays comparable.
+
+    Ask only for the rows you plot: all 28 rows of the quarterly series is about 100 KB,
+    three rows about 14 KB.
+
+    Source: National Statistics Office of Viet Nam (www.nso.gov.vn).
+  x-feature-code: macro_data
+  x-mint:
+    href: /api-reference/macro/vietnam-gdp-by-sector-series
+  x-api-weight: 2
+  parameters:
+    - name: type
+      in: query
+      required: false
+      description: |
+        Period type. Case-insensitive.
+
+        | Value | Periods | Source |
+        | --- | --- | --- |
+        | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+        | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
+        | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
+
+        Quarterly and year-to-date data start in 2021, the first year NSO reported on its
+        revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
+        and are not comparable. `annual` covers 2010 onward on the revised scale.
+      schema:
+        type: string
+        enum:
+          - quarter
+          - ytd
+          - annual
+        default: quarter
+        example: quarter
+    - name: from
+      in: query
+      required: false
+      description: First period (inclusive), in the `period` format of `type` (`2021-Q1`, `2021-06`, `2016`). Omit to start from the oldest.
+      schema:
+        type: string
+        example: 2021-Q1
+    - name: to
+      in: query
+      required: false
+      description: Last period (inclusive). Omit to end at the latest.
+      schema:
+        type: string
+        example: 2026-Q3
+    - name: sectors
+      in: query
+      required: false
+      description: Comma-separated `sectorCode`s, e.g. `total,manufacturing,services`. Omit for all 28 rows. An unknown code returns 400.
+      schema:
+        type: string
+        example: total,manufacturing
+  responses:
+    "200":
+      description: The series, oldest first.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroGdpSectorSeriesResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              type: quarter
+              latestPeriod: 2026-Q3
+              sectors:
+                - sectorCode: total
+                  sectorName: Gross domestic product
+                  sectorShortName: Gross domestic product
+                  sectorNameVi: Tổng số
+                  level: 0
+                  parentCode: null
+              points:
+                - period: 2021-Q1
+                  label: Q1 2021
+                  estimateStatus: preliminary
+                  priceBasis: constant_2010
+                  knowledgeAt: "2021-06-29T01:41:48.000Z"
+                  wasRestated: true
+                  derived: false
+                  sectors:
+                    - sectorCode: total
+                      currentPrice: 1953117
+                      constantPrice: 1194374
+                      shareOfGdp: 100
+                      yoyGrowth: 4.650437
+                - period: 2026-Q3
+                  label: Q3 2026
+                  estimateStatus: estimate
+                  priceBasis: constant_2020
+                  knowledgeAt: "2026-10-03T01:00:06.000Z"
+                  wasRestated: false
+                  derived: false
+                  sectors:
+                    - sectorCode: total
+                      currentPrice: 3698333.989507
+                      constantPrice: 3004778.442597
+                      shareOfGdp: 100
+                      yoyGrowth: 9.947988
+            meta:
+              source: National Statistics Office of Viet Nam (www.nso.gov.vn)
+              source_url: https://www.nso.gov.vn
+              as_of: 2026-Q3
+              display_unit: Billion VND
+              classification:
+                currentPrice: RAW
+                constantPrice: RAW
+                shareOfGdp: RAW
+                yoyGrowth: DERIVED
+              classification_derived_points:
+                currentPrice: COMPUTED
+                constantPrice: COMPUTED
+                shareOfGdp: COMPUTED
+                yoyGrowth: COMPUTED
+              formula_version: gdp-vn-sector-v1
+              served_from_cache: false
+              cache_expires_at: "2026-11-03T07:10:49.165Z"
+              timestamp: "2026-11-02T07:10:49.165Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

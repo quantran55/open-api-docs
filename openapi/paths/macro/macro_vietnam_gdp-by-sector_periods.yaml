@@ -1,0 +1,93 @@
+get:
+  operationId: macroVietnamGdpBySectorPeriods
+  tags:
+    - Macro
+  summary: Vietnam GDP by sector — available periods
+  description: |
+    Periods that have data for `type`, newest first — for a period picker. Each period
+    carries its `estimateStatus`, the constant-price base (`priceBasis`), when NSO
+    published the release returned (`knowledgeAt`), and whether it is derived.
+
+    Source: National Statistics Office of Viet Nam (www.nso.gov.vn).
+  x-feature-code: macro_data
+  x-mint:
+    href: /api-reference/macro/vietnam-gdp-by-sector-periods
+  x-api-weight: 1
+  parameters:
+    - name: type
+      in: query
+      required: false
+      description: |
+        Period type. Case-insensitive.
+
+        | Value | Periods | Source |
+        | --- | --- | --- |
+        | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+        | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
+        | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
+
+        Quarterly and year-to-date data start in 2021, the first year NSO reported on its
+        revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
+        and are not comparable. `annual` covers 2010 onward on the revised scale.
+      schema:
+        type: string
+        enum:
+          - quarter
+          - ytd
+          - annual
+        default: quarter
+        example: quarter
+  responses:
+    "200":
+      description: Periods with data, newest first.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroGdpSectorPeriodsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              type: quarter
+              latestPeriod: 2026-Q3
+              periods:
+                - period: 2026-Q3
+                  label: Q3 2026
+                  estimateStatus: estimate
+                  priceBasis: constant_2020
+                  knowledgeAt: "2026-10-03T01:00:06.000Z"
+                  wasRestated: false
+                  derived: false
+                - period: 2026-Q2
+                  label: Q2 2026
+                  estimateStatus: preliminary
+                  priceBasis: constant_2020
+                  knowledgeAt: "2026-10-03T01:00:06.000Z"
+                  wasRestated: true
+                  derived: false
+                - period: 2026-Q1
+                  label: Q1 2026
+                  estimateStatus: preliminary
+                  priceBasis: constant_2020
+                  knowledgeAt: "2026-10-03T01:00:06.000Z"
+                  wasRestated: true
+                  derived: true
+            meta:
+              source: National Statistics Office of Viet Nam (www.nso.gov.vn)
+              source_url: https://www.nso.gov.vn
+              as_of: 2026-Q3
+              formula_version: gdp-vn-sector-v1
+              served_from_cache: false
+              cache_expires_at: "2026-11-03T07:10:50.254Z"
+              timestamp: "2026-11-02T07:10:50.254Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

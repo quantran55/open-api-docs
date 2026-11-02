@@ -1,0 +1,27 @@
+type: object
+description: Periods that have data for `type`, newest first.
+required:
+  - country
+  - type
+  - latestPeriod
+  - periods
+properties:
+  country:
+    type: string
+    enum:
+      - vn
+    example: vn
+  type:
+    type: string
+    enum:
+      - quarter
+      - ytd
+      - annual
+    example: quarter
+  latestPeriod:
+    type: ["string", "null"]
+    example: 2026-Q3
+  periods:
+    type: array
+    items:
+      $ref: "./GdpSectorPeriodSummary.yaml"

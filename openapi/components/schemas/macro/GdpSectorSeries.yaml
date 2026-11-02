@@ -1,0 +1,44 @@
+type: object
+description: Every period of `type` in one response, oldest first, for charts.
+required:
+  - country
+  - type
+  - latestPeriod
+  - sectors
+  - points
+properties:
+  country:
+    type: string
+    enum:
+      - vn
+    example: vn
+  type:
+    type: string
+    enum:
+      - quarter
+      - ytd
+      - annual
+    example: quarter
+  latestPeriod:
+    type: ["string", "null"]
+    example: 2026-Q3
+  sectors:
+    type: array
+    description: The requested rows, in NSO's order. Names are listed here once, not in every point.
+    items:
+      $ref: "./GdpSectorInfo.yaml"
+  points:
+    type: array
+    description: One entry per period, oldest first. Each point equals the single-period response for that period.
+    items:
+      allOf:
+        - $ref: "./GdpSectorPeriodSummary.yaml"
+        - type: object
+          required:
+            - sectors
+          properties:
+            sectors:
+              type: array
+              description: Values of the rows in `data.sectors`, same order.
+              items:
+                $ref: "./GdpSectorValues.yaml"

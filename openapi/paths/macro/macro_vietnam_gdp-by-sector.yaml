@@ -1,0 +1,160 @@
+get:
+  operationId: macroVietnamGdpBySector
+  tags:
+    - Macro
+  summary: Vietnam GDP by sector (NSO)
+  description: |
+    Vietnam GDP by economic sector for one period, from the National Statistics Office of
+    Viet Nam (NSO). `sectors` has the 28 rows in the order NSO prints them (VSIC 2018):
+    total GDP, the three economic sectors (agriculture, forestry and fishing; industry and
+    construction; services), taxes less subsidies on products, and the industries under
+    them (`level` 0–3, `parentCode`).
+
+    Per row: `currentPrice` and `constantPrice` in billion VND, `shareOfGdp` in % of GDP
+    at current prices, `yoyGrowth` in % against the same period of the previous year at
+    constant prices. Values keep the 6 decimals of the source; a cell NSO does not publish
+    is `null`, never 0. The latest release of every cell is returned: NSO publishes each
+    quarter as an estimate, then revises it as preliminary in the next quarterly report.
+
+    Constant prices are at 2010 base up to Q4 2025 and at 2020 base from Q1 2026
+    (`priceBasis`): levels of the two bases are not comparable, growth rates are. Q1 2026
+    is derived (`derived: true`) — its latest revision is published only as the
+    preliminary 6-month figure minus the preliminary Q2 figure.
+
+    For charts, use the [time series](/api-reference/macro/vietnam-gdp-by-sector-series)
+    endpoint instead of one call per period.
+
+    Source: National Statistics Office of Viet Nam (www.nso.gov.vn).
+  x-feature-code: macro_data
+  # Fixed page URL: the "GDP by Sector" table's API button in the HayInsights app links straight here.
+  x-mint:
+    href: /api-reference/macro/vietnam-gdp-by-sector
+  x-api-weight: 2
+  parameters:
+    - name: type
+      in: query
+      required: false
+      description: |
+        Period type. Case-insensitive.
+
+        | Value | Periods | Source |
+        | --- | --- | --- |
+        | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+        | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
+        | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
+
+        Quarterly and year-to-date data start in 2021, the first year NSO reported on its
+        revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
+        and are not comparable. `annual` covers 2010 onward on the revised scale.
+      schema:
+        type: string
+        enum:
+          - quarter
+          - ytd
+          - annual
+        default: quarter
+        example: quarter
+    - name: period
+      in: query
+      required: false
+      description: |
+        Period to return, in the format of `type`. Omit for the latest period. A valid
+        period with no data returns 200 with `sectors: []`. Case-insensitive.
+
+        | `type` | Format | Examples |
+        | --- | --- | --- |
+        | `quarter` | `YYYY-Qn` | `2026-Q3` |
+        | `ytd` | last month of the period: `YYYY-06`, `YYYY-09`, `YYYY-12` | `2026-09` (9 months), `2025-12` (full year) |
+        | `annual` | `YYYY` | `2025` |
+      schema:
+        type: string
+        example: 2026-Q3
+  responses:
+    "200":
+      description: The 28 rows of one period.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroGdpSectorTableResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              type: quarter
+              period: 2026-Q3
+              label: Q3 2026
+              latestPeriod: 2026-Q3
+              estimateStatus: estimate
+              priceBasis: constant_2020
+              knowledgeAt: "2026-10-03T01:00:06.000Z"
+              wasRestated: false
+              derived: false
+              derivedFrom: []
+              report:
+                period: 2026-Q3
+                label: Q3 2026
+                url: https://www.nso.gov.vn/tin-tuc-thong-ke/2026/10/bao-cao-tinh-hinh-kinh-te-xa-hoi-quy-iii-va-9-thang-nam-2026/
+                publishedAt: "2026-10-03T01:00:06.000Z"
+              sectors:
+                - sectorCode: total
+                  sectorName: Gross domestic product
+                  sectorShortName: Gross domestic product
+                  sectorNameVi: Tổng số
+                  level: 0
+                  parentCode: null
+                  currentPrice: 3698333.989507
+                  constantPrice: 3004778.442597
+                  shareOfGdp: 100
+                  yoyGrowth: 9.947988
+                - sectorCode: agriculture_forestry_fishing
+                  sectorName: Agriculture, forestry and fishing
+                  sectorShortName: Agriculture, forestry and fishing
+                  sectorNameVi: Nông, lâm nghiệp và thủy sản
+                  level: 1
+                  parentCode: total
+                  currentPrice: 395842.015292
+                  constantPrice: 324474.407689
+                  shareOfGdp: 10.703252
+                  yoyGrowth: 4.206762
+                - sectorCode: agriculture
+                  sectorName: Agriculture
+                  sectorShortName: Agriculture
+                  sectorNameVi: Nông nghiệp
+                  level: 2
+                  parentCode: agriculture_forestry_fishing
+                  currentPrice: 283422.433287
+                  constantPrice: 230654
+                  shareOfGdp: 7.663516
+                  yoyGrowth: 3.891719
+            meta:
+              source: National Statistics Office of Viet Nam (www.nso.gov.vn)
+              source_url: https://www.nso.gov.vn/tin-tuc-thong-ke/2026/10/bao-cao-tinh-hinh-kinh-te-xa-hoi-quy-iii-va-9-thang-nam-2026/
+              as_of: 2026-Q3
+              knowledge_at: "2026-10-03T01:00:06.000Z"
+              unit:
+                currentPrice: { unit: VND, scale: 1000000000, display: Billion VND }
+                constantPrice: { unit: VND, scale: 1000000000, display: Billion VND }
+                shareOfGdp: { unit: PERCENT, scale: 1, display: "%" }
+                yoyGrowth: { unit: PERCENT, scale: 1, display: "%" }
+              display_unit: Billion VND
+              classification:
+                currentPrice: RAW
+                constantPrice: RAW
+                shareOfGdp: RAW
+                yoyGrowth: DERIVED
+              formula_version: gdp-vn-sector-v1
+              was_restated: false
+              served_from_cache: false
+              cache_expires_at: "2026-11-03T07:10:49.165Z"
+              timestamp: "2026-11-02T07:10:49.165Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

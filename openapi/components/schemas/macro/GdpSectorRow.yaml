@@ -1,0 +1,4 @@
+description: One row of the table — its name and position plus its four values for the period.
+allOf:
+  - $ref: "./GdpSectorInfo.yaml"
+  - $ref: "./GdpSectorValues.yaml"

@@ -1,0 +1,36 @@
+type: object
+description: |
+  The four values of one row for one period. A cell NSO does not publish is `null` —
+  never 0. Values keep the 6 decimals of the source; round for display.
+required:
+  - sectorCode
+  - currentPrice
+  - constantPrice
+  - shareOfGdp
+  - yoyGrowth
+properties:
+  sectorCode:
+    type: string
+    description: Stable row code (see `GdpSectorRow`).
+    example: total
+  currentPrice:
+    type: ["number", "null"]
+    description: Value at current prices, in billion VND. GDP for `total`, value added for the other rows.
+    example: 3698333.989507
+  constantPrice:
+    type: ["number", "null"]
+    description: |
+      Value at constant prices of the base year in `priceBasis`, in billion VND. Levels at
+      2010 and 2020 prices cannot be chained.
+    example: 3004778.442597
+  shareOfGdp:
+    type: ["number", "null"]
+    description: Share of GDP at current prices, in percent (`total` = 100).
+    example: 100
+  yoyGrowth:
+    type: ["number", "null"]
+    description: |
+      Growth at constant prices against the same period of the previous year, in percent.
+      Can be negative. Quarter vs same quarter, year-to-date vs same year-to-date period,
+      year vs previous year.
+    example: 9.947988

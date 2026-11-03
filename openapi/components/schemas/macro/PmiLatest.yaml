@@ -9,6 +9,7 @@ required:
   - status
   - streak
   - releasedAt
+  - releaseStage
 properties:
   month:
     type: string
@@ -69,3 +70,13 @@ properties:
     format: date-time
     description: When S&P Global published the latest reading (UTC).
     example: "2026-10-01T00:30:00.000Z"
+  releaseStage:
+    type: string
+    enum:
+      - flash
+      - final
+    description: |
+      `flash` while only the preliminary reading is out (US and JP, second half of the
+      survey month until the first working day of the next month); `final` otherwise.
+      Vietnam is always `final`.
+    example: final

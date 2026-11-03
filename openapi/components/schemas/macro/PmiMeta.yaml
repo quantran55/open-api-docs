@@ -12,7 +12,7 @@ allOf:
       series:
         type: string
         description: Full name of the series.
-        example: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+        example: S&P Global US Manufacturing PMI — headline, seasonally adjusted
       as_of:
         type: ["string", "null"]
         description: Latest month in the window (`YYYY-MM`).
@@ -22,6 +22,14 @@ allOf:
         format: date-time
         description: When S&P Global published the latest reading (UTC).
         example: "2026-10-01T00:30:00.000Z"
+      release_stage:
+        type: ["string", "null"]
+        enum:
+          - flash
+          - final
+          - null
+        description: Same as `data.latest.releaseStage`; `null` when there is no reading.
+        example: final
       unit:
         type: string
         description: Unit of the numeric fields.
@@ -30,9 +38,13 @@ allOf:
         type: object
         description: |
           How each field was produced: `value` is passed through as S&P Global published
-          it; `change`, `status` and `streak` are computed by HayInsights.
+          it, and so is `release_stage`; `change`, `status` and `streak` are computed by
+          HayInsights.
         properties:
           value:
+            type: string
+            example: RAW
+          release_stage:
             type: string
             example: RAW
           change:

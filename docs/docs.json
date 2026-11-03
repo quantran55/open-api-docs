@@ -90,7 +90,7 @@
               "GET /openapi/v1/macro/trade/by-region",
               "GET /openapi/v1/macro/japan/gdp-breakdown",
               "GET /openapi/v1/macro/japan/central-gov-debt",
-              "GET /openapi/v1/macro/pmi/vn/manufacturing",
+              "GET /openapi/v1/macro/pmi/{country}/manufacturing",
               "GET /openapi/v1/macro/vietnam/gdp-by-sector",
               "GET /openapi/v1/macro/vietnam/gdp-by-sector/periods",
               "GET /openapi/v1/macro/vietnam/gdp-by-sector/series",

@@ -1,6 +1,6 @@
 type: object
 description: |
-  S&P Global Vietnam Manufacturing PMI over the requested window, with a summary of
+  S&P Global Manufacturing PMI of the requested country over the requested window, with a summary of
   the latest reading. When nothing is on record (for example an `asOf` before the
   first reading), `from`, `to` and `latest` are `null` and `points` is empty.
 required:
@@ -20,13 +20,15 @@ properties:
     type: string
     enum:
       - vn
-    description: Country code, lowercase. Only Vietnam is available.
-    example: vn
+      - us
+      - jp
+    description: Country code, lowercase.
+    example: us
   seriesCode:
     type: string
     enum:
       - manufacturing_pmi
-    description: Series identifier. Vietnam has a manufacturing PMI only.
+    description: Series identifier. Only the manufacturing PMI is available.
     example: manufacturing_pmi
   threshold:
     type: number

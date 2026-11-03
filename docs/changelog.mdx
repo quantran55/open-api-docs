@@ -3,6 +3,24 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.6.0" description="2026-11-03">
+  **Manufacturing PMI for the United States and Japan.**
+
+  **Changed**
+
+  - **Macro · PMI** — `GET /macro/pmi/vn/manufacturing` becomes
+    `GET /macro/pmi/{country}/manufacturing`, with `country` one of `vn`, `us` or `jp`.
+    The old URL keeps working (it is the same route with `country=vn`). The operation
+    is renamed `macroPmiManufacturing` in the spec.
+  - New field `releaseStage` (`flash` or `final`) on `latest` and on every entry of
+    `points`, and `release_stage` in `meta`. The US and JP publish a flash reading in
+    the second half of the survey month; the final reading replaces it on the first
+    working day of the next month. Vietnam is always `final`.
+  - `GET /macro/indicators/pmi` now fills the US and JP rows.
+
+  US and JP history is shorter than Vietnam's for now; older months are being added.
+</Update>
+
 <Update label="0.5.0" description="2026-10-16">
   **Vietnam Manufacturing PMI.**
 

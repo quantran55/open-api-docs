@@ -3645,25 +3645,32 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-  /openapi/v1/macro/pmi/vn/manufacturing:
+  /openapi/v1/macro/pmi/{country}/manufacturing:
     get:
-      operationId: macroPmiVnManufacturing
+      operationId: macroPmiManufacturing
       tags:
         - Macro
-      summary: Vietnam Manufacturing PMI (S&P Global)
+      summary: Manufacturing PMI by country (S&P Global)
       description: |
-        Monthly S&P Global Vietnam Manufacturing PMI — the headline, seasonally adjusted
-        index, in index points. 50 means no change from the previous month; above 50 is
-        expansion, below 50 contraction.
+        Monthly S&P Global Manufacturing PMI for Vietnam, the United States or Japan — the
+        headline, seasonally adjusted index, in index points. 50 means no change from the
+        previous month; above 50 is expansion, below 50 contraction.
 
         `points` has one entry per month in the window, oldest first; a month without a
         reading stays in the list with `value: null` — never 0. `latest` summarises the
         newest reading: the change from the previous month in points, the status against
         50, and how many consecutive months it has held that status.
 
-        S&P Global publishes each month's reading on the first working day of the
-        following month. Pass `asOf` to get the series as it was known at the end of a
-        past day (point-in-time, for backtests).
+        **Flash and final readings.** The United States and Japan publish a preliminary
+        *flash* reading in the second half of the survey month and the *final* reading on
+        the first working day of the next month. `releaseStage` says which one a value
+        is. Once the final reading is out it replaces the flash, so the newest month's
+        `value`, `change`, `status` and `streak` can change between the two releases.
+        Vietnam publishes final readings only.
+
+        Pass `asOf` to get the series as it was known at the end of a past day
+        (point-in-time, for backtests) — including a flash reading that was later
+        replaced.
 
         Source: S&P Global.
       x-feature-code: macro_data
@@ -3671,6 +3678,17 @@ paths:
         href: /api-reference/macro/pmi-vn-manufacturing
       x-api-weight: 2
       parameters:
+        - name: country
+          in: path
+          required: true
+          description: 'Country, case-insensitive: `vn` (Vietnam), `us` (United States) or `jp` (Japan).'
+          schema:
+            type: string
+            enum:
+              - vn
+              - us
+              - jp
+            example: us
         - name: period
           in: query
           required: false
@@ -3703,10 +3721,10 @@ paths:
           schema:
             type: string
             format: date
-            example: '2026-10-01'
+            example: '2026-11-01'
       responses:
         '200':
-          description: Monthly PMI series for the requested window.
+          description: Monthly PMI series for the requested country and window.
           content:
             application/json:
               schema:
@@ -3715,56 +3733,62 @@ paths:
                 success: true
                 statusCode: 200
                 data:
-                  country: vn
+                  country: us
                   seriesCode: manufacturing_pmi
                   threshold: 50
                   period: 3M
-                  from: 2026-07
-                  to: 2026-09
+                  from: 2026-08
+                  to: 2026-10
                   latest:
-                    month: 2026-09
-                    value: 51.9
-                    previousMonth: 2026-08
-                    previousValue: 53.3
-                    change: -1.4
+                    month: 2026-10
+                    value: 54.9
+                    previousMonth: 2026-09
+                    previousValue: 55.9
+                    change: -1
                     status: expansion
                     streak:
                       months: 15
-                      since: 2025-07
+                      since: 2025-08
                       isLowerBound: false
-                    releasedAt: '2026-10-01T00:30:00.000Z'
+                    releasedAt: '2026-11-02T14:45:00.000Z'
+                    releaseStage: final
                   points:
-                    - month: 2026-07
-                      value: 52.9
-                      change: 1.1
-                      status: expansion
                     - month: 2026-08
-                      value: 53.3
-                      change: 0.4
+                      value: 53.9
+                      change: 0
                       status: expansion
+                      releaseStage: final
                     - month: 2026-09
-                      value: 51.9
-                      change: -1.4
+                      value: 55.9
+                      change: 2
                       status: expansion
+                      releaseStage: final
+                    - month: 2026-10
+                      value: 54.9
+                      change: -1
+                      status: expansion
+                      releaseStage: final
                   source: S&P Global
                   unit: index_points
                   wasRestated: false
                 meta:
                   source: S&P Global
-                  series: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
-                  as_of: 2026-09
-                  released_at: '2026-10-01T00:30:00.000Z'
+                  series: S&P Global US Manufacturing PMI — headline, seasonally adjusted
+                  as_of: 2026-10
+                  released_at: '2026-11-02T14:45:00.000Z'
+                  release_stage: final
                   unit: index_points
                   classification:
                     value: RAW
+                    release_stage: RAW
                     change: COMPUTED
                     status: COMPUTED
                     streak: COMPUTED
                   formula_version: pmi-summary-v1
                   was_restated: false
                   served_from_cache: true
-                  cache_expires_at: '2026-10-17T01:12:40.000Z'
-                  timestamp: '2026-10-16T03:00:00.000Z'
+                  cache_expires_at: '2026-11-04T01:12:40.000Z'
+                  timestamp: '2026-11-03T03:00:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -5479,8 +5503,13 @@ paths:
         as published (one decimal; 50 = no change from the previous month). `columns`
         holds the N most recent consecutive months (default 4), oldest first, counted back
         from the latest month that has a reading; a month without a reading keeps its
-        column, with `null` in `values` and "—" in `display`. Currently only VN has data;
-        the US and JP rows return `available: false` with all-null values.
+        column, with `null` in `values` and "—" in `display`.
+
+        The US and JP publish a flash reading during the survey month, so in the second
+        half of a month the newest column can hold flash values for US and JP while the VN
+        cell stays empty until Vietnam publishes (first working day of the next month).
+        Cells show the latest reading, flash or final, without saying which — use
+        `GET /macro/pmi/{country}/manufacturing` for `releaseStage`.
 
         Source: S&P Global.
       x-feature-code: macro_data
@@ -5512,56 +5541,56 @@ paths:
                   indicator: pmi
                   unit: points
                   columns:
-                    - period: Jun 2026
-                      date: '2026-06-30'
                     - period: Jul 2026
                       date: '2026-07-31'
                     - period: Aug 2026
                       date: '2026-08-31'
                     - period: Sep 2026
                       date: '2026-09-30'
+                    - period: Oct 2026
+                      date: '2026-10-31'
                   rows:
                     - country: US
                       countryName: United States
-                      available: false
+                      available: true
                       values:
-                        - null
-                        - null
-                        - null
-                        - null
+                        - 53.9
+                        - 53.9
+                        - 55.9
+                        - 54.9
                       display:
-                        - —
-                        - —
-                        - —
-                        - —
+                        - '53.9'
+                        - '53.9'
+                        - '55.9'
+                        - '54.9'
                     - country: JP
                       countryName: Japan
-                      available: false
+                      available: true
                       values:
-                        - null
-                        - null
-                        - null
-                        - null
+                        - 54.5
+                        - 54.9
+                        - 54.1
+                        - 53.3
                       display:
-                        - —
-                        - —
-                        - —
-                        - —
+                        - '54.5'
+                        - '54.9'
+                        - '54.1'
+                        - '53.3'
                     - country: VN
                       countryName: Vietnam
                       available: true
                       values:
-                        - 51.8
                         - 52.9
                         - 53.3
                         - 51.9
+                        - 52.3
                       display:
-                        - '51.8'
                         - '52.9'
                         - '53.3'
                         - '51.9'
+                        - '52.3'
                 meta:
-                  timestamp: '2026-10-16T03:00:00.000Z'
+                  timestamp: '2026-11-03T03:00:00.000Z'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -12478,6 +12507,7 @@ components:
         - status
         - streak
         - releasedAt
+        - releaseStage
       properties:
         month:
           type: string
@@ -12542,6 +12572,16 @@ components:
           format: date-time
           description: When S&P Global published the latest reading (UTC).
           example: '2026-10-01T00:30:00.000Z'
+        releaseStage:
+          type: string
+          enum:
+            - flash
+            - final
+          description: |
+            `flash` while only the preliminary reading is out (US and JP, second half of the
+            survey month until the first working day of the next month); `final` otherwise.
+            Vietnam is always `final`.
+          example: final
     PmiPoint:
       type: object
       description: |
@@ -12552,6 +12592,7 @@ components:
         - value
         - change
         - status
+        - releaseStage
       properties:
         month:
           type: string
@@ -12585,10 +12626,23 @@ components:
             Reading against the 50 line: `expansion` above 50, `no_change` at exactly 50,
             `contraction` below 50. `null` when the month has no reading.
           example: expansion
+        releaseStage:
+          type:
+            - string
+            - 'null'
+          enum:
+            - flash
+            - final
+            - null
+          description: |
+            Which release `value` comes from: `flash` (preliminary, US and JP only) or
+            `final`. A final reading replaces the flash once published. `null` when the
+            month has no reading.
+          example: final
     PmiManufacturingSeries:
       type: object
       description: |
-        S&P Global Vietnam Manufacturing PMI over the requested window, with a summary of
+        S&P Global Manufacturing PMI of the requested country over the requested window, with a summary of
         the latest reading. When nothing is on record (for example an `asOf` before the
         first reading), `from`, `to` and `latest` are `null` and `points` is empty.
       required:
@@ -12608,13 +12662,15 @@ components:
           type: string
           enum:
             - vn
-          description: Country code, lowercase. Only Vietnam is available.
-          example: vn
+            - us
+            - jp
+          description: Country code, lowercase.
+          example: us
         seriesCode:
           type: string
           enum:
             - manufacturing_pmi
-          description: Series identifier. Vietnam has a manufacturing PMI only.
+          description: Series identifier. Only the manufacturing PMI is available.
           example: manufacturing_pmi
         threshold:
           type: number
@@ -12679,7 +12735,7 @@ components:
             series:
               type: string
               description: Full name of the series.
-              example: S&P Global Vietnam Manufacturing PMI — headline, seasonally adjusted
+              example: S&P Global US Manufacturing PMI — headline, seasonally adjusted
             as_of:
               type:
                 - string
@@ -12693,6 +12749,16 @@ components:
               format: date-time
               description: When S&P Global published the latest reading (UTC).
               example: '2026-10-01T00:30:00.000Z'
+            release_stage:
+              type:
+                - string
+                - 'null'
+              enum:
+                - flash
+                - final
+                - null
+              description: Same as `data.latest.releaseStage`; `null` when there is no reading.
+              example: final
             unit:
               type: string
               description: Unit of the numeric fields.
@@ -12701,9 +12767,13 @@ components:
               type: object
               description: |
                 How each field was produced: `value` is passed through as S&P Global published
-                it; `change`, `status` and `streak` are computed by HayInsights.
+                it, and so is `release_stage`; `change`, `status` and `streak` are computed by
+                HayInsights.
               properties:
                 value:
+                  type: string
+                  example: RAW
+                release_stage:
                   type: string
                   example: RAW
                 change:

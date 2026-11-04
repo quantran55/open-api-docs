@@ -8,6 +8,7 @@ required:
   - knowledgeAt
   - wasRestated
   - derived
+  - revisedSeries
 properties:
   period:
     type: string
@@ -26,7 +27,7 @@ properties:
     description: |
       How final the numbers are, as NSO labels them: `estimate` (first release),
       `preliminary` (revised in the next report, or a year marked preliminary),
-      `official` (annual years published without a label). If cells differ, the least final
+      `official` (years published without a label, and their quarters). If cells differ, the least final
       label wins.
     example: estimate
   priceBasis:
@@ -52,4 +53,11 @@ properties:
       `true` when the numbers are computed by HayInsights rather than printed by NSO.
       Today only Q1 2026: its latest revision is published only as the preliminary 6-month
       figure minus the preliminary Q2 figure (Q3 2026 report).
+    example: false
+  revisedSeries:
+    type: boolean
+    description: |
+      `true` when the values come from NSO's revised quarterly series (national summary data
+      page) instead of the quarterly report. `shareOfGdp` and `yoyGrowth` are then computed by
+      HayInsights, because that series does not publish them.
     example: false

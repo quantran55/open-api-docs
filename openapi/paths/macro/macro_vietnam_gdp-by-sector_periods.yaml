@@ -22,13 +22,13 @@ get:
 
         | Value | Periods | Source |
         | --- | --- | --- |
-        | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+        | `quarter` | single quarters, Q1 2010 onward | NSO quarterly socio-economic report; earlier years from NSO's revised series (NSDP) |
         | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
         | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
 
-        Quarterly and year-to-date data start in 2021, the first year NSO reported on its
-        revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
-        and are not comparable. `annual` covers 2010 onward on the revised scale.
+        All three types use NSO's revised GDP scale. Quarters of the years NSO has labelled
+        preliminary or official come from its revised series (`revisedSeries: true`, including
+        revised Q4 figures), with `shareOfGdp` and `yoyGrowth` computed by HayInsights.
       schema:
         type: string
         enum:
@@ -59,6 +59,7 @@ get:
                   knowledgeAt: "2026-10-03T01:00:06.000Z"
                   wasRestated: false
                   derived: false
+                  revisedSeries: false
                 - period: 2026-Q2
                   label: Q2 2026
                   estimateStatus: preliminary
@@ -66,6 +67,7 @@ get:
                   knowledgeAt: "2026-10-03T01:00:06.000Z"
                   wasRestated: true
                   derived: false
+                  revisedSeries: false
                 - period: 2026-Q1
                   label: Q1 2026
                   estimateStatus: preliminary
@@ -73,6 +75,7 @@ get:
                   knowledgeAt: "2026-10-03T01:00:06.000Z"
                   wasRestated: true
                   derived: true
+                  revisedSeries: false
             meta:
               source: National Statistics Office of Viet Nam (www.nso.gov.vn)
               source_url: https://www.nso.gov.vn

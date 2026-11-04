@@ -3840,13 +3840,13 @@ paths:
 
             | Value | Periods | Source |
             | --- | --- | --- |
-            | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+            | `quarter` | single quarters, Q1 2010 onward | NSO quarterly socio-economic report; earlier years from NSO's revised series (NSDP) |
             | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
             | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
 
-            Quarterly and year-to-date data start in 2021, the first year NSO reported on its
-            revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
-            and are not comparable. `annual` covers 2010 onward on the revised scale.
+            All three types use NSO's revised GDP scale. Quarters of the years NSO has labelled
+            preliminary or official come from its revised series (`revisedSeries: true`, including
+            revised Q4 figures), with `shareOfGdp` and `yoyGrowth` computed by HayInsights.
           schema:
             type: string
             enum:
@@ -3891,6 +3891,7 @@ paths:
                   knowledgeAt: '2026-10-03T01:00:06.000Z'
                   wasRestated: false
                   derived: false
+                  revisedSeries: false
                   derivedFrom: []
                   report:
                     period: 2026-Q3
@@ -3996,13 +3997,13 @@ paths:
 
             | Value | Periods | Source |
             | --- | --- | --- |
-            | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+            | `quarter` | single quarters, Q1 2010 onward | NSO quarterly socio-economic report; earlier years from NSO's revised series (NSDP) |
             | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
             | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
 
-            Quarterly and year-to-date data start in 2021, the first year NSO reported on its
-            revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
-            and are not comparable. `annual` covers 2010 onward on the revised scale.
+            All three types use NSO's revised GDP scale. Quarters of the years NSO has labelled
+            preliminary or official come from its revised series (`revisedSeries: true`, including
+            revised Q4 figures), with `shareOfGdp` and `yoyGrowth` computed by HayInsights.
           schema:
             type: string
             enum:
@@ -4033,6 +4034,7 @@ paths:
                       knowledgeAt: '2026-10-03T01:00:06.000Z'
                       wasRestated: false
                       derived: false
+                      revisedSeries: false
                     - period: 2026-Q2
                       label: Q2 2026
                       estimateStatus: preliminary
@@ -4040,6 +4042,7 @@ paths:
                       knowledgeAt: '2026-10-03T01:00:06.000Z'
                       wasRestated: true
                       derived: false
+                      revisedSeries: false
                     - period: 2026-Q1
                       label: Q1 2026
                       estimateStatus: preliminary
@@ -4047,6 +4050,7 @@ paths:
                       knowledgeAt: '2026-10-03T01:00:06.000Z'
                       wasRestated: true
                       derived: true
+                      revisedSeries: false
                 meta:
                   source: National Statistics Office of Viet Nam (www.nso.gov.vn)
                   source_url: https://www.nso.gov.vn
@@ -4099,13 +4103,13 @@ paths:
 
             | Value | Periods | Source |
             | --- | --- | --- |
-            | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+            | `quarter` | single quarters, Q1 2010 onward | NSO quarterly socio-economic report; earlier years from NSO's revised series (NSDP) |
             | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
             | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
 
-            Quarterly and year-to-date data start in 2021, the first year NSO reported on its
-            revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
-            and are not comparable. `annual` covers 2010 onward on the revised scale.
+            All three types use NSO's revised GDP scale. Quarters of the years NSO has labelled
+            preliminary or official come from its revised series (`revisedSeries: true`, including
+            revised Q4 figures), with `shareOfGdp` and `yoyGrowth` computed by HayInsights.
           schema:
             type: string
             enum:
@@ -4159,17 +4163,18 @@ paths:
                   points:
                     - period: 2021-Q1
                       label: Q1 2021
-                      estimateStatus: preliminary
+                      estimateStatus: official
                       priceBasis: constant_2010
-                      knowledgeAt: '2021-06-29T01:41:48.000Z'
+                      knowledgeAt: '2026-10-14T01:57:21.000Z'
                       wasRestated: true
                       derived: false
+                      revisedSeries: true
                       sectors:
                         - sectorCode: total
-                          currentPrice: 1953117
-                          constantPrice: 1194374
+                          currentPrice: 1975313.989822
+                          constantPrice: 1215965.547717
                           shareOfGdp: 100
-                          yoyGrowth: 4.650437
+                          yoyGrowth: 4.845175
                     - period: 2026-Q3
                       label: Q3 2026
                       estimateStatus: estimate
@@ -4177,6 +4182,7 @@ paths:
                       knowledgeAt: '2026-10-03T01:00:06.000Z'
                       wasRestated: false
                       derived: false
+                      revisedSeries: false
                       sectors:
                         - sectorCode: total
                           currentPrice: 3698333.989507
@@ -12923,6 +12929,7 @@ components:
         - knowledgeAt
         - wasRestated
         - derived
+        - revisedSeries
         - derivedFrom
         - report
         - sectors
@@ -12987,6 +12994,10 @@ components:
           example: false
         derived:
           type: boolean
+          example: false
+        revisedSeries:
+          type: boolean
+          description: See `GdpSectorPeriodSummary.revisedSeries`.
           example: false
         derivedFrom:
           type: array
@@ -13171,6 +13182,7 @@ components:
         - knowledgeAt
         - wasRestated
         - derived
+        - revisedSeries
       properties:
         period:
           type: string
@@ -13189,7 +13201,7 @@ components:
           description: |
             How final the numbers are, as NSO labels them: `estimate` (first release),
             `preliminary` (revised in the next report, or a year marked preliminary),
-            `official` (annual years published without a label). If cells differ, the least final
+            `official` (years published without a label, and their quarters). If cells differ, the least final
             label wins.
           example: estimate
         priceBasis:
@@ -13217,6 +13229,13 @@ components:
             `true` when the numbers are computed by HayInsights rather than printed by NSO.
             Today only Q1 2026: its latest revision is published only as the preliminary 6-month
             figure minus the preliminary Q2 figure (Q3 2026 report).
+          example: false
+        revisedSeries:
+          type: boolean
+          description: |
+            `true` when the values come from NSO's revised quarterly series (national summary data
+            page) instead of the quarterly report. `shareOfGdp` and `yoyGrowth` are then computed by
+            HayInsights, because that series does not publish them.
           example: false
     GdpSectorPeriods:
       type: object

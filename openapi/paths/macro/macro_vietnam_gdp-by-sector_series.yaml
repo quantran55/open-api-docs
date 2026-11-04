@@ -31,13 +31,13 @@ get:
 
         | Value | Periods | Source |
         | --- | --- | --- |
-        | `quarter` | single quarters, Q1 2021 onward | NSO quarterly socio-economic report |
+        | `quarter` | single quarters, Q1 2010 onward | NSO quarterly socio-economic report; earlier years from NSO's revised series (NSDP) |
         | `ytd` | year-to-date: 6, 9 and 12 months, 2021 onward | NSO quarterly socio-economic report |
         | `annual` | full years, 2010 onward | NSO statistical database (national accounts) |
 
-        Quarterly and year-to-date data start in 2021, the first year NSO reported on its
-        revised GDP scale; earlier quarterly reports used the old scale (about 27% lower)
-        and are not comparable. `annual` covers 2010 onward on the revised scale.
+        All three types use NSO's revised GDP scale. Quarters of the years NSO has labelled
+        preliminary or official come from its revised series (`revisedSeries: true`, including
+        revised Q4 figures), with `shareOfGdp` and `yoyGrowth` computed by HayInsights.
       schema:
         type: string
         enum:
@@ -91,17 +91,18 @@ get:
               points:
                 - period: 2021-Q1
                   label: Q1 2021
-                  estimateStatus: preliminary
+                  estimateStatus: official
                   priceBasis: constant_2010
-                  knowledgeAt: "2021-06-29T01:41:48.000Z"
+                  knowledgeAt: "2026-10-14T01:57:21.000Z"
                   wasRestated: true
                   derived: false
+                  revisedSeries: true
                   sectors:
                     - sectorCode: total
-                      currentPrice: 1953117
-                      constantPrice: 1194374
+                      currentPrice: 1975313.989822
+                      constantPrice: 1215965.547717
                       shareOfGdp: 100
-                      yoyGrowth: 4.650437
+                      yoyGrowth: 4.845175
                 - period: 2026-Q3
                   label: Q3 2026
                   estimateStatus: estimate
@@ -109,6 +110,7 @@ get:
                   knowledgeAt: "2026-10-03T01:00:06.000Z"
                   wasRestated: false
                   derived: false
+                  revisedSeries: false
                   sectors:
                     - sectorCode: total
                       currentPrice: 3698333.989507

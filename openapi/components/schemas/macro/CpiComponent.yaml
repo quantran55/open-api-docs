@@ -1,0 +1,33 @@
+type: object
+description: One line of the NSO CPI table.
+required:
+  - code
+  - level
+  - parent
+  - nameVi
+  - nameEn
+properties:
+  code:
+    type: string
+    description: Stable code of the line; the key of `values` in `points`. It does not change when NSO renames a line.
+    example: food_catering
+  level:
+    type: integer
+    enum:
+      - 0
+      - 1
+      - 2
+    description: "`0` headline CPI and the gold and USD price indices, `1` group, `2` sub-group."
+    example: 1
+  parent:
+    type: ["string", "null"]
+    description: Code of the parent line. Groups sit under `cpi_total`; `null` for `cpi_total` and the gold and USD price indices.
+    example: cpi_total
+  nameVi:
+    type: string
+    description: Name in Vietnamese.
+    example: Hàng ăn và dịch vụ ăn uống
+  nameEn:
+    type: string
+    description: Name in English.
+    example: Food and catering services

@@ -1,0 +1,21 @@
+type: object
+description: One quarter of the series.
+required:
+  - quarter
+  - startDate
+  - values
+properties:
+  quarter:
+    type: string
+    description: Quarter (`YYYY-Qn`).
+    example: 2026-Q3
+  startDate:
+    type: string
+    format: date
+    description: First day of the quarter.
+    example: "2026-07-01"
+  values:
+    type: object
+    description: Value per component `code`. `null` when the quarter does not have all three months for that code.
+    additionalProperties:
+      $ref: "./CpiQuarterValue.yaml"

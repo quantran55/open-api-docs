@@ -1,0 +1,17 @@
+type: ["object", "null"]
+description: One value of the series, or `null` when it is missing.
+required:
+  - value
+  - classification
+properties:
+  value:
+    type: number
+    description: Quarterly average against the same quarter of the previous year, in %, to 2 decimals.
+    example: 4.8
+  classification:
+    type: string
+    enum:
+      - RAW
+      - COMPUTED
+    description: "`RAW` as printed by NSO, `COMPUTED` by HayInsights from the three months of the quarter."
+    example: RAW

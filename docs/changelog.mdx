@@ -3,6 +3,19 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.7.0" description="2026-11-06">
+  **Vietnam CPI by component.**
+
+  **Added**
+
+  - **Macro · Vietnam CPI** — `GET /macro/vietnam/cpi-by-component`: quarterly CPI from
+    2015-Q1 for the headline, 11 groups, 5 sub-groups and the gold and US dollar price
+    indices, as % change against the same quarter of the previous year. Source: National
+    Statistics Office of Viet Nam. Supports `asOf` for point-in-time queries.
+
+  Gated by `macro_data` and costs 2 weight per call, like the other Macro endpoints.
+</Update>
+
 <Update label="0.6.0" description="2026-11-03">
   **Manufacturing PMI for the United States and Japan.**
 

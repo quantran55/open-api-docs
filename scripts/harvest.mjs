@@ -77,6 +77,7 @@ const ENDPOINTS = [
   ['macroJapanGdpBreakdown', '/openapi/v1/macro/japan/gdp-breakdown?interval=annual'],
   ['macroJapanCentralGovDebt', '/openapi/v1/macro/japan/central-gov-debt'],
   ['macroPmiManufacturing', '/openapi/v1/macro/pmi/us/manufacturing?period=3M'],
+  ['macroVietnamCpiByComponent', '/openapi/v1/macro/vietnam/cpi-by-component'],
   ['macroIndicatorPmi', '/openapi/v1/macro/indicators/pmi'],
   // Real Estate
   ['realEstateCountrySummary', '/openapi/v1/real-estate/vn'],

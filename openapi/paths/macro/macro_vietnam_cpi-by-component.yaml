@@ -1,0 +1,160 @@
+get:
+  operationId: macroVietnamCpiByComponent
+  tags:
+    - Macro
+  summary: Vietnam CPI by component (NSO)
+  description: |
+    Vietnam's consumer price index by group of goods and services, quarterly, from the
+    National Statistics Office of Viet Nam (NSO). Every value is the **quarterly average
+    against the average of the same quarter of the previous year, in %** — so a chain of
+    quarters is comparable even though NSO has changed the index base year several times.
+
+    `components` lists the 19 lines in the order NSO prints them, and `points` has one
+    entry per quarter, oldest first, from `2015-Q1` to the latest complete quarter. A
+    quarter still in progress has no point yet; `latestMonth` says how far the monthly
+    data has reached.
+
+    | Code | `level` | Line |
+    | --- | --- | --- |
+    | `cpi_total` | 0 | Headline CPI |
+    | `food_catering`, `beverages_tobacco`, `garments_footwear`, `housing_utilities`, `household_equipment`, `medicine_health`, `transport`, `communication`, `education`, `culture_entertainment_tourism`, `other_goods_services` | 1 | The 11 groups |
+    | `staple_food`, `foodstuff`, `eating_out` (under `food_catering`), `health_services` (under `medicine_health`), `education_services` (under `education`) | 2 | The 5 sub-groups |
+    | `gold_price_index`, `usd_price_index` | 0 | Gold and US dollar price indices |
+
+    **Printed and computed quarters.** `values[code].classification` is `RAW` when NSO
+    prints the quarterly average (the March, June, September and December tables of 2019
+    and 2026). Otherwise it is `COMPUTED` by HayInsights from the three months of the
+    quarter, with the monthly index and the monthly change against the same month of the
+    previous year (`meta.formula_version`). Computed values can differ from what NSO
+    would print by a few hundredths of a point, and by up to 0.18 for the most volatile
+    groups, because NSO works from unrounded indices.
+
+    **Missing data.** `values[code]` is `null` — never 0 — when a quarter does not have
+    all three months for that code. `eating_out`, `health_services` and
+    `education_services` are mostly unavailable before 2021.
+
+    Pass `asOf` to get the series as it was known at the end of a past day
+    (point-in-time, for backtests). If nothing was known yet, `points` is empty and
+    `latestQuarter` and `latestMonth` are `null`.
+
+    Source: National Statistics Office of Viet Nam ([www.nso.gov.vn](https://www.nso.gov.vn)).
+    Cite the source when you republish these numbers.
+  x-feature-code: macro_data
+  # Fixed page URL: the API button of the three Vietnam CPI charts in the HayInsights app links straight here.
+  x-mint:
+    href: /api-reference/macro/vietnam-cpi-by-component
+  x-api-weight: 2
+  parameters:
+    - name: asOf
+      in: query
+      required: false
+      description: |
+        Point-in-time date (`YYYY-MM-DD`): return only what was known by the end of
+        that day (UTC), leaving out data and revisions published later. Omit for the
+        latest data.
+      schema:
+        type: string
+        format: date
+        example: "2026-10-01"
+  responses:
+    "200":
+      description: |
+        Quarterly CPI by component. The example shows 5 of the 19 components and the
+        first and the last of the 47 quarters.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroVietnamCpiByComponentResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: vn
+              measure: quarter_avg_yoy
+              unit: PERCENT
+              components:
+                - code: cpi_total
+                  level: 0
+                  parent: null
+                  nameVi: Chỉ số giá tiêu dùng
+                  nameEn: All items (CPI)
+                - code: food_catering
+                  level: 1
+                  parent: cpi_total
+                  nameVi: Hàng ăn và dịch vụ ăn uống
+                  nameEn: Food and catering services
+                - code: eating_out
+                  level: 2
+                  parent: food_catering
+                  nameVi: Ăn uống ngoài gia đình
+                  nameEn: Eating out
+                - code: gold_price_index
+                  level: 0
+                  parent: null
+                  nameVi: Chỉ số giá vàng
+                  nameEn: Gold price index
+                - code: usd_price_index
+                  level: 0
+                  parent: null
+                  nameVi: Chỉ số giá đô la Mỹ
+                  nameEn: US dollar price index
+              points:
+                - quarter: 2015-Q1
+                  startDate: "2015-01-01"
+                  values:
+                    cpi_total:
+                      value: 0.74
+                      classification: COMPUTED
+                    food_catering:
+                      value: 2.14
+                      classification: COMPUTED
+                    eating_out: null
+                    gold_price_index:
+                      value: -2.49
+                      classification: COMPUTED
+                    usd_price_index:
+                      value: 1.26
+                      classification: COMPUTED
+                - quarter: 2026-Q3
+                  startDate: "2026-07-01"
+                  values:
+                    cpi_total:
+                      value: 4.8
+                      classification: RAW
+                    food_catering:
+                      value: 4.58
+                      classification: RAW
+                    eating_out:
+                      value: 7.72
+                      classification: RAW
+                    gold_price_index:
+                      value: 16.15
+                      classification: RAW
+                    usd_price_index:
+                      value: -0.45
+                      classification: RAW
+              latestQuarter: 2026-Q3
+              latestMonth: "2026-09"
+              source: Cục Thống kê (NSO) — www.nso.gov.vn
+              wasRestated: false
+            meta:
+              source: Cục Thống kê (NSO) — www.nso.gov.vn
+              as_of: "2026-09"
+              unit: PERCENT
+              classification:
+                value: RAW when NSO prints the quarterly average (March, June, September, December tables of 2019 and 2026), COMPUTED from the three months otherwise
+              formula_version: cpi-quarter-avg-from-months-v1
+              was_restated: false
+              served_from_cache: true
+              cache_expires_at: "2026-11-07T01:12:40.000Z"
+              timestamp: "2026-11-06T03:00:00.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

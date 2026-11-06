@@ -94,6 +94,7 @@
               "GET /openapi/v1/macro/vietnam/gdp-by-sector",
               "GET /openapi/v1/macro/vietnam/gdp-by-sector/periods",
               "GET /openapi/v1/macro/vietnam/gdp-by-sector/series",
+              "GET /openapi/v1/macro/vietnam/cpi-by-component",
               "GET /openapi/v1/macro/indicators/gdp-growth-rate",
               "GET /openapi/v1/macro/indicators/gdp-per-capita",
               "GET /openapi/v1/macro/indicators/central-government-debt",

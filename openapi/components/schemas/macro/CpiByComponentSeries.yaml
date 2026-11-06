@@ -1,0 +1,57 @@
+type: object
+description: Vietnam CPI by component, one point per quarter.
+required:
+  - country
+  - measure
+  - unit
+  - components
+  - points
+  - latestQuarter
+  - latestMonth
+  - source
+  - wasRestated
+properties:
+  country:
+    type: string
+    enum:
+      - vn
+    description: Country. Only Vietnam for now.
+    example: vn
+  measure:
+    type: string
+    enum:
+      - quarter_avg_yoy
+    description: Every value is the quarterly average against the average of the same quarter of the previous year.
+    example: quarter_avg_yoy
+  unit:
+    type: string
+    enum:
+      - PERCENT
+    description: Unit of `value`.
+    example: PERCENT
+  components:
+    type: array
+    description: The lines of the series, in the order NSO prints them.
+    items:
+      $ref: "./CpiComponent.yaml"
+  points:
+    type: array
+    description: One entry per quarter, oldest first. Empty if nothing was known at `asOf`.
+    items:
+      $ref: "./CpiQuarterPoint.yaml"
+  latestQuarter:
+    type: ["string", "null"]
+    description: Latest complete quarter with data (`YYYY-Qn`).
+    example: 2026-Q3
+  latestMonth:
+    type: ["string", "null"]
+    description: Latest month with data (`YYYY-MM`). Can be ahead of `latestQuarter`.
+    example: "2026-09"
+  source:
+    type: string
+    description: Data provider.
+    example: Cục Thống kê (NSO) — www.nso.gov.vn
+  wasRestated:
+    type: boolean
+    description: NSO has revised a published number in this series since its first release.
+    example: false

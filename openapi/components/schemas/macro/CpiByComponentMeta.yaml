@@ -1,0 +1,43 @@
+description: |
+  Response metadata for CPI by component. On top of `timestamp`, it says where the numbers
+  came from, how they were produced, and how fresh the response is.
+allOf:
+  - $ref: "../common/Meta.yaml"
+  - type: object
+    properties:
+      source:
+        type: string
+        description: Data provider.
+        example: Cục Thống kê (NSO) — www.nso.gov.vn
+      as_of:
+        type: ["string", "null"]
+        description: Latest month with data (`YYYY-MM`); same as `data.latestMonth`.
+        example: "2026-09"
+      unit:
+        type: string
+        description: Unit of `value`.
+        example: PERCENT
+      classification:
+        type: object
+        description: How `value` is produced. Each value also says it in `values[code].classification`.
+        properties:
+          value:
+            type: string
+            example: RAW when NSO prints the quarterly average (March, June, September, December tables of 2019 and 2026), COMPUTED from the three months otherwise
+      formula_version:
+        type: string
+        description: Version tag of the formula behind `COMPUTED` values.
+        example: cpi-quarter-avg-from-months-v1
+      was_restated:
+        type: boolean
+        description: Same as `data.wasRestated`.
+        example: false
+      served_from_cache:
+        type: boolean
+        description: Whether the response was served from cache.
+        example: true
+      cache_expires_at:
+        type: ["string", "null"]
+        format: date-time
+        description: When the cached copy expires (24 h; it is dropped as soon as new data is collected).
+        example: "2026-11-07T01:12:40.000Z"

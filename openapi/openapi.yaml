@@ -216,6 +216,8 @@ paths:
     $ref: "./paths/macro/macro_vietnam_gdp-by-sector_periods.yaml"
   /openapi/v1/macro/vietnam/gdp-by-sector/series:
     $ref: "./paths/macro/macro_vietnam_gdp-by-sector_series.yaml"
+  /openapi/v1/macro/vietnam/cpi-by-component:
+    $ref: "./paths/macro/macro_vietnam_cpi-by-component.yaml"
 
   /openapi/v1/macro/indicators/gdp-growth-rate:
     $ref: "./paths/macro/macro_indicators_gdp-growth-rate.yaml"

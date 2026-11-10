@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "../common/EnvelopeBase.yaml"
+  - type: object
+    required:
+      - data
+    properties:
+      data:
+        $ref: "../macro/FomcSchedule.yaml"
+      meta:
+        $ref: "../macro/FedFundsMeta.yaml"

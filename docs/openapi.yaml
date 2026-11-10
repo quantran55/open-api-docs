@@ -3258,6 +3258,334 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fed-funds/us/daily:
+    get:
+      operationId: macroFedFundsUsDaily
+      tags:
+        - Macro
+      summary: US Fed Funds rate — daily EFFR, percentiles, target range and IORB
+      description: |
+        Daily Effective Federal Funds Rate (EFFR) for the United States, with the
+        distribution of the same day's trades (1st, 25th, 75th and 99th percentiles and
+        volume), the FOMC target range in force, the rate the Fed pays on reserves (IORB,
+        IOER before 2021-07-29) and the EFFR − IORB spread in basis points.
+
+        `points` has one entry per New York Fed business day, oldest first; days the Fed
+        does not publish have no entry. A figure that is not out yet is `null` — never 0
+        (for example IORB on the newest day before FRED updates, which also leaves
+        `spreadIorbBp` `null`). `fomcDecisions` lists the FOMC decisions whose effective
+        date falls in the window, for drawing vertical markers.
+
+        The New York Fed publishes day D at about 9:00 a.m. New York time on business day
+        D+1. History starts on 2016-03-01, when the New York Fed changed the EFFR's source
+        and method; percentiles and volume before that date are not comparable.
+
+        **Terms of use.** `meta.terms_notice` carries the notice the New York Fed requires
+        next to any EFFR figure you publish.
+
+        Sources: Federal Reserve Bank of New York (EFFR, percentiles, volume); FRED, Federal
+        Reserve Bank of St. Louis (IORB, IOER, target range).
+      x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/macro/us-fed-funds-daily
+      x-api-weight: 2
+      parameters:
+        - name: period
+          in: query
+          required: false
+          description: |
+            Window, counted back from the latest day that has an EFFR (not from today).
+            Case-insensitive.
+
+            | Value | Window |
+            | --- | --- |
+            | `1Y` | 12 months |
+            | `3Y` | 36 months |
+            | `ALL` | everything from 2016-03-01 (about 2,700 days) |
+          schema:
+            type: string
+            enum:
+              - 1Y
+              - 3Y
+              - ALL
+            default: 1Y
+            example: 1Y
+      responses:
+        '200':
+          description: Daily Fed Funds series for the requested window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFedFundsUsDailyResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: us
+                  period: 1Y
+                  from: '2025-11-07'
+                  to: '2026-11-06'
+                  latestDate: '2026-11-06'
+                  knowledgeAt: '2026-11-07T14:12:03.000Z'
+                  wasRestated: false
+                  points:
+                    - date: '2026-10-28'
+                      effr: 3.88
+                      p01: 3.83
+                      p25: 3.87
+                      p75: 3.89
+                      p99: 3.95
+                      volumeBn: 115
+                      targetLow: 3.75
+                      targetHigh: 4
+                      iorb: 3.9
+                      spreadIorbBp: -2
+                      reserveRate: IORB
+                    - date: '2026-10-29'
+                      effr: 3.88
+                      p01: 3.83
+                      p25: 3.87
+                      p75: 3.89
+                      p99: 3.94
+                      volumeBn: 117
+                      targetLow: 3.75
+                      targetHigh: 4
+                      iorb: 3.9
+                      spreadIorbBp: -2
+                      reserveRate: IORB
+                    - date: '2026-11-06'
+                      effr: 3.88
+                      p01: 3.82
+                      p25: 3.86
+                      p75: 3.89
+                      p99: 3.96
+                      volumeBn: 112
+                      targetLow: 3.75
+                      targetHigh: 4
+                      iorb: null
+                      spreadIorbBp: null
+                      reserveRate: null
+                  fomcDecisions:
+                    - decisionDate: '2026-10-28'
+                      effectiveDate: '2026-10-29'
+                      action: HOLD
+                      changeBp: 0
+                meta:
+                  source:
+                    - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+                    - FRED (St. Louis Fed) — IORB, IOER and the federal funds target range
+                  as_of: '2026-11-06'
+                  unit:
+                    rate: percent_per_annum
+                    volumeBn: usd_billion
+                    spreadIorbBp: basis_points
+                  knowledge_at: '2026-11-07T14:12:03.000Z'
+                  classification:
+                    RAW:
+                      - effr
+                      - p01
+                      - p25
+                      - p75
+                      - p99
+                      - volumeBn
+                      - targetLow
+                      - targetHigh
+                      - iorb
+                    DERIVED:
+                      - reserveRate
+                    COMPUTED:
+                      - spreadIorbBp
+                  formula_version:
+                    spreadIorbBp: 'v1: (effr - iorb) * 100'
+                  was_restated: false
+                  terms_notice: The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by HayInsights, does not sanction or endorse any particular republication, and has no liability for your use.
+                  served_from_cache: false
+                  cache_expires_at: '2026-11-08T02:12:03.000Z'
+                  timestamp: '2026-11-07T14:12:03.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /openapi/v1/macro/fed-funds/us/fomc-meetings:
+    get:
+      operationId: macroFedFundsUsFomcMeetings
+      tags:
+        - Macro
+      summary: US FOMC meeting schedule and rate decisions
+      description: |
+        The Federal Open Market Committee's meeting calendar with the result of each
+        meeting: the decision (hike, cut or hold), the change in basis points, and the
+        target range and EFFR on the first business day after the decision.
+
+        `meetings` lists one year's meetings, newest first; pick the year with `year`
+        (values in `years`). `nextMeeting` and `upcoming` always cover every meeting that
+        has not happened yet, whatever `year` is, and `currentTargetRange` is the range in
+        force on the latest business day on record.
+
+        A meeting is `upcoming` until its decision day has passed (New York date). Right
+        after that, the result fields can stay `null` until the next collection run. The
+        first meeting on record (2016-01-27) has `action: null` — there is no earlier range
+        to compare with. Cancelled meetings (2020-03-17/18) are left out.
+
+        Scheduled meetings announce at 2:00 p.m. New York time on the decision day;
+        `announcementAt` gives that moment in UTC. Unscheduled meetings have no fixed time.
+
+        Sources: Federal Reserve Board (FOMC calendar, statements); Federal Reserve Bank
+        of New York (EFFR).
+      x-feature-code: macro_data
+      x-mint:
+        href: /api-reference/macro/us-fomc-meetings
+      x-api-weight: 2
+      parameters:
+        - name: year
+          in: query
+          required: false
+          description: |
+            Year of `meetings`, 2016 or later. Omit for the current year (New York time). A
+            year without meetings returns `meetings: []`.
+          schema:
+            type: integer
+            minimum: 2016
+            maximum: 2100
+            example: 2026
+      responses:
+        '200':
+          description: FOMC calendar and the meetings of the requested year.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroFedFundsUsFomcMeetingsResponse'
+              example:
+                success: true
+                statusCode: 200
+                data:
+                  country: us
+                  years:
+                    - 2016
+                    - 2017
+                    - 2018
+                    - 2019
+                    - 2020
+                    - 2021
+                    - 2022
+                    - 2023
+                    - 2024
+                    - 2025
+                    - 2026
+                    - 2027
+                  year: 2026
+                  currentTargetRange:
+                    date: '2026-11-06'
+                    low: 3.75
+                    high: 4
+                  nextMeeting:
+                    meetingStartDate: '2026-12-08'
+                    decisionDate: '2026-12-09'
+                    meetingType: scheduled
+                    status: upcoming
+                    hasSep: true
+                    announcementAt: '2026-12-09T19:00:00.000Z'
+                    effectiveDate: null
+                    action: null
+                    changeBp: null
+                    targetRangeLow: null
+                    targetRangeHigh: null
+                    effrOnEffectiveDate: null
+                    statementUrl: null
+                    implementationNoteUrl: null
+                  upcoming:
+                    - meetingStartDate: '2026-12-08'
+                      decisionDate: '2026-12-09'
+                      meetingType: scheduled
+                      status: upcoming
+                      hasSep: true
+                      announcementAt: '2026-12-09T19:00:00.000Z'
+                      effectiveDate: null
+                      action: null
+                      changeBp: null
+                      targetRangeLow: null
+                      targetRangeHigh: null
+                      effrOnEffectiveDate: null
+                      statementUrl: null
+                      implementationNoteUrl: null
+                  meetings:
+                    - meetingStartDate: '2026-12-08'
+                      decisionDate: '2026-12-09'
+                      meetingType: scheduled
+                      status: upcoming
+                      hasSep: true
+                      announcementAt: '2026-12-09T19:00:00.000Z'
+                      effectiveDate: null
+                      action: null
+                      changeBp: null
+                      targetRangeLow: null
+                      targetRangeHigh: null
+                      effrOnEffectiveDate: null
+                      statementUrl: null
+                      implementationNoteUrl: null
+                    - meetingStartDate: '2026-10-27'
+                      decisionDate: '2026-10-28'
+                      meetingType: scheduled
+                      status: decided
+                      hasSep: false
+                      announcementAt: '2026-10-28T18:00:00.000Z'
+                      effectiveDate: '2026-10-29'
+                      action: HOLD
+                      changeBp: 0
+                      targetRangeLow: 3.75
+                      targetRangeHigh: 4
+                      effrOnEffectiveDate: 3.88
+                      statementUrl: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm
+                      implementationNoteUrl: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a1.htm
+                meta:
+                  source:
+                    - Federal Reserve Board — FOMC meeting calendar
+                    - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+                  as_of: '2026-11-06'
+                  unit:
+                    rate: percent_per_annum
+                    changeBp: basis_points
+                  classification:
+                    RAW:
+                      - meetingStartDate
+                      - decisionDate
+                      - meetingType
+                      - statementUrl
+                      - implementationNoteUrl
+                      - targetRangeLow
+                      - targetRangeHigh
+                      - effrOnEffectiveDate
+                    DERIVED:
+                      - effectiveDate
+                      - status
+                      - hasSep
+                      - announcementAt
+                    COMPUTED:
+                      - action
+                      - changeBp
+                  formula_version:
+                    action: v1
+                    changeBp: 'v1: (target_high after - target_high before) * 100'
+                  terms_notice: The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by HayInsights, does not sanction or endorse any particular republication, and has no liability for your use.
+                  served_from_cache: true
+                  cache_expires_at: '2026-11-08T02:12:03.000Z'
+                  timestamp: '2026-11-07T14:12:03.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /openapi/v1/macro/trade/turnover:
     get:
       operationId: macroTradeTurnover
@@ -12192,6 +12520,510 @@ components:
                       - number
                       - 'null'
                     description: US federal funds rate on the same date, %, when provided by the source.
+    FedFundsDailyPoint:
+      type: object
+      description: |
+        One New York Fed business day. Days the Fed does not publish (weekends, US holidays)
+        have no entry. A figure that is not out yet is `null` — never 0.
+      required:
+        - date
+        - effr
+        - p01
+        - p25
+        - p75
+        - p99
+        - volumeBn
+        - targetLow
+        - targetHigh
+        - iorb
+        - spreadIorbBp
+        - reserveRate
+      properties:
+        date:
+          type: string
+          format: date
+          description: Business day the rate applies to (New York).
+          example: '2026-10-29'
+        effr:
+          type:
+            - number
+            - 'null'
+          description: Effective Federal Funds Rate, % per year — the volume-weighted median of overnight federal funds trades.
+          example: 3.88
+        p01:
+          type:
+            - number
+            - 'null'
+          description: 1st percentile of the same day's trades, % per year.
+          example: 3.83
+        p25:
+          type:
+            - number
+            - 'null'
+          description: 25th percentile, % per year.
+          example: 3.87
+        p75:
+          type:
+            - number
+            - 'null'
+          description: 75th percentile, % per year.
+          example: 3.89
+        p99:
+          type:
+            - number
+            - 'null'
+          description: 99th percentile, % per year.
+          example: 3.94
+        volumeBn:
+          type:
+            - number
+            - 'null'
+          description: Total volume traded that day, in **billion** US dollars.
+          example: 117
+        targetLow:
+          type:
+            - number
+            - 'null'
+          description: Lower bound of the FOMC target range in force that day, % per year.
+          example: 3.75
+        targetHigh:
+          type:
+            - number
+            - 'null'
+          description: Upper bound of the FOMC target range in force that day, % per year.
+          example: 4
+        iorb:
+          type:
+            - number
+            - 'null'
+          description: |
+            Interest rate the Fed pays on reserve balances, % per year. Before 2021-07-29 this
+            is IOER (interest on excess reserves) — see `reserveRate`.
+          example: 3.9
+        spreadIorbBp:
+          type:
+            - number
+            - 'null'
+          description: '`(effr − iorb) × 100`, in basis points. `null` when either rate is missing.'
+          example: -2
+        reserveRate:
+          type:
+            - string
+            - 'null'
+          enum:
+            - IORB
+            - IOER
+            - null
+          description: Name of the rate in `iorb` on that day — `IOER` before 2021-07-29, `IORB` from then. `null` when `iorb` is `null`.
+          example: IORB
+    FomcDecisionMarker:
+      type: object
+      description: An FOMC rate decision whose effective date falls inside the window — one vertical marker on a daily chart.
+      required:
+        - decisionDate
+        - effectiveDate
+        - action
+        - changeBp
+      properties:
+        decisionDate:
+          type: string
+          format: date
+          description: Day the FOMC announced the decision.
+          example: '2026-10-28'
+        effectiveDate:
+          type: string
+          format: date
+          description: First business day the new target range applies (usually the day after the decision).
+          example: '2026-10-29'
+        action:
+          type:
+            - string
+            - 'null'
+          enum:
+            - HIKE
+            - CUT
+            - HOLD
+            - null
+          description: What the FOMC did to the target range. `null` for the first meeting on record, which has nothing to compare against.
+          example: HOLD
+        changeBp:
+          type:
+            - number
+            - 'null'
+          description: Change of the target range's upper bound, in basis points (signed).
+          example: 0
+    FedFundsDaily:
+      type: object
+      description: |
+        Daily Fed Funds data for the United States over the requested window. When nothing
+        is on record yet, `from`, `to` and `latestDate` are `null` and `points` is empty.
+      required:
+        - country
+        - period
+        - from
+        - to
+        - latestDate
+        - knowledgeAt
+        - wasRestated
+        - points
+        - fomcDecisions
+      properties:
+        country:
+          type: string
+          enum:
+            - us
+          description: Country code, lowercase. Only the United States is available.
+          example: us
+        period:
+          type: string
+          enum:
+            - 1Y
+            - 3Y
+            - ALL
+          description: Window that was applied.
+          example: 1Y
+        from:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: First day of the window.
+          example: '2025-11-07'
+        to:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Last day of the window — the latest day with an EFFR.
+          example: '2026-11-06'
+        latestDate:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: Latest business day with an EFFR (same as `to`).
+          example: '2026-11-06'
+        knowledgeAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: When HayInsights last collected a figure in the window (UTC).
+          example: '2026-11-07T14:12:03.000Z'
+        wasRestated:
+          type: boolean
+          description: '`true` when the New York Fed revised any day in the window after first publishing it.'
+          example: false
+        points:
+          type: array
+          description: One entry per business day from `from` to `to`, oldest first.
+          items:
+            $ref: '#/components/schemas/FedFundsDailyPoint'
+        fomcDecisions:
+          type: array
+          description: FOMC decisions whose `effectiveDate` falls inside the window, oldest first.
+          items:
+            $ref: '#/components/schemas/FomcDecisionMarker'
+    FedFundsMeta:
+      description: |
+        Response metadata for the Fed Funds endpoints. On top of `timestamp`, it says where the
+        numbers came from, which fields HayInsights computes, how fresh the response is, and
+        carries the notice the New York Fed requires next to any EFFR figure.
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+        - type: object
+          properties:
+            source:
+              type: array
+              description: Data providers.
+              items:
+                type: string
+              example:
+                - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+                - FRED (St. Louis Fed) — IORB, IOER and the federal funds target range
+            as_of:
+              type:
+                - string
+                - 'null'
+              format: date
+              description: |
+                Latest business day in the response. For `/daily`, the New York Fed publishes
+                day D at about 9:00 a.m. New York time on business day D+1.
+              example: '2026-11-06'
+            unit:
+              type: object
+              description: Unit of each kind of numeric field.
+              additionalProperties:
+                type: string
+              example:
+                rate: percent_per_annum
+                volumeBn: usd_billion
+                spreadIorbBp: basis_points
+            knowledge_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: '`/daily` only — same as `data.knowledgeAt`.'
+              example: '2026-11-07T14:12:03.000Z'
+            classification:
+              type: object
+              description: |
+                How each field was produced: `RAW` is passed through as the source published it,
+                `DERIVED` follows from a published rule, `COMPUTED` is calculated by HayInsights.
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              example:
+                RAW:
+                  - effr
+                  - p01
+                  - p25
+                  - p75
+                  - p99
+                  - volumeBn
+                  - targetLow
+                  - targetHigh
+                  - iorb
+                DERIVED:
+                  - reserveRate
+                COMPUTED:
+                  - spreadIorbBp
+            formula_version:
+              type: object
+              description: Version tag of the formula behind each computed field.
+              additionalProperties:
+                type: string
+              example:
+                spreadIorbBp: 'v1: (effr - iorb) * 100'
+            was_restated:
+              type: boolean
+              description: '`/daily` only — same as `data.wasRestated`.'
+              example: false
+            terms_notice:
+              type: string
+              description: |
+                Notice required by the New York Fed's Terms of Use. Show it with any EFFR
+                figure you publish.
+              example: The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by HayInsights, does not sanction or endorse any particular republication, and has no liability for your use.
+            served_from_cache:
+              type: boolean
+              description: Whether the response was served from cache.
+              example: false
+            cache_expires_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+              description: When the cached copy expires (12 h; it is dropped as soon as a new figure is collected).
+              example: '2026-11-07T02:12:03.000Z'
+    MacroFedFundsUsDailyResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FedFundsDaily'
+            meta:
+              $ref: '#/components/schemas/FedFundsMeta'
+    FomcMeeting:
+      type: object
+      description: |
+        One FOMC meeting. Cancelled meetings are left out. Result fields (`action`,
+        `changeBp`, target range, EFFR) are `null` until the decision is out.
+      required:
+        - meetingStartDate
+        - decisionDate
+        - meetingType
+        - status
+        - hasSep
+        - announcementAt
+        - effectiveDate
+        - action
+        - changeBp
+        - targetRangeLow
+        - targetRangeHigh
+        - effrOnEffectiveDate
+        - statementUrl
+        - implementationNoteUrl
+      properties:
+        meetingStartDate:
+          type: string
+          format: date
+          description: First day of the meeting. Same as `decisionDate` for a one-day meeting.
+          example: '2026-10-27'
+        decisionDate:
+          type: string
+          format: date
+          description: Day the decision is announced (the last meeting day).
+          example: '2026-10-28'
+        meetingType:
+          type: string
+          enum:
+            - scheduled
+            - unscheduled
+          description: '`scheduled` — one of the eight regular meetings; `unscheduled` — an extra meeting.'
+          example: scheduled
+        status:
+          type: string
+          enum:
+            - upcoming
+            - decided
+          description: '`upcoming` until the decision day has passed (New York date) and the statement is out.'
+          example: decided
+        hasSep:
+          type: boolean
+          description: Whether the meeting publishes a Summary of Economic Projections (with the dot plot) — the March, June, September and December meetings.
+          example: false
+        announcementAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
+          description: |
+            When the statement is released, UTC — 2:00 p.m. New York time on `decisionDate`
+            for a scheduled meeting. Convert it to any time zone; do not add a fixed offset
+            (US daylight saving time changes it). `null` for an unscheduled meeting.
+          example: '2026-10-28T18:00:00.000Z'
+        effectiveDate:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: First business day after the decision — the day `targetRangeLow`, `targetRangeHigh` and `effrOnEffectiveDate` are taken from.
+          example: '2026-10-29'
+        action:
+          type:
+            - string
+            - 'null'
+          enum:
+            - HIKE
+            - CUT
+            - HOLD
+            - null
+          description: What the FOMC did to the target range.
+          example: HOLD
+        changeBp:
+          type:
+            - number
+            - 'null'
+          description: Change of the target range's upper bound, in basis points (signed).
+          example: 0
+        targetRangeLow:
+          type:
+            - number
+            - 'null'
+          description: Lower bound of the target range on `effectiveDate`, % per year.
+          example: 3.75
+        targetRangeHigh:
+          type:
+            - number
+            - 'null'
+          description: Upper bound of the target range on `effectiveDate`, % per year.
+          example: 4
+        effrOnEffectiveDate:
+          type:
+            - number
+            - 'null'
+          description: EFFR on `effectiveDate`, % per year.
+          example: 3.88
+        statementUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+          description: FOMC statement on federalreserve.gov. `null` before the meeting.
+          example: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm
+        implementationNoteUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+          description: Implementation Note on federalreserve.gov. `null` before the meeting.
+          example: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a1.htm
+    FomcSchedule:
+      type: object
+      description: FOMC meeting calendar and results for the United States.
+      required:
+        - country
+        - years
+        - year
+        - currentTargetRange
+        - nextMeeting
+        - upcoming
+        - meetings
+      properties:
+        country:
+          type: string
+          enum:
+            - us
+          description: Country code, lowercase.
+          example: us
+        years:
+          type: array
+          description: Years that have meetings on record, oldest first — values accepted by `year`.
+          items:
+            type: integer
+          example:
+            - 2025
+            - 2026
+            - 2027
+        year:
+          type: integer
+          description: Year of `meetings`.
+          example: 2026
+        currentTargetRange:
+          description: Target range on the latest business day on record. `null` when nothing is on record yet.
+          oneOf:
+            - type: object
+              required:
+                - date
+                - low
+                - high
+              properties:
+                date:
+                  type: string
+                  format: date
+                  description: Business day the range is taken from.
+                  example: '2026-11-06'
+                low:
+                  type: number
+                  description: Lower bound, % per year.
+                  example: 3.75
+                high:
+                  type: number
+                  description: Upper bound, % per year.
+                  example: 4
+            - type: 'null'
+        nextMeeting:
+          description: The nearest meeting that has not happened yet. `null` when the Fed has not announced one.
+          oneOf:
+            - $ref: '#/components/schemas/FomcMeeting'
+            - type: 'null'
+        upcoming:
+          type: array
+          description: Every meeting that has not happened yet, nearest first — including next year's once the Fed publishes it.
+          items:
+            $ref: '#/components/schemas/FomcMeeting'
+        meetings:
+          type: array
+          description: Meetings of `year`, newest first. Empty when the year has no meetings.
+          items:
+            $ref: '#/components/schemas/FomcMeeting'
+    MacroFedFundsUsFomcMeetingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeBase'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '#/components/schemas/FomcSchedule'
+            meta:
+              $ref: '#/components/schemas/FedFundsMeta'
     MacroTradeTurnoverResponse:
       allOf:
         - $ref: '#/components/schemas/EnvelopeBase'

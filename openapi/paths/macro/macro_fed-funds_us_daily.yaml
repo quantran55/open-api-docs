@@ -1,0 +1,147 @@
+get:
+  operationId: macroFedFundsUsDaily
+  tags:
+    - Macro
+  summary: US Fed Funds rate — daily EFFR, percentiles, target range and IORB
+  description: |
+    Daily Effective Federal Funds Rate (EFFR) for the United States, with the
+    distribution of the same day's trades (1st, 25th, 75th and 99th percentiles and
+    volume), the FOMC target range in force, the rate the Fed pays on reserves (IORB,
+    IOER before 2021-07-29) and the EFFR − IORB spread in basis points.
+
+    `points` has one entry per New York Fed business day, oldest first; days the Fed
+    does not publish have no entry. A figure that is not out yet is `null` — never 0
+    (for example IORB on the newest day before FRED updates, which also leaves
+    `spreadIorbBp` `null`). `fomcDecisions` lists the FOMC decisions whose effective
+    date falls in the window, for drawing vertical markers.
+
+    The New York Fed publishes day D at about 9:00 a.m. New York time on business day
+    D+1. History starts on 2016-03-01, when the New York Fed changed the EFFR's source
+    and method; percentiles and volume before that date are not comparable.
+
+    **Terms of use.** `meta.terms_notice` carries the notice the New York Fed requires
+    next to any EFFR figure you publish.
+
+    Sources: Federal Reserve Bank of New York (EFFR, percentiles, volume); FRED, Federal
+    Reserve Bank of St. Louis (IORB, IOER, target range).
+  x-feature-code: macro_data
+  # Fixed page URL: the Fed Funds charts' API button in the HayInsights app links straight here.
+  x-mint:
+    href: /api-reference/macro/us-fed-funds-daily
+  x-api-weight: 2
+  parameters:
+    - name: period
+      in: query
+      required: false
+      description: |
+        Window, counted back from the latest day that has an EFFR (not from today).
+        Case-insensitive.
+
+        | Value | Window |
+        | --- | --- |
+        | `1Y` | 12 months |
+        | `3Y` | 36 months |
+        | `ALL` | everything from 2016-03-01 (about 2,700 days) |
+      schema:
+        type: string
+        enum:
+          - 1Y
+          - 3Y
+          - ALL
+        default: 1Y
+        example: 1Y
+  responses:
+    "200":
+      description: Daily Fed Funds series for the requested window.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroFedFundsUsDailyResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: us
+              period: 1Y
+              from: "2025-11-07"
+              to: "2026-11-06"
+              latestDate: "2026-11-06"
+              knowledgeAt: "2026-11-07T14:12:03.000Z"
+              wasRestated: false
+              points:
+                - date: "2026-10-28"
+                  effr: 3.88
+                  p01: 3.83
+                  p25: 3.87
+                  p75: 3.89
+                  p99: 3.95
+                  volumeBn: 115
+                  targetLow: 3.75
+                  targetHigh: 4
+                  iorb: 3.9
+                  spreadIorbBp: -2
+                  reserveRate: IORB
+                - date: "2026-10-29"
+                  effr: 3.88
+                  p01: 3.83
+                  p25: 3.87
+                  p75: 3.89
+                  p99: 3.94
+                  volumeBn: 117
+                  targetLow: 3.75
+                  targetHigh: 4
+                  iorb: 3.9
+                  spreadIorbBp: -2
+                  reserveRate: IORB
+                - date: "2026-11-06"
+                  effr: 3.88
+                  p01: 3.82
+                  p25: 3.86
+                  p75: 3.89
+                  p99: 3.96
+                  volumeBn: 112
+                  targetLow: 3.75
+                  targetHigh: 4
+                  iorb: null
+                  spreadIorbBp: null
+                  reserveRate: null
+              fomcDecisions:
+                - decisionDate: "2026-10-28"
+                  effectiveDate: "2026-10-29"
+                  action: HOLD
+                  changeBp: 0
+            meta:
+              source:
+                - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+                - FRED (St. Louis Fed) — IORB, IOER and the federal funds target range
+              as_of: "2026-11-06"
+              unit:
+                rate: percent_per_annum
+                volumeBn: usd_billion
+                spreadIorbBp: basis_points
+              knowledge_at: "2026-11-07T14:12:03.000Z"
+              classification:
+                RAW: [effr, p01, p25, p75, p99, volumeBn, targetLow, targetHigh, iorb]
+                DERIVED: [reserveRate]
+                COMPUTED: [spreadIorbBp]
+              formula_version:
+                spreadIorbBp: "v1: (effr - iorb) * 100"
+              was_restated: false
+              terms_notice: >-
+                The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at
+                newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by
+                HayInsights, does not sanction or endorse any particular republication, and has no
+                liability for your use.
+              served_from_cache: false
+              cache_expires_at: "2026-11-08T02:12:03.000Z"
+              timestamp: "2026-11-07T14:12:03.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

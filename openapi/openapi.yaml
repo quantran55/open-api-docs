@@ -200,6 +200,10 @@ paths:
     $ref: "./paths/macro/macro_interbank-rates_jp_overnight.yaml"
   /openapi/v1/macro/interbank-rates/vn:
     $ref: "./paths/macro/macro_interbank-rates_vn.yaml"
+  /openapi/v1/macro/fed-funds/us/daily:
+    $ref: "./paths/macro/macro_fed-funds_us_daily.yaml"
+  /openapi/v1/macro/fed-funds/us/fomc-meetings:
+    $ref: "./paths/macro/macro_fed-funds_us_fomc-meetings.yaml"
   /openapi/v1/macro/trade/turnover:
     $ref: "./paths/macro/macro_trade_turnover.yaml"
   /openapi/v1/macro/trade/by-region:

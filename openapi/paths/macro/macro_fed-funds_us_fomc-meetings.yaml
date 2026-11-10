@@ -1,0 +1,160 @@
+get:
+  operationId: macroFedFundsUsFomcMeetings
+  tags:
+    - Macro
+  summary: US FOMC meeting schedule and rate decisions
+  description: |
+    The Federal Open Market Committee's meeting calendar with the result of each
+    meeting: the decision (hike, cut or hold), the change in basis points, and the
+    target range and EFFR on the first business day after the decision.
+
+    `meetings` lists one year's meetings, newest first; pick the year with `year`
+    (values in `years`). `nextMeeting` and `upcoming` always cover every meeting that
+    has not happened yet, whatever `year` is, and `currentTargetRange` is the range in
+    force on the latest business day on record.
+
+    A meeting is `upcoming` until its decision day has passed (New York date). Right
+    after that, the result fields can stay `null` until the next collection run. The
+    first meeting on record (2016-01-27) has `action: null` — there is no earlier range
+    to compare with. Cancelled meetings (2020-03-17/18) are left out.
+
+    Scheduled meetings announce at 2:00 p.m. New York time on the decision day;
+    `announcementAt` gives that moment in UTC. Unscheduled meetings have no fixed time.
+
+    Sources: Federal Reserve Board (FOMC calendar, statements); Federal Reserve Bank
+    of New York (EFFR).
+  x-feature-code: macro_data
+  # Fixed page URL: the FOMC table's API button in the HayInsights app links straight here.
+  x-mint:
+    href: /api-reference/macro/us-fomc-meetings
+  x-api-weight: 2
+  parameters:
+    - name: year
+      in: query
+      required: false
+      description: |
+        Year of `meetings`, 2016 or later. Omit for the current year (New York time). A
+        year without meetings returns `meetings: []`.
+      schema:
+        type: integer
+        minimum: 2016
+        maximum: 2100
+        example: 2026
+  responses:
+    "200":
+      description: FOMC calendar and the meetings of the requested year.
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/responses/MacroFedFundsUsFomcMeetingsResponse.yaml"
+          example:
+            success: true
+            statusCode: 200
+            data:
+              country: us
+              years: [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027]
+              year: 2026
+              currentTargetRange:
+                date: "2026-11-06"
+                low: 3.75
+                high: 4
+              nextMeeting:
+                meetingStartDate: "2026-12-08"
+                decisionDate: "2026-12-09"
+                meetingType: scheduled
+                status: upcoming
+                hasSep: true
+                announcementAt: "2026-12-09T19:00:00.000Z"
+                effectiveDate: null
+                action: null
+                changeBp: null
+                targetRangeLow: null
+                targetRangeHigh: null
+                effrOnEffectiveDate: null
+                statementUrl: null
+                implementationNoteUrl: null
+              upcoming:
+                - meetingStartDate: "2026-12-08"
+                  decisionDate: "2026-12-09"
+                  meetingType: scheduled
+                  status: upcoming
+                  hasSep: true
+                  announcementAt: "2026-12-09T19:00:00.000Z"
+                  effectiveDate: null
+                  action: null
+                  changeBp: null
+                  targetRangeLow: null
+                  targetRangeHigh: null
+                  effrOnEffectiveDate: null
+                  statementUrl: null
+                  implementationNoteUrl: null
+              meetings:
+                - meetingStartDate: "2026-12-08"
+                  decisionDate: "2026-12-09"
+                  meetingType: scheduled
+                  status: upcoming
+                  hasSep: true
+                  announcementAt: "2026-12-09T19:00:00.000Z"
+                  effectiveDate: null
+                  action: null
+                  changeBp: null
+                  targetRangeLow: null
+                  targetRangeHigh: null
+                  effrOnEffectiveDate: null
+                  statementUrl: null
+                  implementationNoteUrl: null
+                - meetingStartDate: "2026-10-27"
+                  decisionDate: "2026-10-28"
+                  meetingType: scheduled
+                  status: decided
+                  hasSep: false
+                  announcementAt: "2026-10-28T18:00:00.000Z"
+                  effectiveDate: "2026-10-29"
+                  action: HOLD
+                  changeBp: 0
+                  targetRangeLow: 3.75
+                  targetRangeHigh: 4
+                  effrOnEffectiveDate: 3.88
+                  statementUrl: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm
+                  implementationNoteUrl: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a1.htm
+            meta:
+              source:
+                - Federal Reserve Board — FOMC meeting calendar
+                - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+              as_of: "2026-11-06"
+              unit:
+                rate: percent_per_annum
+                changeBp: basis_points
+              classification:
+                RAW:
+                  - meetingStartDate
+                  - decisionDate
+                  - meetingType
+                  - statementUrl
+                  - implementationNoteUrl
+                  - targetRangeLow
+                  - targetRangeHigh
+                  - effrOnEffectiveDate
+                DERIVED: [effectiveDate, status, hasSep, announcementAt]
+                COMPUTED: [action, changeBp]
+              formula_version:
+                action: v1
+                changeBp: "v1: (target_high after - target_high before) * 100"
+              terms_notice: >-
+                The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at
+                newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by
+                HayInsights, does not sanction or endorse any particular republication, and has no
+                liability for your use.
+              served_from_cache: true
+              cache_expires_at: "2026-11-08T02:12:03.000Z"
+              timestamp: "2026-11-07T14:12:03.000Z"
+    "400":
+      $ref: "../../components/responses/BadRequest.yaml"
+    "401":
+      $ref: "../../components/responses/Unauthorized.yaml"
+    "403":
+      $ref: "../../components/responses/Forbidden.yaml"
+    "429":
+      $ref: "../../components/responses/RateLimited.yaml"
+    "500":
+      $ref: "../../components/responses/InternalError.yaml"

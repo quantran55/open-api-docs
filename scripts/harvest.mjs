@@ -72,6 +72,8 @@ const ENDPOINTS = [
   ['macroInterbankRatesJpTibor', '/openapi/v1/macro/interbank-rates/jp/tibor'],
   ['macroInterbankRatesJpOvernight', '/openapi/v1/macro/interbank-rates/jp/overnight'],
   ['macroInterbankRatesVn', '/openapi/v1/macro/interbank-rates/vn'],
+  ['macroFedFundsUsDaily', '/openapi/v1/macro/fed-funds/us/daily?period=1Y'],
+  ['macroFedFundsUsFomcMeetings', '/openapi/v1/macro/fed-funds/us/fomc-meetings'],
   ['macroTradeTurnover', '/openapi/v1/macro/trade/turnover?country=jp&granularity=quarter'],
   ['macroTradeByRegion', '/openapi/v1/macro/trade/by-region?country=jp&granularity=quarter'],
   ['macroJapanGdpBreakdown', '/openapi/v1/macro/japan/gdp-breakdown?interval=annual'],

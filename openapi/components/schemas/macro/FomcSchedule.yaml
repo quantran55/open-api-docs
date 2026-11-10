@@ -1,0 +1,65 @@
+type: object
+description: FOMC meeting calendar and results for the United States.
+required:
+  - country
+  - years
+  - year
+  - currentTargetRange
+  - nextMeeting
+  - upcoming
+  - meetings
+properties:
+  country:
+    type: string
+    enum:
+      - us
+    description: Country code, lowercase.
+    example: us
+  years:
+    type: array
+    description: Years that have meetings on record, oldest first — values accepted by `year`.
+    items:
+      type: integer
+    example: [2025, 2026, 2027]
+  year:
+    type: integer
+    description: Year of `meetings`.
+    example: 2026
+  currentTargetRange:
+    description: Target range on the latest business day on record. `null` when nothing is on record yet.
+    oneOf:
+      - type: object
+        required:
+          - date
+          - low
+          - high
+        properties:
+          date:
+            type: string
+            format: date
+            description: Business day the range is taken from.
+            example: "2026-11-06"
+          low:
+            type: number
+            description: Lower bound, % per year.
+            example: 3.75
+          high:
+            type: number
+            description: Upper bound, % per year.
+            example: 4
+      - type: "null"
+  nextMeeting:
+    description: The nearest meeting that has not happened yet. `null` when the Fed has not announced one.
+    oneOf:
+      - $ref: "./FomcMeeting.yaml"
+      - type: "null"
+  upcoming:
+    type: array
+    description: Every meeting that has not happened yet, nearest first — including next year's once the Fed publishes it.
+    items:
+      $ref: "./FomcMeeting.yaml"
+  meetings:
+    type: array
+    description: Meetings of `year`, newest first. Empty when the year has no meetings.
+    items:
+      $ref: "./FomcMeeting.yaml"

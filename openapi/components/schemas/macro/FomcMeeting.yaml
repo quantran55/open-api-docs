@@ -1,0 +1,96 @@
+type: object
+description: |
+  One FOMC meeting. Cancelled meetings are left out. Result fields (`action`,
+  `changeBp`, target range, EFFR) are `null` until the decision is out.
+required:
+  - meetingStartDate
+  - decisionDate
+  - meetingType
+  - status
+  - hasSep
+  - announcementAt
+  - effectiveDate
+  - action
+  - changeBp
+  - targetRangeLow
+  - targetRangeHigh
+  - effrOnEffectiveDate
+  - statementUrl
+  - implementationNoteUrl
+properties:
+  meetingStartDate:
+    type: string
+    format: date
+    description: First day of the meeting. Same as `decisionDate` for a one-day meeting.
+    example: "2026-10-27"
+  decisionDate:
+    type: string
+    format: date
+    description: Day the decision is announced (the last meeting day).
+    example: "2026-10-28"
+  meetingType:
+    type: string
+    enum:
+      - scheduled
+      - unscheduled
+    description: "`scheduled` — one of the eight regular meetings; `unscheduled` — an extra meeting."
+    example: scheduled
+  status:
+    type: string
+    enum:
+      - upcoming
+      - decided
+    description: "`upcoming` until the decision day has passed (New York date) and the statement is out."
+    example: decided
+  hasSep:
+    type: boolean
+    description: Whether the meeting publishes a Summary of Economic Projections (with the dot plot) — the March, June, September and December meetings.
+    example: false
+  announcementAt:
+    type: ["string", "null"]
+    format: date-time
+    description: |
+      When the statement is released, UTC — 2:00 p.m. New York time on `decisionDate`
+      for a scheduled meeting. Convert it to any time zone; do not add a fixed offset
+      (US daylight saving time changes it). `null` for an unscheduled meeting.
+    example: "2026-10-28T18:00:00.000Z"
+  effectiveDate:
+    type: ["string", "null"]
+    format: date
+    description: First business day after the decision — the day `targetRangeLow`, `targetRangeHigh` and `effrOnEffectiveDate` are taken from.
+    example: "2026-10-29"
+  action:
+    type: ["string", "null"]
+    enum:
+      - HIKE
+      - CUT
+      - HOLD
+      - null
+    description: What the FOMC did to the target range.
+    example: HOLD
+  changeBp:
+    type: ["number", "null"]
+    description: Change of the target range's upper bound, in basis points (signed).
+    example: 0
+  targetRangeLow:
+    type: ["number", "null"]
+    description: Lower bound of the target range on `effectiveDate`, % per year.
+    example: 3.75
+  targetRangeHigh:
+    type: ["number", "null"]
+    description: Upper bound of the target range on `effectiveDate`, % per year.
+    example: 4
+  effrOnEffectiveDate:
+    type: ["number", "null"]
+    description: EFFR on `effectiveDate`, % per year.
+    example: 3.88
+  statementUrl:
+    type: ["string", "null"]
+    format: uri
+    description: FOMC statement on federalreserve.gov. `null` before the meeting.
+    example: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm
+  implementationNoteUrl:
+    type: ["string", "null"]
+    format: uri
+    description: Implementation Note on federalreserve.gov. `null` before the meeting.
+    example: https://www.federalreserve.gov/newsevents/pressreleases/monetary20261028a1.htm

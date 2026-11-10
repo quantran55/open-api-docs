@@ -1,0 +1,80 @@
+description: |
+  Response metadata for the Fed Funds endpoints. On top of `timestamp`, it says where the
+  numbers came from, which fields HayInsights computes, how fresh the response is, and
+  carries the notice the New York Fed requires next to any EFFR figure.
+allOf:
+  - $ref: "../common/Meta.yaml"
+  - type: object
+    properties:
+      source:
+        type: array
+        description: Data providers.
+        items:
+          type: string
+        example:
+          - Federal Reserve Bank of New York — Effective Federal Funds Rate (Markets Data API)
+          - FRED (St. Louis Fed) — IORB, IOER and the federal funds target range
+      as_of:
+        type: ["string", "null"]
+        format: date
+        description: |
+          Latest business day in the response. For `/daily`, the New York Fed publishes
+          day D at about 9:00 a.m. New York time on business day D+1.
+        example: "2026-11-06"
+      unit:
+        type: object
+        description: Unit of each kind of numeric field.
+        additionalProperties:
+          type: string
+        example:
+          rate: percent_per_annum
+          volumeBn: usd_billion
+          spreadIorbBp: basis_points
+      knowledge_at:
+        type: ["string", "null"]
+        format: date-time
+        description: "`/daily` only — same as `data.knowledgeAt`."
+        example: "2026-11-07T14:12:03.000Z"
+      classification:
+        type: object
+        description: |
+          How each field was produced: `RAW` is passed through as the source published it,
+          `DERIVED` follows from a published rule, `COMPUTED` is calculated by HayInsights.
+        additionalProperties:
+          type: array
+          items:
+            type: string
+        example:
+          RAW: [effr, p01, p25, p75, p99, volumeBn, targetLow, targetHigh, iorb]
+          DERIVED: [reserveRate]
+          COMPUTED: [spreadIorbBp]
+      formula_version:
+        type: object
+        description: Version tag of the formula behind each computed field.
+        additionalProperties:
+          type: string
+        example:
+          spreadIorbBp: "v1: (effr - iorb) * 100"
+      was_restated:
+        type: boolean
+        description: "`/daily` only — same as `data.wasRestated`."
+        example: false
+      terms_notice:
+        type: string
+        description: |
+          Notice required by the New York Fed's Terms of Use. Show it with any EFFR
+          figure you publish.
+        example: >-
+          The Effective Federal Funds Rate (EFFR) is subject to the Terms of Use posted at
+          newyorkfed.org. The New York Fed is not responsible for publication of the EFFR by
+          HayInsights, does not sanction or endorse any particular republication, and has no
+          liability for your use.
+      served_from_cache:
+        type: boolean
+        description: Whether the response was served from cache.
+        example: false
+      cache_expires_at:
+        type: ["string", "null"]
+        format: date-time
+        description: When the cached copy expires (12 h; it is dropped as soon as a new figure is collected).
+        example: "2026-11-07T02:12:03.000Z"

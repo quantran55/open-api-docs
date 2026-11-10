@@ -3,6 +3,26 @@ title: "Changelog"
 description: "Notable changes to the HayInsights Open API."
 ---
 
+<Update label="0.8.0" description="2026-11-10">
+  **US Fed Funds rate and FOMC meetings.**
+
+  **Added**
+
+  - **Macro · Fed Funds** — `GET /macro/fed-funds/us/daily`: the daily Effective Federal
+    Funds Rate (EFFR) from 2016-03-01, with the 1st, 25th, 75th and 99th percentiles,
+    volume, the FOMC target range, IORB (IOER before 2021-07-29) and the EFFR − IORB
+    spread in basis points, over a `1Y`, `3Y` or `ALL` window. Sources: Federal Reserve
+    Bank of New York; FRED.
+  - **Macro · Fed Funds** — `GET /macro/fed-funds/us/fomc-meetings`: the FOMC calendar
+    with the next meeting, every upcoming meeting, the current target range and one
+    year's meetings with their decision, change in basis points, target range and EFFR.
+    Sources: Federal Reserve Board; Federal Reserve Bank of New York.
+
+  Both responses carry `meta.terms_notice`, the notice the New York Fed requires next to
+  any EFFR figure you publish. Gated by `macro_data` and costs 2 weight per call, like the
+  other Macro endpoints.
+</Update>
+
 <Update label="0.7.0" description="2026-11-06">
   **Vietnam CPI by component.**
 

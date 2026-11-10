@@ -86,6 +86,8 @@
               "GET /openapi/v1/macro/interbank-rates/jp/tibor",
               "GET /openapi/v1/macro/interbank-rates/jp/overnight",
               "GET /openapi/v1/macro/interbank-rates/vn",
+              "GET /openapi/v1/macro/fed-funds/us/daily",
+              "GET /openapi/v1/macro/fed-funds/us/fomc-meetings",
               "GET /openapi/v1/macro/trade/turnover",
               "GET /openapi/v1/macro/trade/by-region",
               "GET /openapi/v1/macro/japan/gdp-breakdown",

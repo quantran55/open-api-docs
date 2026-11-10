@@ -1,0 +1,31 @@
+type: object
+description: An FOMC rate decision whose effective date falls inside the window — one vertical marker on a daily chart.
+required:
+  - decisionDate
+  - effectiveDate
+  - action
+  - changeBp
+properties:
+  decisionDate:
+    type: string
+    format: date
+    description: Day the FOMC announced the decision.
+    example: "2026-10-28"
+  effectiveDate:
+    type: string
+    format: date
+    description: First business day the new target range applies (usually the day after the decision).
+    example: "2026-10-29"
+  action:
+    type: ["string", "null"]
+    enum:
+      - HIKE
+      - CUT
+      - HOLD
+      - null
+    description: What the FOMC did to the target range. `null` for the first meeting on record, which has nothing to compare against.
+    example: HOLD
+  changeBp:
+    type: ["number", "null"]
+    description: Change of the target range's upper bound, in basis points (signed).
+    example: 0

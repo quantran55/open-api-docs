@@ -1,0 +1,63 @@
+type: object
+description: |
+  Daily Fed Funds data for the United States over the requested window. When nothing
+  is on record yet, `from`, `to` and `latestDate` are `null` and `points` is empty.
+required:
+  - country
+  - period
+  - from
+  - to
+  - latestDate
+  - knowledgeAt
+  - wasRestated
+  - points
+  - fomcDecisions
+properties:
+  country:
+    type: string
+    enum:
+      - us
+    description: Country code, lowercase. Only the United States is available.
+    example: us
+  period:
+    type: string
+    enum:
+      - 1Y
+      - 3Y
+      - ALL
+    description: Window that was applied.
+    example: 1Y
+  from:
+    type: ["string", "null"]
+    format: date
+    description: First day of the window.
+    example: "2025-11-07"
+  to:
+    type: ["string", "null"]
+    format: date
+    description: Last day of the window — the latest day with an EFFR.
+    example: "2026-11-06"
+  latestDate:
+    type: ["string", "null"]
+    format: date
+    description: Latest business day with an EFFR (same as `to`).
+    example: "2026-11-06"
+  knowledgeAt:
+    type: ["string", "null"]
+    format: date-time
+    description: When HayInsights last collected a figure in the window (UTC).
+    example: "2026-11-07T14:12:03.000Z"
+  wasRestated:
+    type: boolean
+    description: "`true` when the New York Fed revised any day in the window after first publishing it."
+    example: false
+  points:
+    type: array
+    description: One entry per business day from `from` to `to`, oldest first.
+    items:
+      $ref: "./FedFundsDailyPoint.yaml"
+  fomcDecisions:
+    type: array
+    description: FOMC decisions whose `effectiveDate` falls inside the window, oldest first.
+    items:
+      $ref: "./FomcDecisionMarker.yaml"

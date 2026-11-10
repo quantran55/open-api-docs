@@ -1,0 +1,73 @@
+type: object
+description: |
+  One New York Fed business day. Days the Fed does not publish (weekends, US holidays)
+  have no entry. A figure that is not out yet is `null` — never 0.
+required:
+  - date
+  - effr
+  - p01
+  - p25
+  - p75
+  - p99
+  - volumeBn
+  - targetLow
+  - targetHigh
+  - iorb
+  - spreadIorbBp
+  - reserveRate
+properties:
+  date:
+    type: string
+    format: date
+    description: Business day the rate applies to (New York).
+    example: "2026-10-29"
+  effr:
+    type: ["number", "null"]
+    description: Effective Federal Funds Rate, % per year — the volume-weighted median of overnight federal funds trades.
+    example: 3.88
+  p01:
+    type: ["number", "null"]
+    description: 1st percentile of the same day's trades, % per year.
+    example: 3.83
+  p25:
+    type: ["number", "null"]
+    description: 25th percentile, % per year.
+    example: 3.87
+  p75:
+    type: ["number", "null"]
+    description: 75th percentile, % per year.
+    example: 3.89
+  p99:
+    type: ["number", "null"]
+    description: 99th percentile, % per year.
+    example: 3.94
+  volumeBn:
+    type: ["number", "null"]
+    description: Total volume traded that day, in **billion** US dollars.
+    example: 117
+  targetLow:
+    type: ["number", "null"]
+    description: Lower bound of the FOMC target range in force that day, % per year.
+    example: 3.75
+  targetHigh:
+    type: ["number", "null"]
+    description: Upper bound of the FOMC target range in force that day, % per year.
+    example: 4
+  iorb:
+    type: ["number", "null"]
+    description: |
+      Interest rate the Fed pays on reserve balances, % per year. Before 2021-07-29 this
+      is IOER (interest on excess reserves) — see `reserveRate`.
+    example: 3.9
+  spreadIorbBp:
+    type: ["number", "null"]
+    description: "`(effr − iorb) × 100`, in basis points. `null` when either rate is missing."
+    example: -2
+  reserveRate:
+    type: ["string", "null"]
+    enum:
+      - IORB
+      - IOER
+      - null
+    description: Name of the rate in `iorb` on that day — `IOER` before 2021-07-29, `IORB` from then. `null` when `iorb` is `null`.
+    example: IORB
